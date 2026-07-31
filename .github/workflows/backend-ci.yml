@@ -1,0 +1,70 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [main]
+    paths: ['backend/**', '.github/workflows/backend-ci.yml']
+  pull_request:
+    paths: ['backend/**', '.github/workflows/backend-ci.yml']
+
+defaults:
+  run:
+    working-directory: backend
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: chefai
+          POSTGRES_PASSWORD: chefai
+          POSTGRES_DB: chefai
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U chefai"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      NODE_ENV: test
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_USERNAME: chefai
+      DB_PASSWORD: chefai
+      DB_NAME: chefai
+      JWT_ACCESS_SECRET: ci-access-secret
+      JWT_ACCESS_EXPIRES_IN: 15m
+      JWT_REFRESH_SECRET: ci-refresh-secret
+      JWT_REFRESH_EXPIRES_IN: 7d
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Unit tests
+        run: npm test -- --ci
+
+      - name: Run migrations
+        run: npm run migration:run
+
+      - name: E2E tests
+        run: npm run test:e2e -- --ci

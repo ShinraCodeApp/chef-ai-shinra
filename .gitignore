@@ -1,0 +1,16 @@
+# Node / backend
+node_modules/
+backend/dist/
+backend/coverage/
+backend/.env
+backend/.env.*.local
+
+# Flutter build artifacts (app/.gitignore ya cubre la mayoria, esto es refuerzo)
+app/build/
+app/.dart_tool/
+app/android/.gradle/
+app/android/app/build/
+
+# OS / editor
+.DS_Store
+Thumbs.db

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android bloquea tráfico HTTP sin cifrar por defecto desde API 28+. El backend
+  de Chef AI corre en HTTP durante desarrollo/pruebas locales (sin certificado),
+  así que se permite cleartext explícitamente para el dominio/IP del backend.
+  Cuando el backend se despliegue con HTTPS real, se puede borrar este archivo
+  y la referencia en AndroidManifest.xml.
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">192.168.1.37</domain>
+        <domain includeSubdomains="false">localhost</domain>
+        <domain includeSubdomains="false">10.0.2.2</domain>
+    </domain-config>
+</network-security-config>

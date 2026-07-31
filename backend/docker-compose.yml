@@ -1,0 +1,18 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: chef-ai-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: chefai
+      POSTGRES_PASSWORD: chefai
+      POSTGRES_DB: chefai
+    ports:
+      # 5434 en el host: esta máquina ya tiene varios Postgres corriendo en 5432/5433
+      # de otros proyectos (ShinraFit, Snkrar, etc.) — este puerto queda libre para Chef AI
+      - "5434:5432"
+    volumes:
+      - chefai_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  chefai_postgres_data:
