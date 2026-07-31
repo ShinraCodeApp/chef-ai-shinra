@@ -11,6 +11,10 @@ export const typeOrmConfigFactory = (
   username: configService.get<string>('DB_USERNAME'),
   password: configService.get<string>('DB_PASSWORD'),
   database: configService.get<string>('DB_NAME'),
+  // Neon (y la mayoría de los Postgres administrados) exigen SSL; en Docker local no hace falta.
+  ssl: configService.get<string>('DB_SSL') === 'true'
+    ? { rejectUnauthorized: false }
+    : false,
   autoLoadEntities: true,
   synchronize: false,
   migrations: [
