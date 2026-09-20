@@ -56,6 +56,38 @@ export interface DetectedIngredient {
   confidence: number;
 }
 
+export interface DetectedReceiptItem {
+  name: string;
+  quantity: number;
+  unit: string;
+  unitPrice: number;
+  totalPrice: number;
+}
+
+export interface MealAnalysisNutrition {
+  calories: number;
+  proteinG: number;
+  fatG: number;
+  carbsG: number;
+  fiberG: number;
+  sugarG: number;
+  sodiumMg: number;
+}
+
+export interface MealAnalysisItem {
+  name: string;
+  approxGrams: number;
+}
+
+export interface MealAnalysis {
+  dishName: string;
+  description: string;
+  estimatedServingGrams: number;
+  confidence: number;
+  items: MealAnalysisItem[];
+  nutrition: MealAnalysisNutrition;
+}
+
 export const AI_PROVIDER = Symbol('AI_PROVIDER');
 
 export interface AiProvider {
@@ -64,4 +96,12 @@ export interface AiProvider {
     imageBuffer: Buffer,
     mimeType: string,
   ): Promise<DetectedIngredient[]>;
+  detectReceiptItems(
+    imageBuffer: Buffer,
+    mimeType: string,
+  ): Promise<DetectedReceiptItem[]>;
+  analyzeMealPhoto(
+    imageBuffer: Buffer,
+    mimeType: string,
+  ): Promise<MealAnalysis>;
 }

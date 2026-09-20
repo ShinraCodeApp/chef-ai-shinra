@@ -58,6 +58,9 @@ export class User {
   @Column({ type: 'text', array: true, default: () => "'{}'" })
   allergies: string[];
 
+  @Column({ default: false })
+  onboardingCompleted: boolean;
+
   @OneToMany(() => RefreshToken, (token) => token.user)
   refreshTokens: RefreshToken[];
 

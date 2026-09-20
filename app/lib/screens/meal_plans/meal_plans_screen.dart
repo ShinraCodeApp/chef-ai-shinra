@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../models/user.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/meal_plans_provider.dart';
 import '../../providers/shopping_lists_provider.dart';
 import '../../widgets/empty_state.dart';
+import '../profile/profile_screen.dart';
 import '../recipes/recipe_detail_screen.dart';
 import '../shopping_lists/shopping_lists_screen.dart';
 
@@ -11,6 +14,14 @@ const _mealTypeLabels = {
   'lunch': 'Almuerzo',
   'snack': 'Merienda',
   'dinner': 'Cena',
+};
+
+const _goalLabels = {
+  'lose_weight': 'Bajar de peso',
+  'gain_muscle': 'Ganar músculo',
+  'maintain': 'Mantenerme',
+  'eat_healthier': 'Comer más sano',
+  'save_money': 'Ahorrar dinero',
 };
 
 class MealPlansScreen extends StatefulWidget {
@@ -74,11 +85,16 @@ class _MealPlansScreenState extends State<MealPlansScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<MealPlansProvider>();
+    final user = context.watch<AuthProvider>().currentUser;
     return Scaffold(
       appBar: AppBar(title: const Text('Plan semanal')),
-      body: provider.isLoading && provider.mealPlans.isEmpty
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
+      body: Column(
+        children: [
+          if (user != null) _DietSummaryCard(user: user),
+          Expanded(
+            child: provider.isLoading && provider.mealPlans.isEmpty
+                ? const Center(child: CircularProgressIndicator())
+                : RefreshIndicator(
               onRefresh: () => provider.load(),
               child: provider.mealPlans.isEmpty
               ? ListView(
@@ -145,6 +161,9 @@ class _MealPlansScreenState extends State<MealPlansScreen> {
                   },
                 ),
             ),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _isGenerating ? null : _generate,
         icon: _isGenerating
@@ -152,6 +171,54 @@ class _MealPlansScreenState extends State<MealPlansScreen> {
                 height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2))
             : const Icon(Icons.auto_awesome),
         label: const Text('Generar plan'),
+      ),
+    );
+  }
+}
+
+class _DietSummaryCard extends StatelessWidget {
+  final User user;
+
+  const _DietSummaryCard({required this.user});
+
+  @override
+  Widget build(BuildContext context) {
+    final goalLabel = user.goal != null ? _goalLabels[user.goal] ?? user.goal : null;
+    return Card(
+      margin: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Mi objetivo: ${goalLabel ?? 'sin definir'}',
+                      style: Theme.of(context).textTheme.titleSmall),
+                  if (user.dietPreferences.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: user.dietPreferences
+                          .map((tag) => Chip(
+                                label: Text(tag),
+                                visualDensity: VisualDensity.compact,
+                              ))
+                          .toList(),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (_) => const ProfileScreen())),
+              child: const Text('Editar'),
+            ),
+          ],
+        ),
       ),
     );
   }

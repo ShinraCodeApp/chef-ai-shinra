@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../core/api_client.dart';
 import '../models/admin_stats.dart';
+import '../models/ingredient.dart';
 import '../models/paginated.dart';
 import '../models/user.dart';
 
@@ -14,6 +15,12 @@ class AdminProvider extends ChangeNotifier {
   int page = 1;
   int totalPages = 1;
   bool isLoadingUsers = false;
+
+  List<Ingredient> ingredients = [];
+  int ingredientsPage = 1;
+  int ingredientsTotalPages = 1;
+  bool isLoadingIngredients = false;
+  String ingredientsSearch = '';
 
   Future<void> loadStats() async {
     isLoadingStats = true;
@@ -64,6 +71,82 @@ class AdminProvider extends ChangeNotifier {
         users[index] = updated;
         notifyListeners();
       }
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<bool> deleteUser(String userId) async {
+    try {
+      await _dio.delete('/admin/users/$userId');
+      users.removeWhere((u) => u.id == userId);
+      notifyListeners();
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> loadIngredients({bool reset = true}) async {
+    if (reset) ingredientsPage = 1;
+    isLoadingIngredients = true;
+    notifyListeners();
+    try {
+      final response = await _dio.get('/ingredients', queryParameters: {
+        'page': ingredientsPage,
+        'limit': 20,
+        if (ingredientsSearch.isNotEmpty) 'search': ingredientsSearch,
+      });
+      final paginated = Paginated<Ingredient>.fromJson(
+        response.data as Map<String, dynamic>,
+        Ingredient.fromJson,
+      );
+      ingredients = reset ? paginated.items : [...ingredients, ...paginated.items];
+      ingredientsTotalPages = paginated.totalPages;
+    } finally {
+      isLoadingIngredients = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadNextIngredientsPage() async {
+    if (ingredientsPage >= ingredientsTotalPages) return;
+    ingredientsPage++;
+    await loadIngredients(reset: false);
+  }
+
+  Future<bool> createIngredient(Map<String, dynamic> data) async {
+    try {
+      final response = await _dio.post('/ingredients', data: data);
+      ingredients = [Ingredient.fromJson(response.data as Map<String, dynamic>), ...ingredients];
+      notifyListeners();
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<bool> updateIngredient(String id, Map<String, dynamic> data) async {
+    try {
+      final response = await _dio.patch('/ingredients/$id', data: data);
+      final updated = Ingredient.fromJson(response.data as Map<String, dynamic>);
+      final index = ingredients.indexWhere((i) => i.id == id);
+      if (index != -1) {
+        ingredients[index] = updated;
+        notifyListeners();
+      }
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<bool> deleteIngredient(String id) async {
+    try {
+      await _dio.delete('/ingredients/$id');
+      ingredients.removeWhere((i) => i.id == id);
+      notifyListeners();
       return true;
     } catch (_) {
       return false;

@@ -18,6 +18,7 @@ const _activityOptions = {
   'very_active': 'Muy activo',
 };
 const _dietOptions = [
+  'proteico',
   'vegetariano',
   'vegano',
   'sin_tacc',

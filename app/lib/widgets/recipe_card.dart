@@ -20,11 +20,7 @@ class RecipeCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CircleAvatar(
-                radius: 24,
-                backgroundColor: scheme.primaryContainer,
-                child: Icon(Icons.restaurant, color: scheme.onPrimaryContainer),
-              ),
+              _thumbnail(scheme),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -63,6 +59,43 @@ class RecipeCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _thumbnail(ColorScheme scheme) {
+    final url = recipe.imageUrl;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: SizedBox(
+        width: 56,
+        height: 56,
+        child: url == null || url.isEmpty
+            ? Container(
+                color: scheme.primaryContainer,
+                child: Icon(Icons.restaurant, color: scheme.onPrimaryContainer),
+              )
+            : Image.network(
+                url,
+                fit: BoxFit.cover,
+                loadingBuilder: (context, child, progress) {
+                  if (progress == null) return child;
+                  return Container(
+                    color: scheme.surfaceContainerHighest,
+                    child: const Center(
+                      child: SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    ),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) => Container(
+                  color: scheme.primaryContainer,
+                  child: Icon(Icons.restaurant, color: scheme.onPrimaryContainer),
+                ),
+              ),
       ),
     );
   }

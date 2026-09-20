@@ -7,6 +7,7 @@ import 'recipe_detail_screen.dart';
 import 'create_recipe_screen.dart';
 
 const _dietTagOptions = [
+  'proteico',
   'vegetariano',
   'vegano',
   'sin_tacc',
@@ -17,7 +18,9 @@ const _dietTagOptions = [
 ];
 
 class RecipesListScreen extends StatefulWidget {
-  const RecipesListScreen({super.key});
+  final String? initialDietTag;
+
+  const RecipesListScreen({super.key, this.initialDietTag});
 
   @override
   State<RecipesListScreen> createState() => _RecipesListScreenState();
@@ -30,7 +33,11 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<RecipesProvider>().loadRecipes();
+      final provider = context.read<RecipesProvider>();
+      if (widget.initialDietTag != null) {
+        provider.dietTag = widget.initialDietTag;
+      }
+      provider.loadRecipes();
     });
   }
 
@@ -40,12 +47,23 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
     super.dispose();
   }
 
+  String _titleFor(String? dietTag) {
+    switch (dietTag) {
+      case 'proteico':
+        return 'Comida proteica';
+      case 'vegano':
+        return 'Comida vegana';
+      default:
+        return 'Recetas';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<RecipesProvider>();
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Recetas'),
+        title: Text(_titleFor(widget.initialDietTag)),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/admin_provider.dart';
+import 'admin_ingredients_screen.dart';
+import 'admin_recipes_screen.dart';
 import 'admin_users_screen.dart';
 
 class AdminStatsScreen extends StatefulWidget {
@@ -68,10 +70,34 @@ class _AdminStatsScreenState extends State<AdminStatsScreen> {
               child: ListTile(
                 leading: const Icon(Icons.manage_accounts_outlined),
                 title: const Text('Gestionar usuarios'),
-                subtitle: const Text('Ver usuarios y cambiar roles'),
+                subtitle: const Text('Ver usuarios, cambiar roles o eliminar'),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const AdminUsersScreen()),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.menu_book_outlined),
+                title: const Text('Gestionar recetas'),
+                subtitle: const Text('Ver y eliminar cualquier receta'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const AdminRecipesScreen()),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.egg_outlined),
+                title: const Text('Gestionar ingredientes'),
+                subtitle: const Text('Catálogo, info nutricional y precios'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const AdminIngredientsScreen()),
                 ),
               ),
             ),

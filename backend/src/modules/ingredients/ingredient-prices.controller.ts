@@ -21,8 +21,6 @@ export class IngredientPricesController {
   constructor(private readonly pricesService: IngredientPricesService) {}
 
   @Post('ingredients/:ingredientId/prices')
-  @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN)
   create(
     @Param('ingredientId') ingredientId: string,
     @Body() dto: CreateIngredientPriceDto,

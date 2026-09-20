@@ -17,6 +17,7 @@ interface SeedRecipeIngredient {
 
 interface SeedRecipe {
   title: string;
+  imageUrl?: string;
   description: string;
   servings: number;
   prepTimeMinutes: number;
@@ -44,12 +45,13 @@ const UN = IngredientUnit.UNIT;
 const seedRecipes: SeedRecipe[] = [
   {
     title: 'Milanesas de pollo con puré de papas',
+    imageUrl: 'https://loremflickr.com/640/480/schnitzel,potato',
     description:
       'El clásico de todas las casas: milanesas doradas y crocantes acompañadas de un puré cremoso.',
     servings: 4,
     prepTimeMinutes: 40,
     difficulty: RecipeDifficulty.MEDIUM,
-    dietTags: [],
+    dietTags: ['proteico'],
     estimatedCostTotal: 8000,
     nutrition: { calories: 620, proteinG: 40, fatG: 25, carbsG: 55, fiberG: 5, sugarG: 4, sodiumMg: 480 },
     instructions: [
@@ -71,6 +73,7 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Tortilla de papas y huevo',
+    imageUrl: 'https://loremflickr.com/640/480/omelette,potato',
     description: 'Tortilla española casera, jugosa por dentro y dorada por fuera.',
     servings: 4,
     prepTimeMinutes: 30,
@@ -95,11 +98,12 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Arroz con pollo',
+    imageUrl: 'https://loremflickr.com/640/480/chicken,rice',
     description: 'Arroz sabroso cocido junto al pollo, morrón y cebolla en una sola olla.',
     servings: 4,
     prepTimeMinutes: 45,
     difficulty: RecipeDifficulty.MEDIUM,
-    dietTags: [],
+    dietTags: ['proteico'],
     estimatedCostTotal: 6000,
     nutrition: { calories: 480, proteinG: 32, fatG: 12, carbsG: 58, fiberG: 3, sugarG: 4, sodiumMg: 420 },
     instructions: [
@@ -121,6 +125,7 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Ensalada de lentejas',
+    imageUrl: 'https://loremflickr.com/640/480/lentil,salad',
     description: 'Fresca, económica y rendidora — ideal como plato principal liviano.',
     servings: 4,
     prepTimeMinutes: 25,
@@ -145,6 +150,7 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Tarta de verduras',
+    imageUrl: 'https://loremflickr.com/640/480/vegetable,quiche',
     description: 'Tarta casera de morrón, cebolla y queso, ideal para el almuerzo o la cena.',
     servings: 6,
     prepTimeMinutes: 50,
@@ -172,6 +178,7 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Fideos con salsa de tomate y ajo',
+    imageUrl: 'https://loremflickr.com/640/480/pasta,tomato',
     description: 'Un plato rápido, económico y de siempre: fideos con una salsa simple de tomate y ajo.',
     servings: 4,
     prepTimeMinutes: 25,
@@ -196,11 +203,12 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Ensalada César simple',
+    imageUrl: 'https://loremflickr.com/640/480/caesarsalad,chicken',
     description: 'Versión casera y sencilla de la clásica ensalada César con pollo.',
     servings: 2,
     prepTimeMinutes: 20,
     difficulty: RecipeDifficulty.EASY,
-    dietTags: ['fitness'],
+    dietTags: ['fitness', 'proteico'],
     estimatedCostTotal: 4000,
     nutrition: { calories: 350, proteinG: 30, fatG: 18, carbsG: 18, fiberG: 3, sugarG: 3, sodiumMg: 460 },
     instructions: [
@@ -222,11 +230,12 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Guiso de lentejas con carne',
+    imageUrl: 'https://loremflickr.com/640/480/lentil,stew',
     description: 'Guiso abundante y reconfortante, perfecto para los días fríos.',
     servings: 6,
     prepTimeMinutes: 60,
     difficulty: RecipeDifficulty.MEDIUM,
-    dietTags: ['economico'],
+    dietTags: ['economico', 'proteico'],
     estimatedCostTotal: 5000,
     nutrition: { calories: 390, proteinG: 26, fatG: 15, carbsG: 34, fiberG: 10, sugarG: 4, sodiumMg: 410 },
     instructions: [
@@ -249,11 +258,12 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Pescado al horno con papas y zanahoria',
+    imageUrl: 'https://loremflickr.com/640/480/fish,bakedfish',
     description: 'Pescado horneado con guarnición de papas y zanahorias, liviano y sabroso.',
     servings: 4,
     prepTimeMinutes: 45,
     difficulty: RecipeDifficulty.MEDIUM,
-    dietTags: ['fitness'],
+    dietTags: ['fitness', 'proteico'],
     estimatedCostTotal: 7000,
     nutrition: { calories: 380, proteinG: 32, fatG: 12, carbsG: 32, fiberG: 5, sugarG: 5, sodiumMg: 360 },
     instructions: [
@@ -275,6 +285,7 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Ensalada mixta de verduras',
+    imageUrl: 'https://loremflickr.com/640/480/vegetable,salad',
     description: 'Ensalada fresca y simple para acompañar cualquier plato o comer sola.',
     servings: 4,
     prepTimeMinutes: 15,
@@ -300,6 +311,7 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Sopa de zanahoria',
+    imageUrl: 'https://loremflickr.com/640/480/carrot,soup',
     description: 'Sopa cremosa y reconfortante, ideal como entrada o plato liviano.',
     servings: 4,
     prepTimeMinutes: 35,
@@ -324,6 +336,7 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Panqueques caseros',
+    imageUrl: 'https://loremflickr.com/640/480/pancakes,breakfast',
     description: 'Panqueques simples para el desayuno, la merienda o rellenos salados/dulces.',
     servings: 4,
     prepTimeMinutes: 25,
@@ -348,11 +361,12 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Sandwich de pollo y vegetales',
+    imageUrl: 'https://loremflickr.com/640/480/chicken,sandwich',
     description: 'Sandwich completo con pollo grillado, lechuga, tomate y queso.',
     servings: 2,
     prepTimeMinutes: 20,
     difficulty: RecipeDifficulty.EASY,
-    dietTags: ['fitness'],
+    dietTags: ['fitness', 'proteico'],
     estimatedCostTotal: 3800,
     nutrition: { calories: 420, proteinG: 34, fatG: 16, carbsG: 34, fiberG: 3, sugarG: 4, sodiumMg: 520 },
     instructions: [
@@ -373,6 +387,7 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Ensalada de frutas con yogur',
+    imageUrl: 'https://loremflickr.com/640/480/fruit,yogurt',
     description: 'Postre fresco y liviano con manzana, banana y yogur.',
     servings: 2,
     prepTimeMinutes: 10,
@@ -394,11 +409,12 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Omelette de queso',
+    imageUrl: 'https://loremflickr.com/640/480/cheese,omelette',
     description: 'Omelette simple y rápido, perfecto para un desayuno o cena liviana.',
     servings: 1,
     prepTimeMinutes: 10,
     difficulty: RecipeDifficulty.EASY,
-    dietTags: ['vegetariano', 'fitness', 'keto'],
+    dietTags: ['vegetariano', 'fitness', 'keto', 'proteico'],
     estimatedCostTotal: 1400,
     nutrition: { calories: 320, proteinG: 22, fatG: 25, carbsG: 3, fiberG: 0, sugarG: 1, sodiumMg: 380 },
     instructions: [
@@ -416,6 +432,7 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Arroz con verduras salteadas',
+    imageUrl: 'https://loremflickr.com/640/480/friedrice,vegetable',
     description: 'Arroz salteado con morrón, zanahoria y cebolla, colorido y rendidor.',
     servings: 4,
     prepTimeMinutes: 30,
@@ -441,6 +458,7 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Energy balls crudas de dátil y cacao',
+    imageUrl: 'https://loremflickr.com/640/480/energyballs,chocolate',
     description:
       'Bocaditos energéticos sin cocción, dulces por los dátiles y con el toque amargo del cacao.',
     servings: 8,
@@ -466,6 +484,7 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Leche de almendras casera',
+    imageUrl: 'https://loremflickr.com/640/480/almondmilk,almonds',
     description: 'Bebida vegetal simple, sin cocción, para tomar sola o usar en otras recetas.',
     servings: 4,
     prepTimeMinutes: 15,
@@ -487,6 +506,7 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Ensalada crudivegana de zanahoria, manzana y limón',
+    imageUrl: 'https://loremflickr.com/640/480/carrot,apple',
     description: 'Ensalada fresca, rallada y sin cocción, ácida y crocante.',
     servings: 4,
     prepTimeMinutes: 15,
@@ -510,6 +530,7 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Helado crudo de banana y cacao',
+    imageUrl: 'https://loremflickr.com/640/480/banana,icecream',
     description: '"Nice cream" cremoso hecho solo con banana congelada, sin heladera ni cocción.',
     servings: 3,
     prepTimeMinutes: 10,
@@ -531,6 +552,7 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Granola cruda de avena y semillas',
+    imageUrl: 'https://loremflickr.com/640/480/granola,oats',
     description: 'Mezcla energética sin horno, lista en minutos, ideal para el desayuno con yogur o leche vegetal.',
     servings: 6,
     prepTimeMinutes: 15,
@@ -554,6 +576,7 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Bowl crudo de manzana, chía y limón',
+    imageUrl: 'https://loremflickr.com/640/480/chiapudding,apple',
     description: 'Postre o desayuno liviano a base de gel de chía, manzana fresca y limón, sin cocción.',
     servings: 2,
     prepTimeMinutes: 10,
@@ -572,6 +595,405 @@ const seedRecipes: SeedRecipe[] = [
       { ingredientName: 'Chía', quantity: 20, unit: G },
       { ingredientName: 'Limón', quantity: 1, unit: UN },
       { ingredientName: 'Agua', quantity: 0.2, unit: L },
+    ],
+  },
+  {
+    title: 'Pollo a la mostaza',
+    imageUrl: 'https://loremflickr.com/640/480/chicken,mustard',
+    description:
+      'Pechuga dorada y bañada en una salsa rápida de mostaza, ajo y limón: lista en 10 minutos.',
+    servings: 1,
+    prepTimeMinutes: 10,
+    difficulty: RecipeDifficulty.EASY,
+    dietTags: ['proteico', 'fitness', 'keto'],
+    estimatedCostTotal: 2500,
+    nutrition: { calories: 280, proteinG: 35, fatG: 14, carbsG: 3, fiberG: 1, sugarG: 1, sodiumMg: 450 },
+    instructions: [
+      'Salpimentá la pechuga.',
+      'Doralá en una sartén con el aceite de oliva a fuego medio.',
+      'Agregá el ajo y cociná 30 segundos, sin que se queme.',
+      'Incorporá la mostaza y el jugo de limón.',
+      'Cociná 2-3 minutos más.',
+      'Serví con ensalada o verduras.',
+    ],
+    ingredients: [
+      { ingredientName: 'Pollo (pechuga)', quantity: 0.2, unit: KG },
+      { ingredientName: 'Mostaza', quantity: 15, unit: G },
+      { ingredientName: 'Aceite', quantity: 0.01, unit: L },
+      { ingredientName: 'Ajo', quantity: 1, unit: UN, notes: 'picado' },
+      { ingredientName: 'Limón', quantity: 0.5, unit: UN, notes: 'el jugo' },
+      { ingredientName: 'Sal', quantity: 3, unit: G, notes: 'y pimienta a gusto' },
+    ],
+  },
+  {
+    title: 'Pollo al curry',
+    imageUrl: 'https://loremflickr.com/640/480/chicken,curry',
+    description:
+      'La pechuga de pollo no tiene por qué ser aburrida: cubos jugosos en una salsa cremosa de curry y leche de coco, listos en 20 minutos.',
+    servings: 3,
+    prepTimeMinutes: 20,
+    difficulty: RecipeDifficulty.EASY,
+    dietTags: ['proteico', 'fitness'],
+    estimatedCostTotal: 3800,
+    nutrition: { calories: 320, proteinG: 34, fatG: 16, carbsG: 6, fiberG: 2, sugarG: 3, sodiumMg: 380 },
+    instructions: [
+      'Salpimentar el pollo y dorarlo en una sartén con el aceite de oliva. Retirar y reservar.',
+      'En la misma sartén, cocinar la cebolla durante 3-4 minutos hasta que esté transparente.',
+      'Agregar el ajo y el curry, y cocinar 30 segundos para potenciar su aroma.',
+      'Incorporar la leche de coco y mezclar bien.',
+      'Volver a agregar el pollo y cocinar 5-7 minutos más, hasta que la salsa espese y el pollo esté bien cocido.',
+      'Servir con verduras salteadas, arroz o puré de coliflor, y perejil o cilantro picado por encima.',
+    ],
+    ingredients: [
+      { ingredientName: 'Pollo (pechuga)', quantity: 0.35, unit: KG, notes: 'en cubos' },
+      { ingredientName: 'Aceite', quantity: 0.01, unit: L },
+      { ingredientName: 'Cebolla', quantity: 0.5, unit: UN, notes: 'picada' },
+      { ingredientName: 'Ajo', quantity: 1, unit: UN, notes: 'picado' },
+      { ingredientName: 'Curry en polvo', quantity: 5, unit: G },
+      { ingredientName: 'Leche de coco', quantity: 0.1, unit: L, notes: 'sin azúcar' },
+      { ingredientName: 'Sal', quantity: 3, unit: G, notes: 'y pimienta a gusto' },
+      { ingredientName: 'Perejil', quantity: 2, unit: G, notes: 'o cilantro, opcional' },
+    ],
+  },
+  {
+    title: 'Pizza de pollo',
+    imageUrl: 'https://loremflickr.com/640/480/chicken,pizza',
+    description:
+      'Una base de pizza hecha con pechuga de pollo procesada en lugar de harina, cubierta con salsa de tomate y mozzarella.',
+    servings: 2,
+    prepTimeMinutes: 35,
+    difficulty: RecipeDifficulty.MEDIUM,
+    dietTags: ['proteico', 'fitness', 'sin_tacc'],
+    estimatedCostTotal: 3200,
+    nutrition: { calories: 380, proteinG: 42, fatG: 20, carbsG: 6, fiberG: 1, sugarG: 3, sodiumMg: 520 },
+    instructions: [
+      'Mezclar el pollo procesado con el huevo, el queso rallado y los condimentos.',
+      'Formar una base fina sobre una placa con papel manteca.',
+      'Hornear a 200 °C durante 18-20 minutos, hasta que esté firme y apenas dorada.',
+      'Retirar del horno, agregar la salsa de tomate, la mozzarella y el orégano.',
+      'Llevar nuevamente al horno 5 minutos, hasta que el queso se derrita.',
+      'Terminar con albahaca fresca si gusta.',
+    ],
+    ingredients: [
+      { ingredientName: 'Pollo (pechuga)', quantity: 0.3, unit: KG, notes: 'procesada' },
+      { ingredientName: 'Huevo', quantity: 1, unit: UN },
+      { ingredientName: 'Queso', quantity: 30, unit: G, notes: 'rallado' },
+      { ingredientName: 'Sal', quantity: 3, unit: G, notes: 'y pimienta a gusto' },
+      { ingredientName: 'Ajo en polvo', quantity: 2, unit: G },
+      { ingredientName: 'Orégano', quantity: 4, unit: G, notes: 'para la masa y para decorar' },
+      { ingredientName: 'Salsa de tomate', quantity: 40, unit: G },
+      { ingredientName: 'Mozzarella', quantity: 70, unit: G },
+      { ingredientName: 'Albahaca', quantity: 3, unit: G, notes: 'opcional' },
+    ],
+  },
+  {
+    title: 'Pollo al limón y ajo',
+    imageUrl: 'https://loremflickr.com/640/480/chicken,lemon',
+    description:
+      'Pechugas marinadas en limón, ajo y perejil, doradas en sartén: simples, jugosas y llenas de sabor.',
+    servings: 2,
+    prepTimeMinutes: 35,
+    difficulty: RecipeDifficulty.EASY,
+    dietTags: ['proteico', 'fitness'],
+    estimatedCostTotal: 3000,
+    nutrition: { calories: 280, proteinG: 38, fatG: 12, carbsG: 3, fiberG: 1, sugarG: 1, sodiumMg: 320 },
+    instructions: [
+      'Mezclar el jugo de limón con el ajo, el aceite de oliva, el perejil, la sal y la pimienta.',
+      'Marinar la pechuga durante 20 minutos.',
+      'Cocinar en una sartén bien caliente durante 5-6 minutos por lado, hasta que esté dorada.',
+      'Agregar el resto de la marinada el último minuto para potenciar el sabor.',
+      'Servir con verduras asadas, una ensalada o puré de coliflor.',
+    ],
+    ingredients: [
+      { ingredientName: 'Pollo (pechuga)', quantity: 0.3, unit: KG },
+      { ingredientName: 'Limón', quantity: 0.5, unit: UN, notes: 'el jugo' },
+      { ingredientName: 'Ajo', quantity: 2, unit: UN, notes: 'picados' },
+      { ingredientName: 'Aceite', quantity: 0.01, unit: L },
+      { ingredientName: 'Perejil', quantity: 5, unit: G, notes: 'fresco picado' },
+      { ingredientName: 'Sal', quantity: 3, unit: G, notes: 'y pimienta a gusto' },
+    ],
+  },
+  {
+    title: 'Pollo crocante con yogur y semillas',
+    imageUrl: 'https://loremflickr.com/640/480/chicken,crispy',
+    description:
+      'Bastones de pollo marinados en yogur y ajo, rebozados en semillas mixtas y horneados (o al air fryer) hasta quedar dorados y crocantes.',
+    servings: 3,
+    prepTimeMinutes: 40,
+    difficulty: RecipeDifficulty.MEDIUM,
+    dietTags: ['proteico', 'fitness'],
+    estimatedCostTotal: 3600,
+    nutrition: { calories: 340, proteinG: 36, fatG: 18, carbsG: 8, fiberG: 4, sugarG: 2, sodiumMg: 300 },
+    instructions: [
+      'Cortar la pechuga en bastones o tiras.',
+      'Mezclar el yogur con el ajo en polvo, la sal y la pimienta. Cubrir el pollo y dejar marinar 20 minutos.',
+      'En un plato, mezclar las semillas con el orégano seco.',
+      'Retirar el pollo del yogur y rebozarlo bien en las semillas, presionando para que se adhieran.',
+      'Colocar en una placa con papel manteca o en la air fryer con un toque de aceite.',
+      'Hornear a 200 °C o cocinar en la air fryer hasta que estén dorados y cocidos.',
+      'Servir con dip de yogur o ensalada.',
+    ],
+    ingredients: [
+      { ingredientName: 'Pollo (pechuga)', quantity: 0.3, unit: KG, notes: 'cortada en bastones' },
+      { ingredientName: 'Yogur griego', quantity: 120, unit: G, notes: 'natural' },
+      { ingredientName: 'Ajo en polvo', quantity: 3, unit: G },
+      { ingredientName: 'Sal', quantity: 3, unit: G, notes: 'y pimienta a gusto' },
+      { ingredientName: 'Semillas mixtas', quantity: 60, unit: G, notes: 'sésamo, lino, chía, girasol' },
+      { ingredientName: 'Aceite', quantity: 0.01, unit: L },
+      { ingredientName: 'Orégano', quantity: 2, unit: G, notes: 'o perejil seco, opcional' },
+    ],
+  },
+  {
+    title: 'Milanesas de berenjena al horno',
+    imageUrl: 'https://loremflickr.com/640/480/eggplant,baked',
+    description: 'Versión vegetariana de las milanesas, con rodajas de berenjena rebozadas y horneadas.',
+    servings: 3,
+    prepTimeMinutes: 40,
+    difficulty: RecipeDifficulty.MEDIUM,
+    dietTags: ['vegetariano', 'economico'],
+    estimatedCostTotal: 2800,
+    nutrition: { calories: 240, proteinG: 11, fatG: 12, carbsG: 22, fiberG: 5, sugarG: 5, sodiumMg: 380 },
+    instructions: [
+      'Cortar la berenjena en rodajas de medio centímetro y salarlas. Dejar reposar 15 minutos y secar con papel.',
+      'Pasar cada rodaja por huevo batido y luego por pan rallado, presionando bien.',
+      'Colocar en una placa con papel manteca y rociar con un hilo de aceite.',
+      'Hornear a 200 °C durante 20-25 minutos, dando vuelta a mitad de cocción, hasta dorar.',
+      'Servir con queso rallado por encima o ensalada.',
+    ],
+    ingredients: [
+      { ingredientName: 'Berenjena', quantity: 2, unit: UN },
+      { ingredientName: 'Huevo', quantity: 2, unit: UN },
+      { ingredientName: 'Pan rallado', quantity: 100, unit: G },
+      { ingredientName: 'Queso', quantity: 40, unit: G, notes: 'rallado, opcional' },
+      { ingredientName: 'Aceite', quantity: 0.02, unit: L },
+      { ingredientName: 'Sal', quantity: 6, unit: G },
+    ],
+  },
+  {
+    title: 'Guacamole casero',
+    imageUrl: 'https://loremflickr.com/640/480/guacamole,avocado',
+    description: 'Clásico dip mexicano de palta bien fresco, ideal para untar o acompañar cualquier plato.',
+    servings: 4,
+    prepTimeMinutes: 10,
+    difficulty: RecipeDifficulty.EASY,
+    dietTags: ['vegano', 'vegetariano', 'comida_cruda', 'fitness'],
+    estimatedCostTotal: 2600,
+    nutrition: { calories: 160, proteinG: 2, fatG: 15, carbsG: 8, fiberG: 6, sugarG: 2, sodiumMg: 150 },
+    instructions: [
+      'Pisar la pulpa de las paltas con un tenedor hasta lograr una textura cremosa con algunos grumos.',
+      'Picar la cebolla y el tomate en cubos muy pequeños.',
+      'Mezclar la palta con la cebolla, el tomate y el jugo de limón.',
+      'Salar a gusto y servir de inmediato para que no se oxide.',
+    ],
+    ingredients: [
+      { ingredientName: 'Palta', quantity: 2, unit: UN },
+      { ingredientName: 'Cebolla', quantity: 0.5, unit: UN, notes: 'picada' },
+      { ingredientName: 'Tomate', quantity: 1, unit: UN, notes: 'picado' },
+      { ingredientName: 'Limón', quantity: 1, unit: UN, notes: 'el jugo' },
+      { ingredientName: 'Sal', quantity: 3, unit: G },
+    ],
+  },
+  {
+    title: 'Ensalada de garbanzos con verduras',
+    imageUrl: 'https://loremflickr.com/640/480/chickpea,salad',
+    description: 'Ensalada fría, proteica y rendidora con garbanzos, morrón, tomate y cebolla.',
+    servings: 4,
+    prepTimeMinutes: 20,
+    difficulty: RecipeDifficulty.EASY,
+    dietTags: ['vegano', 'vegetariano', 'economico', 'proteico'],
+    estimatedCostTotal: 2600,
+    nutrition: { calories: 260, proteinG: 11, fatG: 9, carbsG: 34, fiberG: 9, sugarG: 5, sodiumMg: 280 },
+    instructions: [
+      'Cocinar los garbanzos en agua con sal hasta que estén tiernos (o usar ya cocidos). Escurrir y dejar enfriar.',
+      'Cortar el tomate, la cebolla y el morrón en cubos pequeños.',
+      'Mezclar los garbanzos con las verduras picadas.',
+      'Aliñar con aceite, sal y jugo de limón antes de servir.',
+    ],
+    ingredients: [
+      { ingredientName: 'Garbanzos', quantity: 0.3, unit: KG },
+      { ingredientName: 'Tomate', quantity: 2, unit: UN },
+      { ingredientName: 'Cebolla', quantity: 0.5, unit: UN },
+      { ingredientName: 'Morrón', quantity: 1, unit: UN },
+      { ingredientName: 'Aceite', quantity: 0.03, unit: L },
+      { ingredientName: 'Limón', quantity: 1, unit: UN },
+      { ingredientName: 'Sal', quantity: 5, unit: G },
+    ],
+  },
+  {
+    title: 'Tarta de atún y verduras',
+    imageUrl: 'https://loremflickr.com/640/480/tuna,quiche',
+    description: 'Tarta casera rellena de atún, cebolla, morrón y queso, perfecta para el almuerzo.',
+    servings: 6,
+    prepTimeMinutes: 50,
+    difficulty: RecipeDifficulty.MEDIUM,
+    dietTags: ['proteico'],
+    estimatedCostTotal: 5200,
+    nutrition: { calories: 320, proteinG: 20, fatG: 17, carbsG: 24, fiberG: 3, sugarG: 3, sodiumMg: 480 },
+    instructions: [
+      'Mezclar la harina con aceite, sal y un poco de agua hasta formar una masa lisa. Dejar descansar.',
+      'Estirar la masa y cubrir una tartera enmantecada.',
+      'Rehogar la cebolla y el morrón cortados en aceite hasta que estén tiernos.',
+      'Batir los huevos, mezclar con las verduras rehogadas, el atún escurrido y el queso en cubos.',
+      'Volcar el relleno sobre la masa y hornear a fuego medio hasta que cuaje y dore, unos 30 minutos.',
+    ],
+    ingredients: [
+      { ingredientName: 'Harina', quantity: 0.25, unit: KG },
+      { ingredientName: 'Huevo', quantity: 3, unit: UN },
+      { ingredientName: 'Atún', quantity: 160, unit: G, notes: 'escurrido' },
+      { ingredientName: 'Cebolla', quantity: 1, unit: UN },
+      { ingredientName: 'Morrón', quantity: 1, unit: UN },
+      { ingredientName: 'Queso', quantity: 100, unit: G },
+      { ingredientName: 'Aceite', quantity: 0.02, unit: L },
+      { ingredientName: 'Sal', quantity: 5, unit: G },
+    ],
+  },
+  {
+    title: 'Batatas al horno con especias',
+    imageUrl: 'https://loremflickr.com/640/480/sweetpotato,baked',
+    description: 'Bastones de batata horneados hasta quedar tiernos por dentro y dorados por fuera.',
+    servings: 4,
+    prepTimeMinutes: 40,
+    difficulty: RecipeDifficulty.EASY,
+    dietTags: ['vegano', 'vegetariano', 'economico', 'fitness'],
+    estimatedCostTotal: 1800,
+    nutrition: { calories: 160, proteinG: 2, fatG: 5, carbsG: 26, fiberG: 4, sugarG: 6, sodiumMg: 200 },
+    instructions: [
+      'Precalentar el horno. Cortar las batatas en bastones parejos, sin necesidad de pelarlas.',
+      'Mezclar con aceite, sal y orégano en un bol, hasta cubrir bien.',
+      'Disponer en una placa en una sola capa, sin amontonar.',
+      'Hornear a 200 °C durante 25-30 minutos, dando vuelta a mitad de cocción, hasta dorar.',
+    ],
+    ingredients: [
+      { ingredientName: 'Batata', quantity: 0.6, unit: KG },
+      { ingredientName: 'Aceite', quantity: 0.03, unit: L },
+      { ingredientName: 'Sal', quantity: 5, unit: G },
+      { ingredientName: 'Orégano', quantity: 3, unit: G },
+    ],
+  },
+  {
+    title: 'Crema de calabaza',
+    imageUrl: 'https://loremflickr.com/640/480/pumpkin,soup',
+    description: 'Sopa suave y dulzona, reconfortante y muy fácil de preparar.',
+    servings: 4,
+    prepTimeMinutes: 35,
+    difficulty: RecipeDifficulty.EASY,
+    dietTags: ['vegano', 'vegetariano', 'economico'],
+    estimatedCostTotal: 1700,
+    nutrition: { calories: 100, proteinG: 2, fatG: 4, carbsG: 15, fiberG: 3, sugarG: 6, sodiumMg: 280 },
+    instructions: [
+      'Rehogar la cebolla y el ajo picados en una olla con aceite.',
+      'Agregar la calabaza cortada en cubos y cubrir con agua.',
+      'Cocinar hasta que la calabaza esté muy tierna. Salar a gusto.',
+      'Procesar todo hasta lograr una crema homogénea y servir caliente.',
+    ],
+    ingredients: [
+      { ingredientName: 'Calabaza', quantity: 0.6, unit: KG },
+      { ingredientName: 'Cebolla', quantity: 1, unit: UN },
+      { ingredientName: 'Ajo', quantity: 1, unit: UN },
+      { ingredientName: 'Agua', quantity: 0.8, unit: L },
+      { ingredientName: 'Aceite', quantity: 0.02, unit: L },
+      { ingredientName: 'Sal', quantity: 6, unit: G },
+    ],
+  },
+  {
+    title: 'Buñuelos de acelga',
+    imageUrl: 'https://loremflickr.com/640/480/fritters,spinach',
+    description: 'Bocaditos dorados de acelga rehogada, huevo y queso, ideales como entrada o picada.',
+    servings: 4,
+    prepTimeMinutes: 35,
+    difficulty: RecipeDifficulty.MEDIUM,
+    dietTags: ['vegetariano', 'economico'],
+    estimatedCostTotal: 2400,
+    nutrition: { calories: 220, proteinG: 10, fatG: 12, carbsG: 18, fiberG: 3, sugarG: 2, sodiumMg: 420 },
+    instructions: [
+      'Lavar y picar la acelga, y rehogarla en una sartén con un poco de aceite hasta que se ablande. Escurrir el exceso de agua.',
+      'Mezclar la acelga con los huevos batidos, la harina y el queso en cubos.',
+      'Salar la mezcla y formar bollitos con una cuchara.',
+      'Freír en aceite caliente por tandas hasta dorar de ambos lados. Escurrir sobre papel absorbente.',
+    ],
+    ingredients: [
+      { ingredientName: 'Acelga', quantity: 300, unit: G },
+      { ingredientName: 'Huevo', quantity: 2, unit: UN },
+      { ingredientName: 'Harina', quantity: 0.1, unit: KG },
+      { ingredientName: 'Queso', quantity: 60, unit: G },
+      { ingredientName: 'Aceite', quantity: 0.1, unit: L },
+      { ingredientName: 'Sal', quantity: 4, unit: G },
+    ],
+  },
+  {
+    title: 'Bife a la plancha con batatas al horno',
+    imageUrl: 'https://loremflickr.com/640/480/steak,sweetpotato',
+    description: 'Un plato completo y proteico: bife jugoso a la plancha acompañado de batatas horneadas.',
+    servings: 2,
+    prepTimeMinutes: 40,
+    difficulty: RecipeDifficulty.EASY,
+    dietTags: ['proteico', 'fitness'],
+    estimatedCostTotal: 5500,
+    nutrition: { calories: 420, proteinG: 38, fatG: 18, carbsG: 26, fiberG: 3, sugarG: 5, sodiumMg: 320 },
+    instructions: [
+      'Cortar las batatas en bastones, condimentar con aceite y sal, y hornear a 200 °C durante 25-30 minutos.',
+      'Salpimentar los bifes y dejarlos tomar temperatura ambiente unos minutos.',
+      'Cocinar los bifes en una plancha o sartén bien caliente con un chorrito de aceite, 3-4 minutos por lado según el grosor.',
+      'Agregar el ajo picado los últimos minutos de cocción.',
+      'Servir el bife con las batatas y un toque de jugo de limón.',
+    ],
+    ingredients: [
+      { ingredientName: 'Carne (bife)', quantity: 0.4, unit: KG },
+      { ingredientName: 'Batata', quantity: 0.4, unit: KG },
+      { ingredientName: 'Ajo', quantity: 2, unit: UN, notes: 'picado' },
+      { ingredientName: 'Aceite', quantity: 0.03, unit: L },
+      { ingredientName: 'Sal', quantity: 5, unit: G, notes: 'y pimienta a gusto' },
+      { ingredientName: 'Limón', quantity: 0.5, unit: UN, notes: 'opcional' },
+    ],
+  },
+  {
+    title: 'Bowl de yogur, granola y banana',
+    imageUrl: 'https://loremflickr.com/640/480/yogurt,granola',
+    description: 'Desayuno o merienda rápida y nutritiva, lista en 5 minutos sin cocción.',
+    servings: 1,
+    prepTimeMinutes: 5,
+    difficulty: RecipeDifficulty.EASY,
+    dietTags: ['vegetariano', 'fitness', 'comida_cruda'],
+    estimatedCostTotal: 1200,
+    nutrition: { calories: 300, proteinG: 14, fatG: 10, carbsG: 42, fiberG: 6, sugarG: 20, sodiumMg: 60 },
+    instructions: [
+      'Colocar el yogur griego en un bowl.',
+      'Cortar la banana en rodajas y disponerla sobre el yogur.',
+      'Espolvorear con avena y almendras picadas.',
+      'Servir enseguida.',
+    ],
+    ingredients: [
+      { ingredientName: 'Yogur griego', quantity: 150, unit: G },
+      { ingredientName: 'Banana', quantity: 1, unit: UN },
+      { ingredientName: 'Avena', quantity: 30, unit: G },
+      { ingredientName: 'Almendras', quantity: 15, unit: G },
+    ],
+  },
+  {
+    title: 'Wrap de pollo, palta y vegetales',
+    imageUrl: 'https://loremflickr.com/640/480/chicken,wrap',
+    description: 'Tortilla de trigo rellena de pollo grillado, palta, lechuga y tomate, ideal para llevar.',
+    servings: 2,
+    prepTimeMinutes: 25,
+    difficulty: RecipeDifficulty.EASY,
+    dietTags: ['proteico', 'fitness'],
+    estimatedCostTotal: 4200,
+    nutrition: { calories: 380, proteinG: 30, fatG: 16, carbsG: 30, fiberG: 6, sugarG: 3, sodiumMg: 460 },
+    instructions: [
+      'Cocinar la pechuga de pollo a la plancha con sal y cortarla en tiras.',
+      'Pisar la palta con un poco de jugo de limón y sal.',
+      'Calentar levemente las tortillas de trigo para que sean más flexibles.',
+      'Untar cada tortilla con la palta pisada y agregar lechuga, tomate en rodajas y el pollo.',
+      'Enrollar bien apretado y cortar al medio antes de servir.',
+    ],
+    ingredients: [
+      { ingredientName: 'Tortilla de trigo', quantity: 2, unit: UN },
+      { ingredientName: 'Pollo (pechuga)', quantity: 0.25, unit: KG },
+      { ingredientName: 'Palta', quantity: 1, unit: UN },
+      { ingredientName: 'Lechuga', quantity: 1, unit: UN },
+      { ingredientName: 'Tomate', quantity: 1, unit: UN },
+      { ingredientName: 'Limón', quantity: 0.5, unit: UN },
+      { ingredientName: 'Sal', quantity: 3, unit: G },
     ],
   },
 ];
@@ -599,6 +1021,13 @@ async function run() {
       where: { title: seed.title },
     });
     if (existing) {
+      // no se recrea, pero sí se actualizan dietTags e imageUrl: permite sumar tags
+      // nuevos o una foto a recetas que ya estaban sembradas en instalaciones previas.
+      existing.dietTags = seed.dietTags;
+      if (seed.imageUrl && !existing.imageUrl) {
+        existing.imageUrl = seed.imageUrl;
+      }
+      await recipesRepository.save(existing);
       skipped++;
       continue;
     }
@@ -623,6 +1052,7 @@ async function run() {
 
     const recipe = recipesRepository.create({
       title: seed.title,
+      imageUrl: seed.imageUrl ?? null,
       description: seed.description,
       instructions: seed.instructions.map((instruction, index) => ({
         order: index + 1,

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
@@ -45,6 +49,17 @@ export class AdminService {
     }
     user.role = role;
     return this.usersRepository.save(user);
+  }
+
+  async deleteUser(userId: string, requesterId: string): Promise<void> {
+    if (userId === requesterId) {
+      throw new BadRequestException('No podés eliminar tu propia cuenta de administrador');
+    }
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+    await this.usersRepository.remove(user);
   }
 
   async getStats(): Promise<AdminStats> {

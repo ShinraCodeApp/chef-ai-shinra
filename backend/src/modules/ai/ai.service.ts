@@ -3,6 +3,8 @@ import {
   AI_PROVIDER,
   AiProvider,
   DetectedIngredient,
+  DetectedReceiptItem,
+  MealAnalysis,
 } from './ai-provider.interface';
 import { GenerateRecipeDto } from './dto/generate-recipe.dto';
 import { UsersService } from '../users/users.service';
@@ -17,6 +19,10 @@ import {
 } from '../../common/enums';
 
 export interface DetectedIngredientWithCatalog extends DetectedIngredient {
+  ingredientId: string;
+}
+
+export interface DetectedReceiptItemWithCatalog extends DetectedReceiptItem {
   ingredientId: string;
 }
 
@@ -115,6 +121,55 @@ export class AiService {
         return { ...item, ingredientId: ingredient.id };
       }),
     );
+  }
+
+  async scanReceiptForItems(
+    imageBuffer: Buffer,
+    mimeType: string,
+  ): Promise<DetectedReceiptItemWithCatalog[]> {
+    const detected = await this.aiProvider.detectReceiptItems(
+      imageBuffer,
+      mimeType,
+    );
+
+    if (this.storageService.isConfigured()) {
+      // se guarda el ticket escaneado para trazabilidad, sin bloquear la respuesta si falla
+      this.storageService
+        .upload(imageBuffer, mimeType, 'receipt-scans')
+        .catch(() => undefined);
+    }
+
+    return Promise.all(
+      detected.map(async (item) => {
+        const ingredient = await this.ingredientsService.findOrCreateByName(
+          item.name,
+          {
+            category: IngredientCategory.OTROS,
+            unit: this.parseUnit(item.unit),
+          },
+        );
+        return { ...item, ingredientId: ingredient.id };
+      }),
+    );
+  }
+
+  async analyzeMealPhoto(
+    imageBuffer: Buffer,
+    mimeType: string,
+  ): Promise<MealAnalysis> {
+    const analysis = await this.aiProvider.analyzeMealPhoto(
+      imageBuffer,
+      mimeType,
+    );
+
+    if (this.storageService.isConfigured()) {
+      // se guarda la foto del plato para trazabilidad, sin bloquear la respuesta si falla
+      this.storageService
+        .upload(imageBuffer, mimeType, 'meal-scans')
+        .catch(() => undefined);
+    }
+
+    return analysis;
   }
 
   private parseUnit(unit: string): IngredientUnit {

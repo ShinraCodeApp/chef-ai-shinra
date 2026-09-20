@@ -13,8 +13,18 @@ describe('RecipesService', () => {
     id: 'recipe-1',
     difficulty: RecipeDifficulty.EASY,
     recipeIngredients: [
-      { ingredientId: 'ing-1', quantity: 2, unit: IngredientUnit.UNIT },
-      { ingredientId: 'ing-2', quantity: 500, unit: IngredientUnit.GRAMS },
+      {
+        ingredientId: 'ing-1',
+        quantity: 2,
+        unit: IngredientUnit.UNIT,
+        ingredient: { name: 'Huevo' },
+      },
+      {
+        ingredientId: 'ing-2',
+        quantity: 500,
+        unit: IngredientUnit.GRAMS,
+        ingredient: { name: 'Harina' },
+      },
     ],
   };
 
@@ -26,7 +36,7 @@ describe('RecipesService', () => {
       create: jest.fn(),
       remove: jest.fn(),
     };
-    inventoryService = { consume: jest.fn().mockResolvedValue(undefined) };
+    inventoryService = { consume: jest.fn().mockResolvedValue(0) };
 
     recipesService = new RecipesService(
       recipesRepository as any,
@@ -83,6 +93,31 @@ describe('RecipesService', () => {
         500,
         IngredientUnit.GRAMS,
       );
+    });
+
+    it('devuelve missingIngredients vacío cuando el inventario alcanza', async () => {
+      recipesRepository.findOne.mockResolvedValue(recipe);
+
+      const result = await recipesService.cook('user-1', recipe.id);
+
+      expect(result.recipe).toBe(recipe);
+      expect(result.missingIngredients).toEqual([]);
+    });
+
+    it('informa los ingredientes faltantes cuando el inventario no alcanza', async () => {
+      recipesRepository.findOne.mockResolvedValue(recipe);
+      inventoryService.consume.mockResolvedValueOnce(0).mockResolvedValueOnce(200);
+
+      const result = await recipesService.cook('user-1', recipe.id);
+
+      expect(result.missingIngredients).toEqual([
+        {
+          ingredientId: 'ing-2',
+          name: 'Harina',
+          quantity: 200,
+          unit: IngredientUnit.GRAMS,
+        },
+      ]);
     });
   });
 });

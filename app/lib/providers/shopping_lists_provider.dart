@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../core/api_client.dart';
+import '../models/missing_ingredient.dart';
 import '../models/shopping_list.dart';
 
 class ShoppingListsProvider extends ChangeNotifier {
@@ -36,6 +37,35 @@ class ShoppingListsProvider extends ChangeNotifier {
       return list;
     } catch (_) {
       return null;
+    }
+  }
+
+  /// Agrega ingredientes que faltaron al cocinar una receta a una lista de compras:
+  /// reutiliza la más reciente si ya existe alguna, o crea "Para comprar" si no.
+  Future<bool> addMissingItems(List<MissingIngredient> items) async {
+    try {
+      if (lists.isEmpty) {
+        await load();
+      }
+      var targetListId = lists.isNotEmpty ? lists.first.id : null;
+      if (targetListId == null) {
+        final response =
+            await _dio.post('/shopping-lists', data: {'name': 'Para comprar'});
+        final created = ShoppingList.fromJson(response.data as Map<String, dynamic>);
+        lists = [created, ...lists];
+        targetListId = created.id;
+      }
+      for (final item in items) {
+        await _dio.post('/shopping-lists/$targetListId/items', data: {
+          'ingredientId': item.ingredientId,
+          'quantity': item.quantity,
+          'unit': item.unit,
+        });
+      }
+      await load();
+      return true;
+    } catch (_) {
+      return false;
     }
   }
 

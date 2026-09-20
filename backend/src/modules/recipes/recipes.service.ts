@@ -15,7 +15,14 @@ import {
   paginate,
   PaginatedResult,
 } from '../../common/dto/pagination-query.dto';
-import { UserRole } from '../../common/enums';
+import { IngredientUnit, UserRole } from '../../common/enums';
+
+export interface MissingIngredient {
+  ingredientId: string;
+  name: string;
+  quantity: number;
+  unit: IngredientUnit;
+}
 
 @Injectable()
 export class RecipesService {
@@ -156,22 +163,36 @@ export class RecipesService {
     }
   }
 
-  /** Marca la receta como cocinada: descuenta del inventario del usuario los ingredientes usados. */
+  /**
+   * Marca la receta como cocinada: descuenta del inventario del usuario los ingredientes
+   * usados. Devuelve también los ingredientes que no se pudieron descontar del todo por
+   * no haber suficiente en inventario, para que el usuario decida si los agrega a su
+   * lista de compras.
+   */
   async cook(
     userId: string,
     id: string,
     servingsMultiplier = 1,
-  ): Promise<Recipe> {
+  ): Promise<{ recipe: Recipe; missingIngredients: MissingIngredient[] }> {
     const recipe = await this.findOne(id);
+    const missingIngredients: MissingIngredient[] = [];
     for (const recipeIngredient of recipe.recipeIngredients) {
-      await this.inventoryService.consume(
+      const shortfall = await this.inventoryService.consume(
         userId,
         recipeIngredient.ingredientId,
         recipeIngredient.quantity * servingsMultiplier,
         recipeIngredient.unit,
       );
+      if (shortfall > 0) {
+        missingIngredients.push({
+          ingredientId: recipeIngredient.ingredientId,
+          name: recipeIngredient.ingredient.name,
+          quantity: shortfall,
+          unit: recipeIngredient.unit,
+        });
+      }
     }
-    return recipe;
+    return { recipe, missingIngredients };
   }
 
   async toggleFavorite(

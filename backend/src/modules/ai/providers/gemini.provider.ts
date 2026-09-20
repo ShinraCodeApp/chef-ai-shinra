@@ -8,8 +8,10 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import {
   AiProvider,
   DetectedIngredient,
+  DetectedReceiptItem,
   GenerateRecipeInput,
   GeneratedRecipe,
+  MealAnalysis,
 } from '../ai-provider.interface';
 import { extractJson } from '../utils/extract-json';
 
@@ -86,6 +88,52 @@ export class GeminiProvider implements AiProvider {
     }
   }
 
+  async detectReceiptItems(
+    imageBuffer: Buffer,
+    mimeType: string,
+  ): Promise<DetectedReceiptItem[]> {
+    const model = this.getClient().getGenerativeModel({ model: VISION_MODEL });
+    const prompt = this.buildReceiptPrompt();
+
+    const result = await model.generateContent([
+      { text: prompt },
+      { inlineData: { data: imageBuffer.toString('base64'), mimeType } },
+    ]);
+    const text = result.response.text();
+
+    try {
+      return extractJson<DetectedReceiptItem[]>(text);
+    } catch (error) {
+      this.logger.error(`No se pudo parsear el ticket de compra: ${text}`);
+      throw new InternalServerErrorException(
+        'La IA devolvió una respuesta con un formato inesperado al analizar el ticket.',
+      );
+    }
+  }
+
+  async analyzeMealPhoto(
+    imageBuffer: Buffer,
+    mimeType: string,
+  ): Promise<MealAnalysis> {
+    const model = this.getClient().getGenerativeModel({ model: VISION_MODEL });
+    const prompt = this.buildMealAnalysisPrompt();
+
+    const result = await model.generateContent([
+      { text: prompt },
+      { inlineData: { data: imageBuffer.toString('base64'), mimeType } },
+    ]);
+    const text = result.response.text();
+
+    try {
+      return extractJson<MealAnalysis>(text);
+    } catch (error) {
+      this.logger.error(`No se pudo parsear el análisis nutricional: ${text}`);
+      throw new InternalServerErrorException(
+        'La IA devolvió una respuesta con un formato inesperado al analizar el plato.',
+      );
+    }
+  }
+
   private buildRecipePrompt(input: GenerateRecipeInput): string {
     const { availableIngredients, allergies, preferences } = input;
     const lines = [
@@ -152,6 +200,43 @@ export class GeminiProvider implements AiProvider {
       'Respondé ÚNICAMENTE con un JSON válido (sin texto adicional, sin markdown), un array con esta forma exacta:',
       `[{ "name": string, "approxQuantity": number, "unit": string, "state": "fresh" | "frozen" | "opened" | "expired" | "unknown", "confidence": number }]`,
       'confidence es un número entre 0 y 1. Si no estás seguro del alimento, igual incluilo con confidence bajo.',
+    ].join('\n');
+  }
+
+  private buildReceiptPrompt(): string {
+    return [
+      'Sos un sistema de visión artificial especializado en leer tickets de compra de supermercado o verdulería',
+      '(mayormente de Argentina). Analizá la imagen del ticket e identificá cada producto alimenticio comprado,',
+      'ignorando productos de limpieza, bazar u otros no comestibles, y también el total, subtotales o descuentos.',
+      '',
+      'Para cada producto, normalizá el nombre a un ingrediente genérico y simple en español',
+      '(ej. "PECHUGA POLLO KG x1.250" -> "Pollo (pechuga)"). Interpretá el peso o cantidad y su unidad',
+      '("kg", "g", "l", "ml" o "unidad" si se vendió por bulto/unidad), el precio unitario y el precio total pagado',
+      'por ese renglón (si el ticket solo trae un precio, usalo para ambos campos).',
+      '',
+      'Respondé ÚNICAMENTE con un JSON válido (sin texto adicional, sin markdown), un array con esta forma exacta:',
+      `[{ "name": string, "quantity": number, "unit": "g" | "kg" | "ml" | "l" | "unidad", "unitPrice": number, "totalPrice": number }]`,
+      'Si no podés leer algún campo con certeza, estimalo lo mejor posible; no inventes productos que no estén en el ticket.',
+    ].join('\n');
+  }
+
+  private buildMealAnalysisPrompt(): string {
+    return [
+      'Sos un nutricionista experto en estimar valores nutricionales a partir de fotos de platos de comida ya preparados/cocinados.',
+      'Analizá la imagen (un plato, un bowl, una porción sobre la mesa, etc.), identificá el plato en su conjunto y cada',
+      'componente visible, y estimá el tamaño de la porción observando referencias visuales típicas (tamaño del plato, cubiertos, etc.).',
+      '',
+      'Respondé ÚNICAMENTE con un JSON válido (sin texto adicional, sin markdown) con esta forma exacta:',
+      `{
+  "dishName": string,
+  "description": string,
+  "estimatedServingGrams": number,
+  "confidence": number,
+  "items": [{ "name": string, "approxGrams": number }],
+  "nutrition": { "calories": number, "proteinG": number, "fatG": number, "carbsG": number, "fiberG": number, "sugarG": number, "sodiumMg": number }
+}`,
+      'confidence es un número entre 0 y 1 que indica qué tan seguro estás de la identificación y la estimación.',
+      'Si la imagen no muestra comida, igual respondé con el JSON, usando dishName "No se detectó comida" y confidence 0.',
     ].join('\n');
   }
 }

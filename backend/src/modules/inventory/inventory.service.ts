@@ -66,13 +66,17 @@ export class InventoryService {
    * viene necesariamente del inventario registrado). Convierte unidades cuando son
    * de la misma magnitud (g/kg, ml/l); si son incompatibles (ej. "unidad" vs "g")
    * ese ítem del inventario se deja intacto porque no hay forma confiable de reconciliar.
+   *
+   * Devuelve la cantidad (en `unit`) que no pudo descontarse por no haber suficiente
+   * en inventario — se usa para ofrecerle al usuario agregar lo faltante a la lista
+   * de compras.
    */
   async consume(
     userId: string,
     ingredientId: string,
     quantity: number,
     unit: IngredientUnit,
-  ): Promise<void> {
+  ): Promise<number> {
     const items = await this.inventoryRepository.find({
       where: { userId, ingredientId },
       order: { addedAt: 'ASC' },
@@ -105,5 +109,6 @@ export class InventoryService {
         await this.inventoryRepository.save(item);
       }
     }
+    return remainingToConsume;
   }
 }

@@ -32,6 +32,7 @@ class InventoryProvider extends ChangeNotifier {
     required String unit,
     String state = 'fresh',
     String? expirationDate,
+    String? source,
   }) async {
     try {
       await _dio.post('/inventory', data: {
@@ -40,6 +41,7 @@ class InventoryProvider extends ChangeNotifier {
         'unit': unit,
         'state': state,
         if (expirationDate != null) 'expirationDate': expirationDate,
+        if (source != null) 'source': source,
       });
       await load();
       return true;

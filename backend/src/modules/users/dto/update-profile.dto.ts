@@ -1,5 +1,6 @@
 import {
   IsArray,
+  IsBoolean,
   IsEnum,
   IsInt,
   IsNumber,
@@ -62,4 +63,8 @@ export class UpdateProfileDto {
   @IsArray()
   @IsString({ each: true })
   allergies?: string[];
+
+  @IsOptional()
+  @IsBoolean()
+  onboardingCompleted?: boolean;
 }

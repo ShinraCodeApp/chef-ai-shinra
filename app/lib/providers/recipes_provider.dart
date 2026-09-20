@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../core/api_client.dart';
+import '../models/missing_ingredient.dart';
 import '../models/paginated.dart';
 import '../models/recipe.dart';
 
@@ -102,10 +103,26 @@ class RecipesProvider extends ChangeNotifier {
     return Recipe.fromJson(response.data as Map<String, dynamic>);
   }
 
-  Future<void> cook(String recipeId, {double servingsMultiplier = 1}) async {
-    await _dio.post('/recipes/$recipeId/cook', data: {
+  Future<List<MissingIngredient>> cook(String recipeId,
+      {double servingsMultiplier = 1}) async {
+    final response = await _dio.post('/recipes/$recipeId/cook', data: {
       'servingsMultiplier': servingsMultiplier,
     });
+    final missing = response.data['missingIngredients'] as List? ?? [];
+    return missing
+        .map((e) => MissingIngredient.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<bool> deleteRecipe(String recipeId) async {
+    try {
+      await _dio.delete('/recipes/$recipeId');
+      recipes.removeWhere((r) => r.id == recipeId);
+      notifyListeners();
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   Future<bool> toggleFavorite(String recipeId) async {

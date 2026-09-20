@@ -49,4 +49,40 @@ export class AiController {
     }
     return this.aiService.scanImageForIngredients(image.buffer, image.mimetype);
   }
+
+  @Post('receipt/scan')
+  @UseInterceptors(
+    FileInterceptor('image', { limits: { fileSize: MAX_IMAGE_SIZE_BYTES } }),
+  )
+  scanReceipt(@UploadedFile() image?: Express.Multer.File) {
+    if (!image) {
+      throw new BadRequestException(
+        'Falta el archivo de imagen (campo "image")',
+      );
+    }
+    if (!ALLOWED_MIME_TYPES.includes(image.mimetype)) {
+      throw new BadRequestException(
+        'Formato de imagen no soportado (usar JPEG, PNG o WEBP)',
+      );
+    }
+    return this.aiService.scanReceiptForItems(image.buffer, image.mimetype);
+  }
+
+  @Post('meal/analyze')
+  @UseInterceptors(
+    FileInterceptor('image', { limits: { fileSize: MAX_IMAGE_SIZE_BYTES } }),
+  )
+  analyzeMeal(@UploadedFile() image?: Express.Multer.File) {
+    if (!image) {
+      throw new BadRequestException(
+        'Falta el archivo de imagen (campo "image")',
+      );
+    }
+    if (!ALLOWED_MIME_TYPES.includes(image.mimetype)) {
+      throw new BadRequestException(
+        'Formato de imagen no soportado (usar JPEG, PNG o WEBP)',
+      );
+    }
+    return this.aiService.analyzeMealPhoto(image.buffer, image.mimetype);
+  }
 }

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../core/theme.dart';
 import '../../providers/auth_provider.dart';
 import '../home/home_screen.dart';
+import '../onboarding/onboarding_screen.dart';
 import 'login_screen.dart';
 
 /// Decide qué pantalla mostrar al arrancar la app según haya o no una sesión
@@ -42,6 +43,9 @@ class _AuthGateState extends State<AuthGate> {
           ),
         );
       case AuthStatus.authenticated:
+        if (auth.currentUser?.onboardingCompleted == false) {
+          return const OnboardingScreen();
+        }
         return const HomeScreen();
       case AuthStatus.unauthenticated:
         return const LoginScreen();

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../models/missing_ingredient.dart';
 import '../../models/recipe.dart';
 import '../../providers/recipes_provider.dart';
+import '../../providers/shopping_lists_provider.dart';
 import '../../widgets/app_loading.dart';
 
 class RecipeDetailScreen extends StatefulWidget {
@@ -39,13 +41,15 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   Future<void> _cook() async {
     setState(() => _isCooking = true);
     try {
-      await context.read<RecipesProvider>().cook(_recipe!.id);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('¡Buen provecho! Se descontó del inventario.'),
-          ),
-        );
+      final missing = await context.read<RecipesProvider>().cook(_recipe!.id);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('¡Buen provecho! Se descontó del inventario.'),
+        ),
+      );
+      if (missing.isNotEmpty) {
+        await _offerAddMissingToShoppingList(missing);
       }
     } catch (_) {
       if (mounted) {
@@ -56,6 +60,45 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     } finally {
       if (mounted) setState(() => _isCooking = false);
     }
+  }
+
+  Future<void> _offerAddMissingToShoppingList(
+      List<MissingIngredient> missing) async {
+    final shouldAdd = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Te faltaron ingredientes'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('¿Los agregamos a tu lista de compras?'),
+            const SizedBox(height: 12),
+            ...missing.map(
+              (item) => Text(
+                  '• ${item.quantity.toStringAsFixed(item.quantity.truncateToDouble() == item.quantity ? 0 : 1)} ${item.unit} — ${item.name}'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false), child: const Text('No')),
+          FilledButton(
+              onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Sí')),
+        ],
+      ),
+    );
+    if (shouldAdd != true || !mounted) return;
+    final added =
+        await context.read<ShoppingListsProvider>().addMissingItems(missing);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(added
+            ? 'Ingredientes agregados a tu lista de compras.'
+            : 'No se pudieron agregar a la lista de compras.'),
+      ),
+    );
   }
 
   @override
@@ -83,6 +126,32 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (recipe.imageUrl != null && recipe.imageUrl!.isNotEmpty) ...[
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Image.network(
+                        recipe.imageUrl!,
+                        height: 200,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (context, child, progress) {
+                          if (progress == null) return child;
+                          return Container(
+                            height: 200,
+                            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                            child: const Center(child: CircularProgressIndicator()),
+                          );
+                        },
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          height: 200,
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                          child: Icon(Icons.restaurant,
+                              size: 48, color: Theme.of(context).colorScheme.outline),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
                   Text(recipe.description,
                       style: Theme.of(context).textTheme.bodyLarge),
                   const SizedBox(height: 12),
