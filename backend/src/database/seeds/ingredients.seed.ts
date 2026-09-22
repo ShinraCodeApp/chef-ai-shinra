@@ -675,6 +675,7 @@ async function run() {
     username: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
+    ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
     // se registran todas las entities (no solo Ingredient) porque TypeORM necesita
     // resolver las relaciones inversas declaradas en Ingredient (inventoryItems, prices, etc.)
     entities: [path.join(__dirname, '../../modules/**/*.entity.{ts,js}')],
