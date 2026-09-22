@@ -56,6 +56,16 @@ const Map<String, String> kRecipeImageAssets = {
   'Pabellón criollo': 'assets/recipe_images/pabellon-criollo.jpg',
   'Paella de pollo': 'assets/recipe_images/paella-pollo.jpg',
   'Arroz con bacalao': 'assets/recipe_images/arroz-bacalao.jpg',
+  'Arroz pilaf': 'assets/recipe_images/arroz-pilaf.jpg',
+  'Sushi balls': 'assets/recipe_images/sushi-balls.jpg',
+  'Chow fan de pollo': 'assets/recipe_images/chow-fan-pollo.jpg',
+  'Bibimbap coreano': 'assets/recipe_images/bibimbap-coreano.jpg',
+  'Dosas de arroz y lentejas fermentadas': 'assets/recipe_images/dosas-arroz-lentejas.jpg',
+  'Arancini siciliano': 'assets/recipe_images/arancini-siciliano.jpg',
+  'Arroz rojo': 'assets/recipe_images/arroz-rojo.jpg',
+  'Morisqueta de Michoacán': 'assets/recipe_images/morisqueta-michoacan.jpg',
+  'Paella mixta': 'assets/recipe_images/paella-mixta.jpg',
+  'Arroz del Senyoret': 'assets/recipe_images/arroz-senyoret.jpg',
 };
 
 /// Devuelve la ruta del asset local para una receta del catálogo base, o null si
