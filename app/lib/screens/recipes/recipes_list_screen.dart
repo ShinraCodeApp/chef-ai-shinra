@@ -18,6 +18,7 @@ const _dietTagOptions = [
   'comida_cruda',
   'hipotiroidismo',
   'hipertiroidismo',
+  'anime',
 ];
 
 class RecipesListScreen extends StatefulWidget {
@@ -60,6 +61,8 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
         return 'Recetas para hipotiroidismo';
       case 'hipertiroidismo':
         return 'Recetas para hipertiroidismo';
+      case 'anime':
+        return 'Platos anime';
       default:
         return 'Recetas';
     }

@@ -49,6 +49,8 @@ class HomeScreen extends StatelessWidget {
           (ctx) => const RecipesListScreen(initialDietTag: 'hipotiroidismo')),
       _QuickAction('Hipertiroidismo', Icons.medical_information_outlined,
           (ctx) => const RecipesListScreen(initialDietTag: 'hipertiroidismo')),
+      _QuickAction('Platos anime', Icons.ramen_dining,
+          (ctx) => const RecipesListScreen(initialDietTag: 'anime')),
       _QuickAction('Favoritos', Icons.favorite, (ctx) => const FavoritesScreen()),
       _QuickAction('Compartir receta', Icons.share, (ctx) => const CreateRecipeScreen()),
       _QuickAction('Plan semanal', Icons.calendar_month,

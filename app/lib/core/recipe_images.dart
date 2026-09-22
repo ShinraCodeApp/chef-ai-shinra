@@ -66,6 +66,13 @@ const Map<String, String> kRecipeImageAssets = {
   'Morisqueta de Michoacán': 'assets/recipe_images/morisqueta-michoacan.jpg',
   'Paella mixta': 'assets/recipe_images/paella-mixta.jpg',
   'Arroz del Senyoret': 'assets/recipe_images/arroz-senyoret.jpg',
+  'Wrap integral de avena y huevo': 'assets/recipe_images/wrap-avena-huevo.jpg',
+  'Galletas de avena fáciles': 'assets/recipe_images/galletas-avena.jpg',
+  'Budín de cacao y banana': 'assets/recipe_images/budin-cacao-banana.jpg',
+  'Budín de zanahoria y naranja': 'assets/recipe_images/budin-zanahoria-naranja.jpg',
+  'Budín de yogur y frutos rojos': 'assets/recipe_images/budin-yogur-frutos-rojos.jpg',
+  'Budín de manzana y avena': 'assets/recipe_images/budin-manzana-avena.jpg',
+  'Fideos Food Wars: mapo tofu, curry y albóndiga': 'assets/recipe_images/food-wars-mapo-tofu-curry.jpg',
 };
 
 /// Devuelve la ruta del asset local para una receta del catálogo base, o null si

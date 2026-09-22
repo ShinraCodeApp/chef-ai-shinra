@@ -11,6 +11,7 @@ const Map<String, String> kDietTagLabels = {
   'comida_cruda': 'comida cruda',
   'hipotiroidismo': 'hipotiroidismo',
   'hipertiroidismo': 'hipertiroidismo',
+  'anime': 'platos anime',
 };
 
 String dietTagLabel(String tag) => kDietTagLabels[tag] ?? tag;
