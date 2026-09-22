@@ -41,6 +41,11 @@ const Map<String, String> kRecipeImageAssets = {
   'Bife a la plancha con batatas al horno': 'assets/recipe_images/bife-plancha-batatas.jpg',
   'Bowl de yogur, granola y banana': 'assets/recipe_images/bowl-yogur-granola-banana.jpg',
   'Wrap de pollo, palta y vegetales': 'assets/recipe_images/wrap-pollo-palta.jpg',
+  'Bowl de atún, huevo y almendras': 'assets/recipe_images/bowl-atun-huevo-almendras.jpg',
+  'Tostadas de atún, huevo y queso': 'assets/recipe_images/tostadas-atun-huevo-queso.jpg',
+  'Ensalada de brócoli y coliflor con queso':
+      'assets/recipe_images/ensalada-brocoli-coliflor-queso.jpg',
+  'Bife con brócoli y batatas al horno': 'assets/recipe_images/bife-brocoli-batatas.jpg',
 };
 
 /// Devuelve la ruta del asset local para una receta del catálogo base, o null si

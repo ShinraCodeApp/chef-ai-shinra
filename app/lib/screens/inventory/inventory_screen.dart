@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../core/nutrition.dart';
+import '../../models/inventory_item.dart';
 import '../../providers/inventory_provider.dart';
 import '../../widgets/empty_state.dart';
 import '../generate_recipe/voice_inventory_screen.dart';
@@ -74,10 +76,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                           margin: const EdgeInsets.symmetric(vertical: 4),
                           child: ListTile(
                             title: Text(item.ingredient.name),
-                            subtitle: Text(
-                              '${item.quantity} ${item.unit} · ${_stateLabels[item.state] ?? item.state}'
-                              '${item.expirationDate != null ? ' · vence ${item.expirationDate}' : ''}',
-                            ),
+                            subtitle: _ItemSubtitle(item: item),
                             trailing: IconButton(
                               icon: const Icon(Icons.delete_outline),
                               onPressed: () =>
@@ -97,4 +96,56 @@ class _InventoryScreenState extends State<InventoryScreen> {
       ),
     );
   }
+}
+
+class _ItemSubtitle extends StatelessWidget {
+  final InventoryItem item;
+
+  const _ItemSubtitle({required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    final nutrition = nutritionFor(item.ingredient, item.quantity, item.unit);
+    final macro = macroLabel(item.ingredient);
+    final scheme = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '${item.quantity} ${item.unit} · ${_stateLabels[item.state] ?? item.state}'
+          '${item.expirationDate != null ? ' · vence ${item.expirationDate}' : ''}',
+        ),
+        if (nutrition.hasData || macro != null) ...[
+          const SizedBox(height: 4),
+          Wrap(
+            spacing: 6,
+            runSpacing: 4,
+            children: [
+              if (nutrition.calories != null)
+                _macroChip('${nutrition.calories!.toStringAsFixed(0)} kcal'),
+              if (nutrition.proteinG != null)
+                _macroChip('Proteína: ${nutrition.proteinG!.toStringAsFixed(1)}g'),
+              if (nutrition.carbsG != null)
+                _macroChip('Carbs: ${nutrition.carbsG!.toStringAsFixed(1)}g'),
+              if (macro != null)
+                Chip(
+                  label: Text(macro, style: const TextStyle(fontSize: 11)),
+                  visualDensity: VisualDensity.compact,
+                  backgroundColor: macro == 'Proteico'
+                      ? scheme.primaryContainer
+                      : scheme.tertiaryContainer,
+                  padding: EdgeInsets.zero,
+                ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _macroChip(String label) => Chip(
+        label: Text(label, style: const TextStyle(fontSize: 11)),
+        visualDensity: VisualDensity.compact,
+        padding: EdgeInsets.zero,
+      );
 }
