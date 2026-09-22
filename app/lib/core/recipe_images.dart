@@ -46,6 +46,7 @@ const Map<String, String> kRecipeImageAssets = {
   'Ensalada de brócoli y coliflor con queso':
       'assets/recipe_images/ensalada-brocoli-coliflor-queso.jpg',
   'Bife con brócoli y batatas al horno': 'assets/recipe_images/bife-brocoli-batatas.jpg',
+  'Sándwich de pepino y pollo': 'assets/recipe_images/sandwich-pepino-pollo.jpg',
 };
 
 /// Devuelve la ruta del asset local para una receta del catálogo base, o null si

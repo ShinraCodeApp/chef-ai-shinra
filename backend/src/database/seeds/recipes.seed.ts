@@ -1062,6 +1062,35 @@ const seedRecipes: SeedRecipe[] = [
       { ingredientName: 'Sal', quantity: 6, unit: G },
     ],
   },
+  {
+    title: 'Sándwich de pepino y pollo',
+    description:
+      'Sándwich fresco con pollo, pepino y vegetales crocantes, bañado en una vinagreta de naranja y sésamo.',
+    servings: 4,
+    prepTimeMinutes: 15,
+    difficulty: RecipeDifficulty.EASY,
+    dietTags: ['proteico', 'fitness'],
+    estimatedCostTotal: 3500,
+    nutrition: { calories: 415, proteinG: 28, fatG: 22, carbsG: 32, fiberG: 3, sugarG: 12, sodiumMg: 420 },
+    instructions: [
+      'Para la vinagreta: procesar o licuar el jugo de naranja, el aceite de sésamo, el ajo, la sal y la pimienta hasta integrar.',
+      'Agregar los gajos de naranja picados a la vinagreta y reservar.',
+      'Cocinar las pechugas de pollo aplanadas a la plancha hasta que estén doradas y bien cocidas.',
+      'Sobre una rebanada de pan, colocar el pollo, unas rodajas de pepino, el tomate cherry y el pimiento en juliana a gusto.',
+      'Agregar una cucharadita de la vinagreta, tapar con otra rebanada de pan y servir. Tip: se puede reemplazar el pollo por queso.',
+    ],
+    ingredients: [
+      { ingredientName: 'Pan', quantity: 8, unit: UN, notes: 'rebanadas, pan integral' },
+      { ingredientName: 'Pollo (pechuga)', quantity: 0.3, unit: KG, notes: 'aplanada' },
+      { ingredientName: 'Pepino', quantity: 2, unit: UN, notes: 'en rodajas' },
+      { ingredientName: 'Tomate', quantity: 1, unit: UN, notes: 'cherry, en cuartos' },
+      { ingredientName: 'Morrón', quantity: 1, unit: UN, notes: 'amarillo, en juliana' },
+      { ingredientName: 'Naranja', quantity: 2, unit: UN, notes: 'el jugo de una y los gajos de la otra' },
+      { ingredientName: 'Aceite de sésamo', quantity: 0.06, unit: L },
+      { ingredientName: 'Ajo', quantity: 0.5, unit: UN, notes: 'picado finamente' },
+      { ingredientName: 'Sal', quantity: 3, unit: G, notes: 'y pimienta negra a gusto' },
+    ],
+  },
 ];
 
 async function run() {
