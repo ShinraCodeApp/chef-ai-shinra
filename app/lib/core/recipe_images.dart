@@ -47,6 +47,15 @@ const Map<String, String> kRecipeImageAssets = {
       'assets/recipe_images/ensalada-brocoli-coliflor-queso.jpg',
   'Bife con brócoli y batatas al horno': 'assets/recipe_images/bife-brocoli-batatas.jpg',
   'Sándwich de pepino y pollo': 'assets/recipe_images/sandwich-pepino-pollo.jpg',
+  'Arroz con setas meloso': 'assets/recipe_images/arroz-setas-meloso.jpg',
+  'Paella de carne': 'assets/recipe_images/paella-carne.jpg',
+  'Pan con psyllium': 'assets/recipe_images/pan-psyllium.jpg',
+  'Cuscús base: cómo se cocina': 'assets/recipe_images/cuscus-base.jpg',
+  'Picante de pollo': 'assets/recipe_images/picante-pollo.jpg',
+  'Arroz con atún': 'assets/recipe_images/arroz-atun.jpg',
+  'Pabellón criollo': 'assets/recipe_images/pabellon-criollo.jpg',
+  'Paella de pollo': 'assets/recipe_images/paella-pollo.jpg',
+  'Arroz con bacalao': 'assets/recipe_images/arroz-bacalao.jpg',
 };
 
 /// Devuelve la ruta del asset local para una receta del catálogo base, o null si
