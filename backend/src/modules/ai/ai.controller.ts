@@ -15,6 +15,7 @@ import {
 } from '../../common/decorators/current-user.decorator';
 import { AiService } from './ai.service';
 import { GenerateRecipeDto } from './dto/generate-recipe.dto';
+import { ParseVoiceInventoryDto } from './dto/parse-voice-inventory.dto';
 
 const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024;
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -84,5 +85,10 @@ export class AiController {
       );
     }
     return this.aiService.analyzeMealPhoto(image.buffer, image.mimetype);
+  }
+
+  @Post('inventory/parse-voice')
+  parseVoiceInventory(@Body() dto: ParseVoiceInventoryDto) {
+    return this.aiService.parseVoiceInventory(dto.text);
   }
 }

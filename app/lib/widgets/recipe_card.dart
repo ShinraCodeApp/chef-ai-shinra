@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/recipe_images.dart';
 import '../models/recipe.dart';
 
 class RecipeCard extends StatelessWidget {
@@ -64,39 +65,46 @@ class RecipeCard extends StatelessWidget {
   }
 
   Widget _thumbnail(ColorScheme scheme) {
+    final placeholder = Container(
+      color: scheme.primaryContainer,
+      child: Icon(Icons.restaurant, color: scheme.onPrimaryContainer),
+    );
+    final localAsset = localRecipeImageAsset(recipe.title);
     final url = recipe.imageUrl;
+
+    Widget image;
+    if (localAsset != null) {
+      image = Image.asset(
+        localAsset,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => placeholder,
+      );
+    } else if (url != null && url.isNotEmpty) {
+      image = Image.network(
+        url,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, progress) {
+          if (progress == null) return child;
+          return Container(
+            color: scheme.surfaceContainerHighest,
+            child: const Center(
+              child: SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) => placeholder,
+      );
+    } else {
+      image = placeholder;
+    }
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
-      child: SizedBox(
-        width: 56,
-        height: 56,
-        child: url == null || url.isEmpty
-            ? Container(
-                color: scheme.primaryContainer,
-                child: Icon(Icons.restaurant, color: scheme.onPrimaryContainer),
-              )
-            : Image.network(
-                url,
-                fit: BoxFit.cover,
-                loadingBuilder: (context, child, progress) {
-                  if (progress == null) return child;
-                  return Container(
-                    color: scheme.surfaceContainerHighest,
-                    child: const Center(
-                      child: SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                    ),
-                  );
-                },
-                errorBuilder: (context, error, stackTrace) => Container(
-                  color: scheme.primaryContainer,
-                  child: Icon(Icons.restaurant, color: scheme.onPrimaryContainer),
-                ),
-              ),
-      ),
+      child: SizedBox(width: 56, height: 56, child: image),
     );
   }
 

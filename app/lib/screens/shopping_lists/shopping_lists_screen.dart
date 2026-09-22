@@ -10,6 +10,8 @@ class ShoppingListsScreen extends StatefulWidget {
   State<ShoppingListsScreen> createState() => _ShoppingListsScreenState();
 }
 
+const _units = ['g', 'kg', 'ml', 'l', 'unidad'];
+
 class _ShoppingListsScreenState extends State<ShoppingListsScreen> {
   @override
   void initState() {
@@ -17,6 +19,97 @@ class _ShoppingListsScreenState extends State<ShoppingListsScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ShoppingListsProvider>().load();
     });
+  }
+
+  Future<void> _createList() async {
+    final controller = TextEditingController();
+    final name = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Nueva lista de compras'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(labelText: 'Nombre de la lista'),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Cancelar')),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(
+                controller.text.trim().isEmpty ? 'Lista de compras' : controller.text.trim()),
+            child: const Text('Crear'),
+          ),
+        ],
+      ),
+    );
+    if (name == null || !mounted) return;
+    final ok = await context.read<ShoppingListsProvider>().createList(name);
+    if (!mounted) return;
+    if (!ok) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('No se pudo crear la lista.')));
+    }
+  }
+
+  Future<void> _addItem(String listId) async {
+    final nameController = TextEditingController();
+    final quantityController = TextEditingController(text: '1');
+    var unit = 'unidad';
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: const Text('Agregar ítem'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                autofocus: true,
+                decoration: const InputDecoration(labelText: 'Ítem'),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: quantityController,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      decoration: const InputDecoration(labelText: 'Cantidad'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      initialValue: unit,
+                      decoration: const InputDecoration(labelText: 'Unidad'),
+                      items: _units.map((u) => DropdownMenuItem(value: u, child: Text(u))).toList(),
+                      onChanged: (value) => setDialogState(() => unit = value ?? 'unidad'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancelar')),
+            FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Agregar')),
+          ],
+        ),
+      ),
+    );
+    if (result != true || !mounted) return;
+    final name = nameController.text.trim();
+    final quantity = double.tryParse(quantityController.text) ?? 1;
+    if (name.isEmpty) return;
+    final ok = await context
+        .read<ShoppingListsProvider>()
+        .addCustomItem(listId, name: name, quantity: quantity, unit: unit);
+    if (!mounted) return;
+    if (!ok) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('No se pudo agregar el ítem.')));
+    }
   }
 
   @override
@@ -85,12 +178,27 @@ class _ShoppingListsScreenState extends State<ShoppingListsScreen> {
                                   ),
                                 )),
                           ];
-                        }).toList(),
+                        }).toList()
+                          ..add(
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              child: OutlinedButton.icon(
+                                onPressed: () => _addItem(list.id),
+                                icon: const Icon(Icons.add),
+                                label: const Text('Agregar ítem'),
+                              ),
+                            ),
+                          ),
                       ),
                     );
                   },
                 ),
             ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _createList,
+        tooltip: 'Nueva lista',
+        child: const Icon(Icons.add),
+      ),
     );
   }
 }

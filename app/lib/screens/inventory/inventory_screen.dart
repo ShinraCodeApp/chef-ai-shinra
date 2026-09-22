@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/inventory_provider.dart';
 import '../../widgets/empty_state.dart';
+import '../generate_recipe/voice_inventory_screen.dart';
 import 'add_inventory_item_screen.dart';
 
 const _stateLabels = {
@@ -32,7 +33,21 @@ class _InventoryScreenState extends State<InventoryScreen> {
   Widget build(BuildContext context) {
     final provider = context.watch<InventoryProvider>();
     return Scaffold(
-      appBar: AppBar(title: const Text('Mi inventario')),
+      appBar: AppBar(
+        title: const Text('Mi inventario'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.mic_outlined),
+            tooltip: 'Dictar por voz',
+            onPressed: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const VoiceInventoryScreen()),
+              );
+              if (context.mounted) context.read<InventoryProvider>().load();
+            },
+          ),
+        ],
+      ),
       body: provider.isLoading && provider.items.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(

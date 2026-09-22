@@ -122,7 +122,8 @@ class _ScanMealScreenState extends State<ScanMealScreen> {
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(title: const Text('Calorías de mi plato')),
-      body: SingleChildScrollView(
+      body: SafeArea(
+        child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -257,6 +258,7 @@ class _ScanMealScreenState extends State<ScanMealScreen> {
               ),
             ],
           ],
+        ),
         ),
       ),
     );

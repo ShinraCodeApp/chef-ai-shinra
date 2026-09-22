@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../core/diet_tags.dart';
 import '../../core/ingredients_api.dart';
 import '../../models/ingredient.dart';
 import '../../providers/recipes_provider.dart';
@@ -16,6 +17,8 @@ const _dietTagOptions = [
   'fitness',
   'economico',
   'comida_cruda',
+  'hipotiroidismo',
+  'hipertiroidismo',
 ];
 
 class _IngredientRow {
@@ -150,7 +153,8 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Compartir mi receta')),
-      body: SingleChildScrollView(
+      body: SafeArea(
+        child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -215,7 +219,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
               spacing: 8,
               children: _dietTagOptions
                   .map((tag) => FilterChip(
-                        label: Text(tag),
+                        label: Text(dietTagLabel(tag)),
                         selected: _dietTags.contains(tag),
                         onSelected: (selected) => setState(() {
                           selected ? _dietTags.add(tag) : _dietTags.remove(tag);
@@ -361,6 +365,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
               label: const Text('Compartir receta'),
             ),
           ],
+        ),
         ),
       ),
     );

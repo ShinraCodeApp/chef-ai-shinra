@@ -104,4 +104,5 @@ export interface AiProvider {
     imageBuffer: Buffer,
     mimeType: string,
   ): Promise<MealAnalysis>;
+  parseIngredientsFromText(text: string): Promise<DetectedIngredient[]>;
 }

@@ -14,3 +14,6 @@ app/android/app/build/
 # OS / editor
 .DS_Store
 Thumbs.db
+
+# Claude Code (config local de sesión, no es parte del proyecto)
+.claude/

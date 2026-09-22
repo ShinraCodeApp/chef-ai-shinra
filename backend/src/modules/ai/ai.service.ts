@@ -172,6 +172,23 @@ export class AiService {
     return analysis;
   }
 
+  async parseVoiceInventory(text: string): Promise<DetectedIngredientWithCatalog[]> {
+    const detected = await this.aiProvider.parseIngredientsFromText(text);
+
+    return Promise.all(
+      detected.map(async (item) => {
+        const ingredient = await this.ingredientsService.findOrCreateByName(
+          item.name,
+          {
+            category: IngredientCategory.OTROS,
+            unit: this.parseUnit(item.unit),
+          },
+        );
+        return { ...item, ingredientId: ingredient.id };
+      }),
+    );
+  }
+
   private parseUnit(unit: string): IngredientUnit {
     const normalized = unit.trim().toLowerCase();
     const match = Object.values(IngredientUnit).find(

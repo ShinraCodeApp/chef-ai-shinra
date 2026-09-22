@@ -125,7 +125,8 @@ class _AdminIngredientEditScreenState extends State<AdminIngredientEditScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(_isEditing ? 'Editar ingrediente' : 'Nuevo ingrediente')),
-      body: SingleChildScrollView(
+      body: SafeArea(
+        child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -247,6 +248,7 @@ class _AdminIngredientEditScreenState extends State<AdminIngredientEditScreen> {
                   : const Text('Guardar'),
             ),
           ],
+        ),
         ),
       ),
     );

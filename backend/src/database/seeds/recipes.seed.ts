@@ -45,7 +45,6 @@ const UN = IngredientUnit.UNIT;
 const seedRecipes: SeedRecipe[] = [
   {
     title: 'Milanesas de pollo con puré de papas',
-    imageUrl: 'https://loremflickr.com/640/480/schnitzel,potato',
     description:
       'El clásico de todas las casas: milanesas doradas y crocantes acompañadas de un puré cremoso.',
     servings: 4,
@@ -73,7 +72,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Tortilla de papas y huevo',
-    imageUrl: 'https://loremflickr.com/640/480/omelette,potato',
     description: 'Tortilla española casera, jugosa por dentro y dorada por fuera.',
     servings: 4,
     prepTimeMinutes: 30,
@@ -98,7 +96,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Arroz con pollo',
-    imageUrl: 'https://loremflickr.com/640/480/chicken,rice',
     description: 'Arroz sabroso cocido junto al pollo, morrón y cebolla en una sola olla.',
     servings: 4,
     prepTimeMinutes: 45,
@@ -125,7 +122,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Ensalada de lentejas',
-    imageUrl: 'https://loremflickr.com/640/480/lentil,salad',
     description: 'Fresca, económica y rendidora — ideal como plato principal liviano.',
     servings: 4,
     prepTimeMinutes: 25,
@@ -150,7 +146,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Tarta de verduras',
-    imageUrl: 'https://loremflickr.com/640/480/vegetable,quiche',
     description: 'Tarta casera de morrón, cebolla y queso, ideal para el almuerzo o la cena.',
     servings: 6,
     prepTimeMinutes: 50,
@@ -178,7 +173,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Fideos con salsa de tomate y ajo',
-    imageUrl: 'https://loremflickr.com/640/480/pasta,tomato',
     description: 'Un plato rápido, económico y de siempre: fideos con una salsa simple de tomate y ajo.',
     servings: 4,
     prepTimeMinutes: 25,
@@ -203,7 +197,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Ensalada César simple',
-    imageUrl: 'https://loremflickr.com/640/480/caesarsalad,chicken',
     description: 'Versión casera y sencilla de la clásica ensalada César con pollo.',
     servings: 2,
     prepTimeMinutes: 20,
@@ -230,7 +223,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Guiso de lentejas con carne',
-    imageUrl: 'https://loremflickr.com/640/480/lentil,stew',
     description: 'Guiso abundante y reconfortante, perfecto para los días fríos.',
     servings: 6,
     prepTimeMinutes: 60,
@@ -258,7 +250,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Pescado al horno con papas y zanahoria',
-    imageUrl: 'https://loremflickr.com/640/480/fish,bakedfish',
     description: 'Pescado horneado con guarnición de papas y zanahorias, liviano y sabroso.',
     servings: 4,
     prepTimeMinutes: 45,
@@ -285,7 +276,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Ensalada mixta de verduras',
-    imageUrl: 'https://loremflickr.com/640/480/vegetable,salad',
     description: 'Ensalada fresca y simple para acompañar cualquier plato o comer sola.',
     servings: 4,
     prepTimeMinutes: 15,
@@ -311,7 +301,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Sopa de zanahoria',
-    imageUrl: 'https://loremflickr.com/640/480/carrot,soup',
     description: 'Sopa cremosa y reconfortante, ideal como entrada o plato liviano.',
     servings: 4,
     prepTimeMinutes: 35,
@@ -336,7 +325,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Panqueques caseros',
-    imageUrl: 'https://loremflickr.com/640/480/pancakes,breakfast',
     description: 'Panqueques simples para el desayuno, la merienda o rellenos salados/dulces.',
     servings: 4,
     prepTimeMinutes: 25,
@@ -361,7 +349,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Sandwich de pollo y vegetales',
-    imageUrl: 'https://loremflickr.com/640/480/chicken,sandwich',
     description: 'Sandwich completo con pollo grillado, lechuga, tomate y queso.',
     servings: 2,
     prepTimeMinutes: 20,
@@ -387,7 +374,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Ensalada de frutas con yogur',
-    imageUrl: 'https://loremflickr.com/640/480/fruit,yogurt',
     description: 'Postre fresco y liviano con manzana, banana y yogur.',
     servings: 2,
     prepTimeMinutes: 10,
@@ -409,7 +395,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Omelette de queso',
-    imageUrl: 'https://loremflickr.com/640/480/cheese,omelette',
     description: 'Omelette simple y rápido, perfecto para un desayuno o cena liviana.',
     servings: 1,
     prepTimeMinutes: 10,
@@ -432,7 +417,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Arroz con verduras salteadas',
-    imageUrl: 'https://loremflickr.com/640/480/friedrice,vegetable',
     description: 'Arroz salteado con morrón, zanahoria y cebolla, colorido y rendidor.',
     servings: 4,
     prepTimeMinutes: 30,
@@ -458,7 +442,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Energy balls crudas de dátil y cacao',
-    imageUrl: 'https://loremflickr.com/640/480/energyballs,chocolate',
     description:
       'Bocaditos energéticos sin cocción, dulces por los dátiles y con el toque amargo del cacao.',
     servings: 8,
@@ -484,7 +467,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Leche de almendras casera',
-    imageUrl: 'https://loremflickr.com/640/480/almondmilk,almonds',
     description: 'Bebida vegetal simple, sin cocción, para tomar sola o usar en otras recetas.',
     servings: 4,
     prepTimeMinutes: 15,
@@ -506,7 +488,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Ensalada crudivegana de zanahoria, manzana y limón',
-    imageUrl: 'https://loremflickr.com/640/480/carrot,apple',
     description: 'Ensalada fresca, rallada y sin cocción, ácida y crocante.',
     servings: 4,
     prepTimeMinutes: 15,
@@ -530,7 +511,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Helado crudo de banana y cacao',
-    imageUrl: 'https://loremflickr.com/640/480/banana,icecream',
     description: '"Nice cream" cremoso hecho solo con banana congelada, sin heladera ni cocción.',
     servings: 3,
     prepTimeMinutes: 10,
@@ -552,7 +532,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Granola cruda de avena y semillas',
-    imageUrl: 'https://loremflickr.com/640/480/granola,oats',
     description: 'Mezcla energética sin horno, lista en minutos, ideal para el desayuno con yogur o leche vegetal.',
     servings: 6,
     prepTimeMinutes: 15,
@@ -576,7 +555,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Bowl crudo de manzana, chía y limón',
-    imageUrl: 'https://loremflickr.com/640/480/chiapudding,apple',
     description: 'Postre o desayuno liviano a base de gel de chía, manzana fresca y limón, sin cocción.',
     servings: 2,
     prepTimeMinutes: 10,
@@ -599,7 +577,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Pollo a la mostaza',
-    imageUrl: 'https://loremflickr.com/640/480/chicken,mustard',
     description:
       'Pechuga dorada y bañada en una salsa rápida de mostaza, ajo y limón: lista en 10 minutos.',
     servings: 1,
@@ -627,7 +604,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Pollo al curry',
-    imageUrl: 'https://loremflickr.com/640/480/chicken,curry',
     description:
       'La pechuga de pollo no tiene por qué ser aburrida: cubos jugosos en una salsa cremosa de curry y leche de coco, listos en 20 minutos.',
     servings: 3,
@@ -657,7 +633,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Pizza de pollo',
-    imageUrl: 'https://loremflickr.com/640/480/chicken,pizza',
     description:
       'Una base de pizza hecha con pechuga de pollo procesada en lugar de harina, cubierta con salsa de tomate y mozzarella.',
     servings: 2,
@@ -688,7 +663,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Pollo al limón y ajo',
-    imageUrl: 'https://loremflickr.com/640/480/chicken,lemon',
     description:
       'Pechugas marinadas en limón, ajo y perejil, doradas en sartén: simples, jugosas y llenas de sabor.',
     servings: 2,
@@ -715,7 +689,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Pollo crocante con yogur y semillas',
-    imageUrl: 'https://loremflickr.com/640/480/chicken,crispy',
     description:
       'Bastones de pollo marinados en yogur y ajo, rebozados en semillas mixtas y horneados (o al air fryer) hasta quedar dorados y crocantes.',
     servings: 3,
@@ -745,7 +718,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Milanesas de berenjena al horno',
-    imageUrl: 'https://loremflickr.com/640/480/eggplant,baked',
     description: 'Versión vegetariana de las milanesas, con rodajas de berenjena rebozadas y horneadas.',
     servings: 3,
     prepTimeMinutes: 40,
@@ -771,7 +743,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Guacamole casero',
-    imageUrl: 'https://loremflickr.com/640/480/guacamole,avocado',
     description: 'Clásico dip mexicano de palta bien fresco, ideal para untar o acompañar cualquier plato.',
     servings: 4,
     prepTimeMinutes: 10,
@@ -795,7 +766,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Ensalada de garbanzos con verduras',
-    imageUrl: 'https://loremflickr.com/640/480/chickpea,salad',
     description: 'Ensalada fría, proteica y rendidora con garbanzos, morrón, tomate y cebolla.',
     servings: 4,
     prepTimeMinutes: 20,
@@ -821,7 +791,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Tarta de atún y verduras',
-    imageUrl: 'https://loremflickr.com/640/480/tuna,quiche',
     description: 'Tarta casera rellena de atún, cebolla, morrón y queso, perfecta para el almuerzo.',
     servings: 6,
     prepTimeMinutes: 50,
@@ -849,7 +818,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Batatas al horno con especias',
-    imageUrl: 'https://loremflickr.com/640/480/sweetpotato,baked',
     description: 'Bastones de batata horneados hasta quedar tiernos por dentro y dorados por fuera.',
     servings: 4,
     prepTimeMinutes: 40,
@@ -872,7 +840,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Crema de calabaza',
-    imageUrl: 'https://loremflickr.com/640/480/pumpkin,soup',
     description: 'Sopa suave y dulzona, reconfortante y muy fácil de preparar.',
     servings: 4,
     prepTimeMinutes: 35,
@@ -897,7 +864,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Buñuelos de acelga',
-    imageUrl: 'https://loremflickr.com/640/480/fritters,spinach',
     description: 'Bocaditos dorados de acelga rehogada, huevo y queso, ideales como entrada o picada.',
     servings: 4,
     prepTimeMinutes: 35,
@@ -922,7 +888,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Bife a la plancha con batatas al horno',
-    imageUrl: 'https://loremflickr.com/640/480/steak,sweetpotato',
     description: 'Un plato completo y proteico: bife jugoso a la plancha acompañado de batatas horneadas.',
     servings: 2,
     prepTimeMinutes: 40,
@@ -948,7 +913,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Bowl de yogur, granola y banana',
-    imageUrl: 'https://loremflickr.com/640/480/yogurt,granola',
     description: 'Desayuno o merienda rápida y nutritiva, lista en 5 minutos sin cocción.',
     servings: 1,
     prepTimeMinutes: 5,
@@ -971,7 +935,6 @@ const seedRecipes: SeedRecipe[] = [
   },
   {
     title: 'Wrap de pollo, palta y vegetales',
-    imageUrl: 'https://loremflickr.com/640/480/chicken,wrap',
     description: 'Tortilla de trigo rellena de pollo grillado, palta, lechuga y tomate, ideal para llevar.',
     servings: 2,
     prepTimeMinutes: 25,
@@ -994,6 +957,109 @@ const seedRecipes: SeedRecipe[] = [
       { ingredientName: 'Tomate', quantity: 1, unit: UN },
       { ingredientName: 'Limón', quantity: 0.5, unit: UN },
       { ingredientName: 'Sal', quantity: 3, unit: G },
+    ],
+  },
+  {
+    title: 'Bowl de atún, huevo y almendras',
+    description:
+      'Bowl rápido rico en yodo, selenio y zinc — nutrientes clave para el buen funcionamiento de la tiroides en el hipotiroidismo.',
+    servings: 2,
+    prepTimeMinutes: 15,
+    difficulty: RecipeDifficulty.EASY,
+    dietTags: ['hipotiroidismo', 'proteico', 'fitness'],
+    estimatedCostTotal: 4000,
+    nutrition: { calories: 300, proteinG: 28, fatG: 18, carbsG: 4, fiberG: 1, sugarG: 1, sodiumMg: 380 },
+    instructions: [
+      'Hervir los huevos durante 9-10 minutos, enfriar, pelar y cortar por la mitad.',
+      'Escurrir bien el atún.',
+      'Lavar y cortar la lechuga en trozos.',
+      'Armar el bowl con la lechuga, el atún, los huevos y las almendras picadas por encima.',
+      'Aliñar con aceite de oliva, jugo de limón y sal a gusto.',
+    ],
+    ingredients: [
+      { ingredientName: 'Atún', quantity: 120, unit: G, notes: 'escurrido' },
+      { ingredientName: 'Huevo', quantity: 2, unit: UN },
+      { ingredientName: 'Almendras', quantity: 20, unit: G, notes: 'picadas' },
+      { ingredientName: 'Lechuga', quantity: 1, unit: UN },
+      { ingredientName: 'Aceite', quantity: 0.02, unit: L },
+      { ingredientName: 'Limón', quantity: 0.5, unit: UN },
+      { ingredientName: 'Sal', quantity: 3, unit: G },
+    ],
+  },
+  {
+    title: 'Tostadas de atún, huevo y queso',
+    description:
+      'Tostadas calientes con atún, huevo y queso gratinado: una combinación práctica de yodo y selenio para el hipotiroidismo.',
+    servings: 2,
+    prepTimeMinutes: 15,
+    difficulty: RecipeDifficulty.EASY,
+    dietTags: ['hipotiroidismo', 'proteico'],
+    estimatedCostTotal: 3500,
+    nutrition: { calories: 420, proteinG: 30, fatG: 16, carbsG: 35, fiberG: 2, sugarG: 3, sodiumMg: 650 },
+    instructions: [
+      'Hervir el huevo durante 9-10 minutos, enfriar, pelar y picar.',
+      'Mezclar el atún escurrido con el huevo picado y la mostaza.',
+      'Tostar el pan y repartir la mezcla de atún y huevo encima.',
+      'Cubrir con el queso en láminas y llevar a horno o sandwichera hasta que se derrita.',
+    ],
+    ingredients: [
+      { ingredientName: 'Pan', quantity: 2, unit: UN },
+      { ingredientName: 'Atún', quantity: 120, unit: G, notes: 'escurrido' },
+      { ingredientName: 'Huevo', quantity: 1, unit: UN },
+      { ingredientName: 'Queso', quantity: 50, unit: G },
+      { ingredientName: 'Mostaza', quantity: 10, unit: G, notes: 'opcional' },
+      { ingredientName: 'Sal', quantity: 2, unit: G },
+    ],
+  },
+  {
+    title: 'Ensalada de brócoli y coliflor con queso',
+    description:
+      'Ensalada tibia de vegetales crucíferos con queso, una buena opción de calcio para acompañar el hipertiroidismo.',
+    servings: 4,
+    prepTimeMinutes: 25,
+    difficulty: RecipeDifficulty.EASY,
+    dietTags: ['hipertiroidismo', 'vegetariano', 'fitness'],
+    estimatedCostTotal: 3000,
+    nutrition: { calories: 190, proteinG: 10, fatG: 13, carbsG: 9, fiberG: 4, sugarG: 3, sodiumMg: 220 },
+    instructions: [
+      'Cortar el brócoli y la coliflor en ramitos parejos.',
+      'Cocinar al vapor o hervir ambos hasta que estén tiernos pero firmes, unos 8-10 minutos.',
+      'Escurrir bien y dejar entibiar.',
+      'Mezclar con el queso cortado en cubos.',
+      'Aliñar con aceite de oliva, jugo de limón y sal a gusto.',
+    ],
+    ingredients: [
+      { ingredientName: 'Brócoli', quantity: 0.3, unit: KG },
+      { ingredientName: 'Coliflor', quantity: 0.3, unit: KG },
+      { ingredientName: 'Queso', quantity: 100, unit: G },
+      { ingredientName: 'Aceite', quantity: 0.03, unit: L },
+      { ingredientName: 'Limón', quantity: 0.5, unit: UN },
+      { ingredientName: 'Sal', quantity: 4, unit: G },
+    ],
+  },
+  {
+    title: 'Bife con brócoli y batatas al horno',
+    description:
+      'Plato completo y calórico con vegetales crucíferos, pensado para acompañar el mayor gasto energético del hipertiroidismo.',
+    servings: 2,
+    prepTimeMinutes: 40,
+    difficulty: RecipeDifficulty.MEDIUM,
+    dietTags: ['hipertiroidismo', 'proteico'],
+    estimatedCostTotal: 7000,
+    nutrition: { calories: 650, proteinG: 55, fatG: 28, carbsG: 45, fiberG: 8, sugarG: 5, sodiumMg: 350 },
+    instructions: [
+      'Precalentar el horno. Cortar la batata en cubos, condimentar con aceite y sal y hornear 25-30 minutos.',
+      'Cocinar el brócoli al vapor o hervido hasta que esté tierno, unos 8 minutos.',
+      'Salpimentar el bife y cocinarlo a la plancha con el ajo hasta el punto deseado.',
+      'Servir el bife junto a la batata al horno y el brócoli.',
+    ],
+    ingredients: [
+      { ingredientName: 'Carne (bife)', quantity: 0.4, unit: KG },
+      { ingredientName: 'Brócoli', quantity: 0.3, unit: KG },
+      { ingredientName: 'Batata', quantity: 0.4, unit: KG },
+      { ingredientName: 'Ajo', quantity: 2, unit: UN },
+      { ingredientName: 'Aceite', quantity: 0.03, unit: L },
+      { ingredientName: 'Sal', quantity: 6, unit: G },
     ],
   },
 ];
@@ -1021,12 +1087,10 @@ async function run() {
       where: { title: seed.title },
     });
     if (existing) {
-      // no se recrea, pero sí se actualizan dietTags e imageUrl: permite sumar tags
-      // nuevos o una foto a recetas que ya estaban sembradas en instalaciones previas.
+      // no se recrea, pero sí se sincronizan dietTags e imageUrl con lo que diga el seed
+      // (incluso a null), para poder limpiar fotos incorrectas de instalaciones previas.
       existing.dietTags = seed.dietTags;
-      if (seed.imageUrl && !existing.imageUrl) {
-        existing.imageUrl = seed.imageUrl;
-      }
+      existing.imageUrl = seed.imageUrl ?? null;
       await recipesRepository.save(existing);
       skipped++;
       continue;

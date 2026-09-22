@@ -641,6 +641,30 @@ const seedIngredients: Partial<Ingredient>[] = [
     sugarPer100g: 2,
     sodiumPer100g: 550,
   },
+  {
+    name: 'Brócoli',
+    category: IngredientCategory.VERDURAS,
+    unit: IngredientUnit.KILOGRAMS,
+    caloriesPer100g: 34,
+    proteinPer100g: 2.8,
+    fatPer100g: 0.4,
+    carbsPer100g: 6.6,
+    fiberPer100g: 2.6,
+    sugarPer100g: 1.7,
+    sodiumPer100g: 33,
+  },
+  {
+    name: 'Coliflor',
+    category: IngredientCategory.VERDURAS,
+    unit: IngredientUnit.KILOGRAMS,
+    caloriesPer100g: 25,
+    proteinPer100g: 1.9,
+    fatPer100g: 0.3,
+    carbsPer100g: 5,
+    fiberPer100g: 2,
+    sugarPer100g: 1.9,
+    sodiumPer100g: 30,
+  },
 ];
 
 async function run() {

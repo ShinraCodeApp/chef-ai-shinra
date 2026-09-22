@@ -123,7 +123,8 @@ class _ScanInventoryScreenState extends State<ScanInventoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Escanear heladera/alacena')),
-      body: SingleChildScrollView(
+      body: SafeArea(
+        child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -225,6 +226,7 @@ class _ScanInventoryScreenState extends State<ScanInventoryScreen> {
               ],
             ],
           ],
+        ),
         ),
       ),
     );

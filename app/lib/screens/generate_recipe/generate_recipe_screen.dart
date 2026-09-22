@@ -69,7 +69,8 @@ class _GenerateRecipeScreenState extends State<GenerateRecipeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Generar receta con IA')),
-      body: SingleChildScrollView(
+      body: SafeArea(
+        child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,6 +155,7 @@ class _GenerateRecipeScreenState extends State<GenerateRecipeScreen> {
               label: const Text('Generar receta'),
             ),
           ],
+        ),
         ),
       ),
     );

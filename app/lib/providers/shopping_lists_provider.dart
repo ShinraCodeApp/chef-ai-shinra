@@ -69,6 +69,40 @@ class ShoppingListsProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> createList(String name) async {
+    try {
+      final response = await _dio.post('/shopping-lists', data: {'name': name});
+      final created = ShoppingList.fromJson(response.data as Map<String, dynamic>);
+      lists = [created, ...lists];
+      notifyListeners();
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<bool> addCustomItem(
+    String listId, {
+    required String name,
+    required double quantity,
+    required String unit,
+  }) async {
+    try {
+      final response = await _dio.post('/shopping-lists/$listId/items', data: {
+        'customName': name,
+        'quantity': quantity,
+        'unit': unit,
+      });
+      final item = ShoppingListItem.fromJson(response.data as Map<String, dynamic>);
+      final list = lists.firstWhere((l) => l.id == listId);
+      list.items.add(item);
+      notifyListeners();
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   Future<void> toggleItem(String listId, String itemId) async {
     await _dio.post('/shopping-lists/$listId/items/$itemId/toggle');
     final list = lists.firstWhere((l) => l.id == listId);

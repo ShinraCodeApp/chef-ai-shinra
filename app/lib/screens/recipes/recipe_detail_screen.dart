@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
+import '../../core/diet_tags.dart';
+import '../../core/recipe_images.dart';
 import '../../models/missing_ingredient.dart';
 import '../../models/recipe.dart';
 import '../../providers/recipes_provider.dart';
@@ -20,6 +24,8 @@ class RecipeDetailScreen extends StatefulWidget {
 class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   Recipe? _recipe;
   bool _isCooking = false;
+  final _tts = FlutterTts();
+  bool _isSpeaking = false;
 
   @override
   void initState() {
@@ -31,6 +37,59 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
         if (mounted) setState(() => _recipe = recipe);
       });
     }
+    _tts.setLanguage('es-AR');
+    _tts.setCompletionHandler(() {
+      if (mounted) setState(() => _isSpeaking = false);
+    });
+  }
+
+  @override
+  void dispose() {
+    _tts.stop();
+    super.dispose();
+  }
+
+  Future<void> _toggleSpeak(Recipe recipe) async {
+    if (_isSpeaking) {
+      await _tts.stop();
+      setState(() => _isSpeaking = false);
+      return;
+    }
+    final buffer = StringBuffer()
+      ..writeln(recipe.title)
+      ..writeln(recipe.description)
+      ..writeln('Ingredientes:');
+    for (final ri in recipe.recipeIngredients) {
+      buffer.writeln('${ri.quantity} ${ri.unit} de ${ri.ingredient.name}.');
+    }
+    buffer.writeln('Preparación:');
+    for (final step in recipe.instructions) {
+      buffer.writeln('Paso ${step.order}. ${step.instruction}');
+    }
+    setState(() => _isSpeaking = true);
+    await _tts.speak(buffer.toString());
+  }
+
+  Future<void> _shareRecipe(Recipe recipe) async {
+    final buffer = StringBuffer()
+      ..writeln(recipe.title)
+      ..writeln()
+      ..writeln(recipe.description)
+      ..writeln()
+      ..writeln('⏱ ${recipe.prepTimeMinutes} min · 🍽 ${recipe.servings} porciones')
+      ..writeln()
+      ..writeln('Ingredientes:');
+    for (final ri in recipe.recipeIngredients) {
+      buffer.writeln('• ${ri.quantity} ${ri.unit} — ${ri.ingredient.name}');
+    }
+    buffer.writeln();
+    buffer.writeln('Preparación:');
+    for (final step in recipe.instructions) {
+      buffer.writeln('${step.order}. ${step.instruction}');
+    }
+    buffer.writeln();
+    buffer.writeln('Compartido desde Chef Ai by Shinra');
+    await SharePlus.instance.share(ShareParams(text: buffer.toString(), subject: recipe.title));
   }
 
   Future<void> _toggleFavorite() async {
@@ -111,6 +170,16 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
             ? null
             : [
                 IconButton(
+                  icon: Icon(_isSpeaking ? Icons.stop_circle_outlined : Icons.volume_up_outlined),
+                  tooltip: _isSpeaking ? 'Detener' : 'Escuchar receta',
+                  onPressed: () => _toggleSpeak(recipe),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.share_outlined),
+                  tooltip: 'Compartir receta',
+                  onPressed: () => _shareRecipe(recipe),
+                ),
+                IconButton(
                   icon: Icon(
                     recipe.isFavorite ? Icons.favorite : Icons.favorite_border,
                     color: recipe.isFavorite ? Theme.of(context).colorScheme.error : null,
@@ -119,17 +188,33 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                 ),
               ],
       ),
-      body: recipe == null
+      body: SafeArea(
+        child: recipe == null
           ? const AppLoading()
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (recipe.imageUrl != null && recipe.imageUrl!.isNotEmpty) ...[
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: Image.network(
+                  Builder(builder: (context) {
+                    final localAsset = localRecipeImageAsset(recipe.title);
+                    final placeholder = Container(
+                      height: 200,
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      child: Icon(Icons.restaurant,
+                          size: 48, color: Theme.of(context).colorScheme.outline),
+                    );
+                    Widget? image;
+                    if (localAsset != null) {
+                      image = Image.asset(
+                        localAsset,
+                        height: 200,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => placeholder,
+                      );
+                    } else if (recipe.imageUrl != null && recipe.imageUrl!.isNotEmpty) {
+                      image = Image.network(
                         recipe.imageUrl!,
                         height: 200,
                         width: double.infinity,
@@ -142,16 +227,18 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             child: const Center(child: CircularProgressIndicator()),
                           );
                         },
-                        errorBuilder: (context, error, stackTrace) => Container(
-                          height: 200,
-                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                          child: Icon(Icons.restaurant,
-                              size: 48, color: Theme.of(context).colorScheme.outline),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
+                        errorBuilder: (context, error, stackTrace) => placeholder,
+                      );
+                    }
+                    if (image == null) return const SizedBox.shrink();
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ClipRRect(borderRadius: BorderRadius.circular(16), child: image),
+                        const SizedBox(height: 16),
+                      ],
+                    );
+                  }),
                   Text(recipe.description,
                       style: Theme.of(context).textTheme.bodyLarge),
                   const SizedBox(height: 12),
@@ -165,7 +252,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                       if (recipe.estimatedCostTotal != null)
                         _infoChip(Icons.attach_money,
                             recipe.estimatedCostTotal!.toStringAsFixed(0)),
-                      ...recipe.dietTags.map((tag) => Chip(label: Text(tag))),
+                      ...recipe.dietTags.map((tag) => Chip(label: Text(dietTagLabel(tag)))),
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -219,6 +306,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                 ],
               ),
             ),
+      ),
     );
   }
 

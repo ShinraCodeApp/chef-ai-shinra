@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../core/diet_tags.dart';
 import '../../models/recipe.dart';
 import '../../providers/recipes_provider.dart';
 import '../recipes/recipe_detail_screen.dart';
@@ -108,7 +109,7 @@ class _AdminRecipesScreenState extends State<AdminRecipesScreen> {
                             [
                               if (recipe.isAiGenerated) 'Generada por IA',
                               '${recipe.servings} porciones',
-                              ...recipe.dietTags,
+                              ...recipe.dietTags.map(dietTagLabel),
                             ].join(' · '),
                           ),
                           onTap: () => Navigator.of(context).push(

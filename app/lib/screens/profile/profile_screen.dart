@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../core/diet_tags.dart';
 import '../../providers/auth_provider.dart';
 
 const _sexOptions = {'male': 'Masculino', 'female': 'Femenino', 'other': 'Otro'};
@@ -26,6 +27,8 @@ const _dietOptions = [
   'fitness',
   'economico',
   'comida_cruda',
+  'hipotiroidismo',
+  'hipertiroidismo',
 ];
 const _allergyOptions = [
   'celiaquia',
@@ -135,7 +138,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(
+        child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -230,7 +234,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               spacing: 8,
               children: _dietOptions
                   .map((tag) => FilterChip(
-                        label: Text(tag),
+                        label: Text(dietTagLabel(tag)),
                         selected: _dietPreferences.contains(tag),
                         onSelected: (selected) => setState(() {
                           selected ? _dietPreferences.add(tag) : _dietPreferences.remove(tag);
@@ -262,6 +266,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   : const Text('Guardar cambios'),
             ),
           ],
+        ),
         ),
       ),
     );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../core/diet_tags.dart';
 import '../../models/user.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/meal_plans_provider.dart';
@@ -203,7 +204,7 @@ class _DietSummaryCard extends StatelessWidget {
                       runSpacing: 6,
                       children: user.dietPreferences
                           .map((tag) => Chip(
-                                label: Text(tag),
+                                label: Text(dietTagLabel(tag)),
                                 visualDensity: VisualDensity.compact,
                               ))
                           .toList(),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../core/diet_tags.dart';
 import '../../providers/recipes_provider.dart';
 import '../../widgets/recipe_card.dart';
 import '../../widgets/empty_state.dart';
@@ -15,6 +16,8 @@ const _dietTagOptions = [
   'fitness',
   'economico',
   'comida_cruda',
+  'hipotiroidismo',
+  'hipertiroidismo',
 ];
 
 class RecipesListScreen extends StatefulWidget {
@@ -53,6 +56,10 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
         return 'Comida proteica';
       case 'vegano':
         return 'Comida vegana';
+      case 'hipotiroidismo':
+        return 'Recetas para hipotiroidismo';
+      case 'hipertiroidismo':
+        return 'Recetas para hipertiroidismo';
       default:
         return 'Recetas';
     }
@@ -103,7 +110,7 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
                   itemBuilder: (_) => [
                     const PopupMenuItem(value: null, child: Text('Todas')),
                     ..._dietTagOptions.map(
-                      (tag) => PopupMenuItem(value: tag, child: Text(tag)),
+                      (tag) => PopupMenuItem(value: tag, child: Text(dietTagLabel(tag))),
                     ),
                   ],
                 ),
@@ -116,7 +123,7 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Chip(
-                  label: Text('Filtro: ${provider.dietTag}'),
+                  label: Text('Filtro: ${dietTagLabel(provider.dietTag!)}'),
                   onDeleted: () {
                     provider.dietTag = null;
                     provider.loadRecipes();

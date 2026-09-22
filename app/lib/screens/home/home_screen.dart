@@ -5,6 +5,7 @@ import '../../providers/auth_provider.dart';
 import '../generate_recipe/generate_recipe_screen.dart';
 import '../generate_recipe/scan_inventory_screen.dart';
 import '../generate_recipe/scan_meal_screen.dart';
+import '../generate_recipe/voice_inventory_screen.dart';
 import '../generate_recipe/scan_receipt_screen.dart';
 import '../inventory/inventory_screen.dart';
 import '../recipes/recipes_list_screen.dart';
@@ -38,11 +39,16 @@ class HomeScreen extends StatelessWidget {
       _QuickAction('Calorías de mi plato', Icons.restaurant_menu,
           (ctx) => const ScanMealScreen()),
       _QuickAction('Mi inventario', Icons.kitchen, (ctx) => const InventoryScreen()),
+      _QuickAction('Dictar inventario', Icons.mic, (ctx) => const VoiceInventoryScreen()),
       _QuickAction('Recetas', Icons.menu_book, (ctx) => const RecipesListScreen()),
       _QuickAction('Comida proteica', Icons.fitness_center,
           (ctx) => const RecipesListScreen(initialDietTag: 'proteico')),
       _QuickAction('Comida vegana', Icons.eco,
           (ctx) => const RecipesListScreen(initialDietTag: 'vegano')),
+      _QuickAction('Hipotiroidismo', Icons.medical_information_outlined,
+          (ctx) => const RecipesListScreen(initialDietTag: 'hipotiroidismo')),
+      _QuickAction('Hipertiroidismo', Icons.medical_information_outlined,
+          (ctx) => const RecipesListScreen(initialDietTag: 'hipertiroidismo')),
       _QuickAction('Favoritos', Icons.favorite, (ctx) => const FavoritesScreen()),
       _QuickAction('Compartir receta', Icons.share, (ctx) => const CreateRecipeScreen()),
       _QuickAction('Plan semanal', Icons.calendar_month,

@@ -15,10 +15,12 @@ import {
 } from '../ai-provider.interface';
 import { extractJson } from '../utils/extract-json';
 
-// gemini-2.5-flash fue discontinuado para cuentas nuevas (jul. 2026); se usa la
-// generación 3.x vigente. gemini-3.6-flash es multimodal (texto + visión).
-const TEXT_MODEL = 'gemini-3.6-flash';
-const VISION_MODEL = 'gemini-3.6-flash';
+// gemini-2.5-flash fue discontinuado para cuentas nuevas (jul. 2026). gemini-3.6-flash
+// (la generación "estable" recomendada) devolvía 503 "high demand" de forma persistente
+// al momento de escribir esto — gemini-3-flash-preview es multimodal (texto + visión) y
+// respondía con normalidad. Si 3.6-flash vuelve a estar disponible, se puede volver a él.
+const TEXT_MODEL = 'gemini-3-flash-preview';
+const VISION_MODEL = 'gemini-3-flash-preview';
 
 @Injectable()
 export class GeminiProvider implements AiProvider {
@@ -134,6 +136,25 @@ export class GeminiProvider implements AiProvider {
     }
   }
 
+  async parseIngredientsFromText(text: string): Promise<DetectedIngredient[]> {
+    const model = this.getClient().getGenerativeModel({ model: TEXT_MODEL });
+    const prompt = this.buildVoiceInventoryPrompt(text);
+
+    const result = await model.generateContent(prompt);
+    const responseText = result.response.text();
+
+    try {
+      return extractJson<DetectedIngredient[]>(responseText);
+    } catch (error) {
+      this.logger.error(
+        `No se pudo parsear los ingredientes dictados: ${responseText}`,
+      );
+      throw new InternalServerErrorException(
+        'La IA devolvió una respuesta con un formato inesperado al interpretar el dictado.',
+      );
+    }
+  }
+
   private buildRecipePrompt(input: GenerateRecipeInput): string {
     const { availableIngredients, allergies, preferences } = input;
     const lines = [
@@ -217,6 +238,22 @@ export class GeminiProvider implements AiProvider {
       'Respondé ÚNICAMENTE con un JSON válido (sin texto adicional, sin markdown), un array con esta forma exacta:',
       `[{ "name": string, "quantity": number, "unit": "g" | "kg" | "ml" | "l" | "unidad", "unitPrice": number, "totalPrice": number }]`,
       'Si no podés leer algún campo con certeza, estimalo lo mejor posible; no inventes productos que no estén en el ticket.',
+    ].join('\n');
+  }
+
+  private buildVoiceInventoryPrompt(text: string): string {
+    return [
+      'Sos un asistente que interpreta lo que un usuario dictó por voz sobre los alimentos que tiene para agregar a su',
+      'inventario de cocina. El texto puede venir con errores de transcripción o de forma coloquial.',
+      '',
+      `Texto dictado: "${text}"`,
+      '',
+      'Identificá cada alimento mencionado con su cantidad aproximada y unidad ("g", "kg", "ml", "l" o "unidad" si no',
+      'se especifica peso/volumen, ej. "una docena de huevos" -> 12 unidad).',
+      '',
+      'Respondé ÚNICAMENTE con un JSON válido (sin texto adicional, sin markdown), un array con esta forma exacta:',
+      `[{ "name": string, "approxQuantity": number, "unit": string, "state": "fresh" | "frozen" | "opened" | "expired" | "unknown", "confidence": number }]`,
+      'Usá "fresh" como estado por defecto salvo que el texto indique otra cosa. confidence es un número entre 0 y 1.',
     ].join('\n');
   }
 

@@ -127,7 +127,8 @@ class _ScanReceiptScreenState extends State<ScanReceiptScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Escanear ticket de compra')),
-      body: SingleChildScrollView(
+      body: SafeArea(
+        child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -241,6 +242,7 @@ class _ScanReceiptScreenState extends State<ScanReceiptScreen> {
               ],
             ],
           ],
+        ),
         ),
       ),
     );

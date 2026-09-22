@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../core/diet_tags.dart';
 import '../../providers/auth_provider.dart';
 
 const _goalOptions = {
@@ -25,6 +26,8 @@ const _dietOptions = [
   'fitness',
   'economico',
   'comida_cruda',
+  'hipotiroidismo',
+  'hipertiroidismo',
 ];
 
 /// Se muestra una única vez, después de registrarse, para conocer al usuario
@@ -138,7 +141,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 runSpacing: 8,
                 children: _dietOptions
                     .map((tag) => FilterChip(
-                          label: Text(tag),
+                          label: Text(dietTagLabel(tag)),
                           selected: _dietPreferences.contains(tag),
                           onSelected: (selected) => setState(() {
                             selected
