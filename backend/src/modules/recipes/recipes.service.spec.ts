@@ -36,7 +36,9 @@ describe('RecipesService', () => {
       create: jest.fn(),
       remove: jest.fn(),
     };
-    inventoryService = { consume: jest.fn().mockResolvedValue(0) };
+    inventoryService = {
+      consume: jest.fn().mockResolvedValue({ shortfall: 0, depleted: false }),
+    };
 
     recipesService = new RecipesService(
       recipesRepository as any,
@@ -106,7 +108,9 @@ describe('RecipesService', () => {
 
     it('informa los ingredientes faltantes cuando el inventario no alcanza', async () => {
       recipesRepository.findOne.mockResolvedValue(recipe);
-      inventoryService.consume.mockResolvedValueOnce(0).mockResolvedValueOnce(200);
+      inventoryService.consume
+        .mockResolvedValueOnce({ shortfall: 0, depleted: false })
+        .mockResolvedValueOnce({ shortfall: 200, depleted: false });
 
       const result = await recipesService.cook('user-1', recipe.id);
 
@@ -116,6 +120,24 @@ describe('RecipesService', () => {
           name: 'Harina',
           quantity: 200,
           unit: IngredientUnit.GRAMS,
+        },
+      ]);
+    });
+
+    it('sugiere agregar a la lista de compras un ingrediente que alcanzó pero se agotó', async () => {
+      recipesRepository.findOne.mockResolvedValue(recipe);
+      inventoryService.consume
+        .mockResolvedValueOnce({ shortfall: 0, depleted: true })
+        .mockResolvedValueOnce({ shortfall: 0, depleted: false });
+
+      const result = await recipesService.cook('user-1', recipe.id);
+
+      expect(result.missingIngredients).toEqual([
+        {
+          ingredientId: 'ing-1',
+          name: 'Huevo',
+          quantity: 2,
+          unit: IngredientUnit.UNIT,
         },
       ]);
     });

@@ -67,21 +67,24 @@ export class InventoryService {
    * de la misma magnitud (g/kg, ml/l); si son incompatibles (ej. "unidad" vs "g")
    * ese ítem del inventario se deja intacto porque no hay forma confiable de reconciliar.
    *
-   * Devuelve la cantidad (en `unit`) que no pudo descontarse por no haber suficiente
-   * en inventario — se usa para ofrecerle al usuario agregar lo faltante a la lista
-   * de compras.
+   * Devuelve `shortfall`, la cantidad (en `unit`) que no pudo descontarse por no haber
+   * suficiente en inventario, y `depleted`, si el ingrediente tenía stock antes de
+   * cocinar y quedó en 0 (aunque haya alcanzado para cubrir la receta). Ambos casos se
+   * usan para ofrecerle al usuario agregar el ingrediente a la lista de compras.
    */
   async consume(
     userId: string,
     ingredientId: string,
     quantity: number,
     unit: IngredientUnit,
-  ): Promise<number> {
+  ): Promise<{ shortfall: number; depleted: boolean }> {
     const items = await this.inventoryRepository.find({
       where: { userId, ingredientId },
       order: { addedAt: 'ASC' },
     });
 
+    const hadStock = items.length > 0;
+    let anyConsumed = false;
     let remainingToConsume = quantity;
     for (const item of items) {
       if (remainingToConsume <= 0) break;
@@ -97,6 +100,7 @@ export class InventoryService {
 
       if (itemQuantityInRequestedUnit <= remainingToConsume) {
         remainingToConsume -= itemQuantityInRequestedUnit;
+        anyConsumed = true;
         await this.inventoryRepository.remove(item);
       } else {
         const consumedInItemUnit = convertQuantity(
@@ -106,9 +110,19 @@ export class InventoryService {
         )!;
         item.quantity -= consumedInItemUnit;
         remainingToConsume = 0;
+        anyConsumed = true;
         await this.inventoryRepository.save(item);
       }
     }
-    return remainingToConsume;
+
+    const shortfall = remainingToConsume;
+    let depleted = false;
+    if (hadStock && anyConsumed && shortfall === 0) {
+      const stillHasStock = await this.inventoryRepository.exists({
+        where: { userId, ingredientId },
+      });
+      depleted = !stillHasStock;
+    }
+    return { shortfall, depleted };
   }
 }

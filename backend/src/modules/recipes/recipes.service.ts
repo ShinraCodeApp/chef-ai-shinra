@@ -165,9 +165,9 @@ export class RecipesService {
 
   /**
    * Marca la receta como cocinada: descuenta del inventario del usuario los ingredientes
-   * usados. Devuelve también los ingredientes que no se pudieron descontar del todo por
-   * no haber suficiente en inventario, para que el usuario decida si los agrega a su
-   * lista de compras.
+   * usados. Devuelve también los ingredientes a sugerir para la lista de compras: los que
+   * no se pudieron descontar del todo por no haber suficiente en inventario, y los que
+   * sí alcanzaron pero quedaron en 0 (se terminaron con esta receta).
    */
   async cook(
     userId: string,
@@ -177,10 +177,11 @@ export class RecipesService {
     const recipe = await this.findOne(id);
     const missingIngredients: MissingIngredient[] = [];
     for (const recipeIngredient of recipe.recipeIngredients) {
-      const shortfall = await this.inventoryService.consume(
+      const neededQuantity = recipeIngredient.quantity * servingsMultiplier;
+      const { shortfall, depleted } = await this.inventoryService.consume(
         userId,
         recipeIngredient.ingredientId,
-        recipeIngredient.quantity * servingsMultiplier,
+        neededQuantity,
         recipeIngredient.unit,
       );
       if (shortfall > 0) {
@@ -188,6 +189,13 @@ export class RecipesService {
           ingredientId: recipeIngredient.ingredientId,
           name: recipeIngredient.ingredient.name,
           quantity: shortfall,
+          unit: recipeIngredient.unit,
+        });
+      } else if (depleted) {
+        missingIngredients.push({
+          ingredientId: recipeIngredient.ingredientId,
+          name: recipeIngredient.ingredient.name,
+          quantity: neededQuantity,
           unit: recipeIngredient.unit,
         });
       }

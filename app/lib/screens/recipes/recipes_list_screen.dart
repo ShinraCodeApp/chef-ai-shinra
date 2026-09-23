@@ -84,106 +84,117 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: const InputDecoration(
-                      hintText: 'Buscar receta…',
-                      prefixIcon: Icon(Icons.search),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: const InputDecoration(
+                        hintText: 'Buscar receta…',
+                        prefixIcon: Icon(Icons.search),
+                      ),
+                      onSubmitted: (value) {
+                        provider.search = value;
+                        provider.loadRecipes();
+                      },
                     ),
-                    onSubmitted: (value) {
-                      provider.search = value;
+                  ),
+                  const SizedBox(width: 8),
+                  PopupMenuButton<String?>(
+                    icon: const Icon(Icons.filter_list),
+                    onSelected: (value) {
+                      provider.dietTag = value;
+                      provider.loadRecipes();
+                    },
+                    itemBuilder: (_) => [
+                      const PopupMenuItem(value: null, child: Text('Todas')),
+                      ..._dietTagOptions.map(
+                        (tag) => PopupMenuItem(
+                          value: tag,
+                          child: Text(dietTagLabel(tag)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            if (provider.dietTag != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Chip(
+                    label: Text('Filtro: ${dietTagLabel(provider.dietTag!)}'),
+                    onDeleted: () {
+                      provider.dietTag = null;
                       provider.loadRecipes();
                     },
                   ),
                 ),
-                const SizedBox(width: 8),
-                PopupMenuButton<String?>(
-                  icon: const Icon(Icons.filter_list),
-                  onSelected: (value) {
-                    provider.dietTag = value;
-                    provider.loadRecipes();
-                  },
-                  itemBuilder: (_) => [
-                    const PopupMenuItem(value: null, child: Text('Todas')),
-                    ..._dietTagOptions.map(
-                      (tag) => PopupMenuItem(value: tag, child: Text(dietTagLabel(tag))),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          if (provider.dietTag != null)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Chip(
-                  label: Text('Filtro: ${dietTagLabel(provider.dietTag!)}'),
-                  onDeleted: () {
-                    provider.dietTag = null;
-                    provider.loadRecipes();
-                  },
-                ),
               ),
-            ),
-          Expanded(
-            child: provider.isLoading && provider.recipes.isEmpty
-                ? const Center(child: CircularProgressIndicator())
-                : RefreshIndicator(
-                    onRefresh: () => provider.loadRecipes(),
-                    child: provider.recipes.isEmpty
-                    ? ListView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        children: const [
-                          SizedBox(height: 80),
-                          EmptyState(
-                            icon: Icons.menu_book_outlined,
-                            message: 'Todavía no hay recetas. ¡Generá una con IA!',
-                          ),
-                        ],
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        itemCount: provider.recipes.length + 1,
-                        itemBuilder: (context, index) {
-                          if (index == provider.recipes.length) {
-                            if (provider.page < provider.totalPages) {
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                child: Center(
-                                  child: TextButton(
-                                    onPressed: provider.loadNextPage,
-                                    child: const Text('Cargar más'),
-                                  ),
+            Expanded(
+              child: provider.isLoading && provider.recipes.isEmpty
+                  ? const Center(child: CircularProgressIndicator())
+                  : RefreshIndicator(
+                      onRefresh: () => provider.loadRecipes(),
+                      child: provider.recipes.isEmpty
+                          ? ListView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              children: const [
+                                SizedBox(height: 80),
+                                EmptyState(
+                                  icon: Icons.menu_book_outlined,
+                                  message:
+                                      'Todavía no hay recetas. ¡Generá una con IA!',
                                 ),
-                              );
-                            }
-                            return const SizedBox(height: 24);
-                          }
-                          final recipe = provider.recipes[index];
-                          return RecipeCard(
-                            recipe: recipe,
-                            onTap: () => Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    RecipeDetailScreen(recipeId: recipe.id),
+                              ],
+                            )
+                          : ListView.builder(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
                               ),
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              itemCount: provider.recipes.length + 1,
+                              itemBuilder: (context, index) {
+                                if (index == provider.recipes.length) {
+                                  if (provider.page < provider.totalPages) {
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 16,
+                                      ),
+                                      child: Center(
+                                        child: TextButton(
+                                          onPressed: provider.loadNextPage,
+                                          child: const Text('Cargar más'),
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                  return const SizedBox(height: 24);
+                                }
+                                final recipe = provider.recipes[index];
+                                return RecipeCard(
+                                  recipe: recipe,
+                                  onTap: () => Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) => RecipeDetailScreen(
+                                        recipeId: recipe.id,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
-                          );
-                        },
-                      ),
-                  ),
-          ),
-        ],
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }
