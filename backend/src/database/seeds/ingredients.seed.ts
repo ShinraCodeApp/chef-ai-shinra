@@ -2921,6 +2921,18 @@ const seedIngredients: Partial<Ingredient>[] = [
     sugarPer100g: 0.5,
     sodiumPer100g: 115,
   },
+  {
+    name: 'Tomatillo',
+    category: IngredientCategory.VERDURAS,
+    unit: IngredientUnit.GRAMS,
+    caloriesPer100g: 32,
+    proteinPer100g: 1,
+    fatPer100g: 1,
+    carbsPer100g: 5.8,
+    fiberPer100g: 1.9,
+    sugarPer100g: 3.9,
+    sodiumPer100g: 1,
+  },
 ];
 
 async function run() {
