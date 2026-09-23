@@ -89,6 +89,21 @@ export class RecipesService {
         dietTag: query.dietTag,
       });
     }
+    if (query.ingredient) {
+      qb.andWhere(
+        (subQb) => {
+          const subQuery = subQb
+            .subQuery()
+            .select('ri.recipeId')
+            .from('recipe_ingredients', 'ri')
+            .innerJoin('ingredients', 'ing', 'ing.id = ri."ingredientId"')
+            .where('ing.name ILIKE :ingredient')
+            .getQuery();
+          return `recipe.id IN ${subQuery}`;
+        },
+        { ingredient: `%${query.ingredient}%` },
+      );
+    }
     if (query.maxPrepTimeMinutes !== undefined) {
       qb.andWhere('recipe.prepTimeMinutes <= :maxPrepTimeMinutes', {
         maxPrepTimeMinutes: query.maxPrepTimeMinutes,

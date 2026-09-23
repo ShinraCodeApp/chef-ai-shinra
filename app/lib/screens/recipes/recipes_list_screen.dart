@@ -32,6 +32,7 @@ class RecipesListScreen extends StatefulWidget {
 
 class _RecipesListScreenState extends State<RecipesListScreen> {
   final _searchController = TextEditingController();
+  bool _searchByIngredient = false;
 
   @override
   void initState() {
@@ -94,17 +95,50 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
                   Expanded(
                     child: TextField(
                       controller: _searchController,
-                      decoration: const InputDecoration(
-                        hintText: 'Buscar receta…',
-                        prefixIcon: Icon(Icons.search),
+                      decoration: InputDecoration(
+                        hintText: _searchByIngredient
+                            ? 'Buscar por ingrediente…'
+                            : 'Buscar receta…',
+                        prefixIcon: const Icon(Icons.search),
                       ),
                       onSubmitted: (value) {
-                        provider.search = value;
+                        if (_searchByIngredient) {
+                          provider.ingredient = value;
+                          provider.search = '';
+                        } else {
+                          provider.search = value;
+                          provider.ingredient = '';
+                        }
                         provider.loadRecipes();
                       },
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 4),
+                  IconButton(
+                    icon: Icon(
+                      _searchByIngredient
+                          ? Icons.egg_alt
+                          : Icons.egg_alt_outlined,
+                    ),
+                    tooltip: _searchByIngredient
+                        ? 'Buscando por ingrediente'
+                        : 'Buscar por ingrediente',
+                    onPressed: () {
+                      setState(
+                        () => _searchByIngredient = !_searchByIngredient,
+                      );
+                      final value = _searchController.text;
+                      if (_searchByIngredient) {
+                        provider.ingredient = value;
+                        provider.search = '';
+                      } else {
+                        provider.search = value;
+                        provider.ingredient = '';
+                      }
+                      if (value.isNotEmpty) provider.loadRecipes();
+                    },
+                  ),
+                  const SizedBox(width: 4),
                   PopupMenuButton<String?>(
                     icon: const Icon(Icons.filter_list),
                     onSelected: (value) {
@@ -133,6 +167,21 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
                     label: Text('Filtro: ${dietTagLabel(provider.dietTag!)}'),
                     onDeleted: () {
                       provider.dietTag = null;
+                      provider.loadRecipes();
+                    },
+                  ),
+                ),
+              ),
+            if (provider.ingredient.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Chip(
+                    label: Text('Ingrediente: ${provider.ingredient}'),
+                    onDeleted: () {
+                      provider.ingredient = '';
+                      _searchController.clear();
                       provider.loadRecipes();
                     },
                   ),

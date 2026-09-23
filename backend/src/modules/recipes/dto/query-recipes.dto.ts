@@ -12,6 +12,11 @@ export class QueryRecipesDto extends PaginationQueryDto {
   @IsString()
   dietTag?: string;
 
+  /** Filtra recetas que usen un ingrediente cuyo nombre matchee (parcial, sin importar mayúsculas) */
+  @IsOptional()
+  @IsString()
+  ingredient?: string;
+
   @IsOptional()
   @Type(() => Number)
   @IsInt()

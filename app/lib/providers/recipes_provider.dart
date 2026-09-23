@@ -14,6 +14,7 @@ class RecipesProvider extends ChangeNotifier {
   int totalPages = 1;
   String search = '';
   String? dietTag;
+  String ingredient = '';
 
   List<Recipe> favorites = [];
   bool isLoadingFavorites = false;
@@ -29,6 +30,7 @@ class RecipesProvider extends ChangeNotifier {
         'limit': 20,
         if (search.isNotEmpty) 'search': search,
         if (dietTag != null) 'dietTag': dietTag,
+        if (ingredient.isNotEmpty) 'ingredient': ingredient,
       });
       final paginated = Paginated<Recipe>.fromJson(
         response.data as Map<String, dynamic>,
