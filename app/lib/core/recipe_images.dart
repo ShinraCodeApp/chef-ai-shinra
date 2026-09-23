@@ -115,6 +115,16 @@ const Map<String, String> kRecipeImageAssets = {
   'Flan proteico en taza': 'assets/recipe_images/flan-proteico-taza.jpg',
   'Hamburguesita de huevo': 'assets/recipe_images/hamburguesita-huevo.jpg',
   'Espárragos gratinados con cherry y parmesano': 'assets/recipe_images/esparragos-gratinados-cherry-parmesano.jpg',
+  'Carbonada': 'assets/recipe_images/carbonada.jpg',
+  'Majadito': 'assets/recipe_images/majadito.jpg',
+  'Silpancho': 'assets/recipe_images/silpancho.jpg',
+  'Pollo Chijaukay con arroz chaufa': 'assets/recipe_images/pollo-chijaukay-chaufa.jpg',
+  'Caigua rellena de carne': 'assets/recipe_images/caigua-rellena-carne.jpg',
+  'Pollo tipakay': 'assets/recipe_images/pollo-tipakay.jpg',
+  'Arroz paisa colombiano': 'assets/recipe_images/arroz-paisa-colombiano.jpg',
+  'Gohan': 'assets/recipe_images/gohan.jpg',
+  'Arroz con coco': 'assets/recipe_images/arroz-con-coco.jpg',
+  'Ensalada de quinoa mediterránea': 'assets/recipe_images/ensalada-quinoa-mediterranea.jpg',
 };
 
 /// Devuelve la ruta del asset local para una receta del catálogo base, o null si

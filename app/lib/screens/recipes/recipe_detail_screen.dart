@@ -273,6 +273,17 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                       child: Text('${step.order}. ${step.instruction}'),
                     ),
                   ),
+                  if (recipe.tips.isNotEmpty) ...[
+                    const SizedBox(height: 20),
+                    Text('Consejos', style: Theme.of(context).textTheme.titleMedium),
+                    const SizedBox(height: 8),
+                    ...recipe.tips.map(
+                      (tip) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Text('• $tip'),
+                      ),
+                    ),
+                  ],
                   if (recipe.nutrition != null) ...[
                     const SizedBox(height: 20),
                     Text('Nutrición (aprox.)',

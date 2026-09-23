@@ -52,6 +52,7 @@ export class RecipesService {
       estimatedCostTotal: dto.estimatedCostTotal ?? null,
       imageUrl: dto.imageUrl ?? null,
       dietTags: dto.dietTags ?? [],
+      tips: dto.tips ?? null,
       isAiGenerated: options.isAiGenerated ?? false,
       createdByUserId: options.createdByUserId ?? null,
       nutrition: options.nutrition ?? null,

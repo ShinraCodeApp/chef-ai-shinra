@@ -75,6 +75,9 @@ export class Recipe {
   @Column({ type: 'jsonb', nullable: true })
   nutrition: RecipeNutrition | null;
 
+  @Column({ type: 'text', array: true, nullable: true })
+  tips: string[] | null;
+
   @OneToMany(() => RecipeIngredient, (ri) => ri.recipe, { cascade: true })
   recipeIngredients: RecipeIngredient[];
 

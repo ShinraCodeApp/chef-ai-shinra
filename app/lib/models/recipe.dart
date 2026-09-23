@@ -81,6 +81,7 @@ class Recipe {
   final bool isAiGenerated;
   final RecipeNutrition? nutrition;
   final List<RecipeIngredientEntry> recipeIngredients;
+  final List<String> tips;
   bool isFavorite;
 
   Recipe({
@@ -97,6 +98,7 @@ class Recipe {
     required this.isAiGenerated,
     this.nutrition,
     required this.recipeIngredients,
+    this.tips = const [],
     this.isFavorite = false,
   });
 
@@ -121,6 +123,7 @@ class Recipe {
         recipeIngredients: (json['recipeIngredients'] as List? ?? [])
             .map((e) => RecipeIngredientEntry.fromJson(e as Map<String, dynamic>))
             .toList(),
+        tips: (json['tips'] as List? ?? []).map((e) => e.toString()).toList(),
         isFavorite: json['isFavorite'] as bool? ?? false,
       );
 }

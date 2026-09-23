@@ -53,6 +53,11 @@ export class CreateRecipeDto {
   @IsString({ each: true })
   dietTags?: string[];
 
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tips?: string[];
+
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
