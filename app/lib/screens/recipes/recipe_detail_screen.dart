@@ -3,6 +3,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../core/diet_tags.dart';
+import '../../core/quantity_format.dart';
 import '../../core/recipe_images.dart';
 import '../../models/missing_ingredient.dart';
 import '../../models/recipe.dart';
@@ -60,7 +61,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       ..writeln(recipe.description)
       ..writeln('Ingredientes:');
     for (final ri in recipe.recipeIngredients) {
-      buffer.writeln('${ri.quantity} ${ri.unit} de ${ri.ingredient.name}.');
+      buffer.writeln('${formatQuantity(ri.quantity, ri.unit)} de ${ri.ingredient.name}.');
     }
     buffer.writeln('Preparación:');
     for (final step in recipe.instructions) {
@@ -80,7 +81,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       ..writeln()
       ..writeln('Ingredientes:');
     for (final ri in recipe.recipeIngredients) {
-      buffer.writeln('• ${ri.quantity} ${ri.unit} — ${ri.ingredient.name}');
+      buffer.writeln('• ${formatQuantity(ri.quantity, ri.unit)} — ${ri.ingredient.name}');
     }
     buffer.writeln();
     buffer.writeln('Preparación:');
@@ -135,7 +136,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
             const SizedBox(height: 12),
             ...missing.map(
               (item) => Text(
-                  '• ${item.quantity.toStringAsFixed(item.quantity.truncateToDouble() == item.quantity ? 0 : 1)} ${item.unit} — ${item.name}'),
+                  '• ${formatQuantity(item.quantity, item.unit)} — ${item.name}'),
             ),
           ],
         ),
@@ -261,7 +262,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                   ...recipe.recipeIngredients.map(
                     (ri) => Padding(
                       padding: const EdgeInsets.symmetric(vertical: 2),
-                      child: Text('• ${ri.quantity} ${ri.unit} — ${ri.ingredient.name}'),
+                      child: Text('• ${formatQuantity(ri.quantity, ri.unit)} — ${ri.ingredient.name}'),
                     ),
                   ),
                   const SizedBox(height: 20),
