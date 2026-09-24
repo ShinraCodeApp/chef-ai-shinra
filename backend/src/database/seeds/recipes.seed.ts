@@ -11696,6 +11696,215 @@ export const seedRecipes: SeedRecipe[] = [
       { ingredientName: 'Coco rallado', quantity: 80, unit: G, notes: 'para los bordes' },
     ],
   },
+  {
+    title: 'Pan viral sin harinas',
+    description: 'Pan express de atún y huevo hecho en microondas, sin harinas y bien proteico.',
+    servings: 1,
+    prepTimeMinutes: 6,
+    difficulty: RecipeDifficulty.EASY,
+    dietTags: ['proteico', 'fitness', 'sin_tacc'],
+    estimatedCostTotal: 1200,
+    nutrition: { calories: 210, proteinG: 26, fatG: 9, carbsG: 4, fiberG: 0.5, sugarG: 1, sodiumMg: 420 },
+    instructions: [
+      'Escurrir bien el atún y colocarlo en un bol.',
+      'Agregar el huevo, el ajo deshidratado, la cebolla en escamas, el polvo para hornear y las especias a gusto.',
+      'Mezclar todo hasta integrar (el polvo para hornear se agrega al final, justo antes de cocinar).',
+      'Volcar la mezcla en un recipiente apto para microondas.',
+      'Cocinar 4 minutos a potencia máxima, hasta que esté firme.',
+      'Dejar entibiar unos minutos antes de desmoldar y cortar.',
+    ],
+    ingredients: [
+      { ingredientName: 'Atún', quantity: 120, unit: G, notes: 'al agua, escurrido, 1 lata' },
+      { ingredientName: 'Huevo', quantity: 1, unit: UN },
+      { ingredientName: 'Ajo en polvo', quantity: 2, unit: G, notes: 'deshidratado, 1 cdita' },
+      { ingredientName: 'Cebolla', quantity: 2, unit: G, notes: 'en escamas, un puñadito' },
+      { ingredientName: 'Polvo de hornear', quantity: 5, unit: G, notes: '1 cucharada, agregar al final' },
+    ],
+  },
+  {
+    title: 'Mantecol sin azúcar',
+    description: 'Versión fit del clásico mantecol, con mantequilla de maní y proteína, sin azúcar.',
+    servings: 6,
+    prepTimeMinutes: 30,
+    difficulty: RecipeDifficulty.MEDIUM,
+    dietTags: ['proteico', 'fitness', 'sin_tacc'],
+    estimatedCostTotal: 3500,
+    nutrition: { calories: 220, proteinG: 12, fatG: 15, carbsG: 8, fiberG: 1.5, sugarG: 2, sodiumMg: 90 },
+    instructions: [
+      'Hidratar la gelatina sin sabor en el agua caliente y dejar reposar 5 minutos.',
+      'En un bol, mezclar la mantequilla de maní, la harina de maní, la proteína en polvo, la leche en polvo, el endulzante y la sal.',
+      'Agregar la esencia de vainilla y la gelatina hidratada, mezclando hasta obtener una pasta homogénea.',
+      'Volcar en un molde y llevar al freezer 2 horas, hasta que endurezca y se compacte.',
+      'Llevar a horno a temperatura mínima (90-100°C), con la puerta apenas abierta, 10-15 minutos.',
+      'Volver al freezer otras 2 horas antes de desmoldar y cortar.',
+    ],
+    ingredients: [
+      { ingredientName: 'Mantequilla de maní', quantity: 140, unit: G, notes: 'natural' },
+      { ingredientName: 'Harina de maní', quantity: 30, unit: G, notes: 'desgrasada, opcional' },
+      { ingredientName: 'Proteína en polvo', quantity: 30, unit: G, notes: '1 scoop, whey, vainilla o neutro' },
+      { ingredientName: 'Leche', quantity: 20, unit: G, notes: 'en polvo descremada' },
+      { ingredientName: 'Edulcorante', quantity: 10, unit: G, notes: 'líquido, a gusto' },
+      { ingredientName: 'Sal', quantity: 1, unit: G, notes: 'pizca' },
+      { ingredientName: 'Esencia de vainilla', quantity: 5, unit: G },
+      { ingredientName: 'Gelatina sin sabor', quantity: 6, unit: G },
+      { ingredientName: 'Agua', quantity: 0.07, unit: L, notes: 'caliente' },
+    ],
+  },
+  {
+    title: 'Cheesecake de pistacho sin horno',
+    description: 'Cheesecake cremoso de pistacho con base crocante y ganache de chocolate blanco, sin horno.',
+    servings: 10,
+    prepTimeMinutes: 60,
+    difficulty: RecipeDifficulty.MEDIUM,
+    dietTags: ['vegetariano'],
+    estimatedCostTotal: 7000,
+    nutrition: { calories: 320, proteinG: 9, fatG: 22, carbsG: 20, fiberG: 1, sugarG: 14, sodiumMg: 220 },
+    instructions: [
+      'Para la base, procesar las galletas hasta hacer polvo y mezclar con la manteca derretida.',
+      'Aplastar fuerte en un molde, buscando un fondo bien compacto. Llevar a la heladera 15-20 minutos para que endurezca.',
+      'Para el relleno, hidratar la gelatina con el agua 5 minutos y luego agregarle agua hirviendo para disolverla.',
+      'Mezclar el queso blanco con la pasta de pistacho hasta que quede liso. Sumar la gelatina tibia y mezclar rápido.',
+      'Volcar el relleno sobre la base y llevar al freezer 30-40 minutos.',
+      'Para el ganache, picar el chocolate blanco y derretirlo en microondas en tandas de 30 segundos, mezclando cada vez.',
+      'Calentar la crema de leche por separado hasta que humee y verterla sobre el chocolate derretido. Mezclar del centro hacia afuera hasta emulsionar.',
+      'Agregar la pasta de pistacho al ganache y mezclar fuerte hasta lograr una textura lisa y brillante.',
+      'Volcar el ganache sobre el cheesecake ya firme y llevar a la heladera hasta el momento de servir.',
+    ],
+    ingredients: [
+      { ingredientName: 'Galletas', quantity: 200, unit: G, notes: 'de vainilla, tipo Lincoln' },
+      { ingredientName: 'Manteca', quantity: 100, unit: G, notes: 'derretida' },
+      { ingredientName: 'Queso crema', quantity: 500, unit: G, notes: 'blanco light' },
+      { ingredientName: 'Pasta de pistacho', quantity: 250, unit: G, notes: '200g para el relleno, 50g para el ganache' },
+      { ingredientName: 'Gelatina sin sabor', quantity: 14, unit: G },
+      { ingredientName: 'Agua', quantity: 0.045, unit: L },
+      { ingredientName: 'Chocolate blanco', quantity: 120, unit: G },
+      { ingredientName: 'Crema de leche', quantity: 50, unit: G },
+    ],
+  },
+  {
+    title: 'Brownie de palta y cacao',
+    description: 'Brownie individual sin harinas ni azúcar, con palta como base cremosa.',
+    servings: 1,
+    prepTimeMinutes: 20,
+    difficulty: RecipeDifficulty.EASY,
+    dietTags: ['vegetariano', 'fitness', 'sin_tacc'],
+    estimatedCostTotal: 1200,
+    nutrition: { calories: 160, proteinG: 7, fatG: 10, carbsG: 10, fiberG: 5, sugarG: 2, sodiumMg: 60 },
+    instructions: [
+      'Pisar bien la palta en un bowl hasta obtener un puré lo más cremoso posible.',
+      'Agregar el huevo y mezclar bien hasta integrar completamente.',
+      'Sumar el cacao amargo, el polvo para hornear y el edulcorante.',
+      'Mezclar todo hasta lograr una preparación homogénea y sin grumos.',
+      'Volcar en un molde chico apto para horno o microondas.',
+      'Cocinar en horno a 200°C durante 15-20 minutos, o en microondas 4-5 minutos según la potencia.',
+    ],
+    ingredients: [
+      { ingredientName: 'Palta', quantity: 0.5, unit: UN, notes: 'chica, unos 40g' },
+      { ingredientName: 'Huevo', quantity: 1, unit: UN },
+      { ingredientName: 'Cacao amargo', quantity: 15, unit: G, notes: '2 cucharadas' },
+      { ingredientName: 'Polvo de hornear', quantity: 2, unit: G, notes: 'media cucharadita' },
+      { ingredientName: 'Edulcorante', quantity: 4, unit: G, notes: '4 sobrecitos en polvo, o equivalente líquido' },
+    ],
+  },
+  {
+    title: 'Brownie proteico sin harinas ni azúcar',
+    description: 'Brownie húmedo a base de banana y proteína en polvo, sin harinas ni azúcar agregada.',
+    servings: 4,
+    prepTimeMinutes: 25,
+    difficulty: RecipeDifficulty.EASY,
+    dietTags: ['proteico', 'fitness', 'sin_tacc'],
+    estimatedCostTotal: 1800,
+    nutrition: { calories: 123, proteinG: 9, fatG: 3.25, carbsG: 18, fiberG: 2, sugarG: 10, sodiumMg: 45 },
+    instructions: [
+      'Pisar bien las bananas hasta formar un puré.',
+      'Agregar el huevo y mezclar.',
+      'Incorporar la proteína en polvo y el cacao amargo.',
+      'Volcar la mezcla en una fuente o molde pequeño previamente engrasado.',
+      'Distribuir los chips de chocolate por arriba.',
+      'Cocinar en horno o freidora de aire a 180°C durante 15-20 minutos.',
+      'Dejar enfriar unos minutos y cortar en 4 porciones.',
+    ],
+    ingredients: [
+      { ingredientName: 'Banana', quantity: 2, unit: UN, notes: 'medianas' },
+      { ingredientName: 'Huevo', quantity: 1, unit: UN },
+      { ingredientName: 'Proteína en polvo', quantity: 30, unit: G, notes: '1 scoop sabor chocolate, o 2 cdas de leche descremada en polvo' },
+      { ingredientName: 'Cacao amargo', quantity: 15, unit: G },
+      { ingredientName: 'Chocolate amargo', quantity: 10, unit: G, notes: 'chips' },
+    ],
+  },
+  {
+    title: 'Torta de avena y manzana',
+    description: 'Torta húmeda y liviana de avena y manzana rallada, sin azúcar, lista para el horno en un paso.',
+    servings: 6,
+    prepTimeMinutes: 35,
+    difficulty: RecipeDifficulty.EASY,
+    dietTags: ['vegetariano', 'fitness'],
+    estimatedCostTotal: 2200,
+    nutrition: { calories: 160, proteinG: 7, fatG: 5, carbsG: 22, fiberG: 3, sugarG: 8, sodiumMg: 60 },
+    instructions: [
+      'Mezclar todos los ingredientes en un bol hasta obtener una preparación homogénea.',
+      'Llevar la mezcla a un molde previamente engrasado o con papel manteca.',
+      'Cocinar en horno precalentado a 180°C durante 25 minutos.',
+      'Dejar entibiar antes de desmoldar. Opcional: espolvorear canela por arriba.',
+    ],
+    ingredients: [
+      { ingredientName: 'Avena', quantity: 150, unit: G },
+      { ingredientName: 'Manzana', quantity: 2, unit: UN, notes: 'ralladas' },
+      { ingredientName: 'Huevo', quantity: 3, unit: UN },
+      { ingredientName: 'Polvo de hornear', quantity: 5, unit: G, notes: '1 cucharadita' },
+      { ingredientName: 'Esencia de vainilla', quantity: 5, unit: G, notes: '1 cucharadita' },
+      { ingredientName: 'Edulcorante', quantity: 8, unit: G, notes: 'sin calorías, a gusto' },
+      { ingredientName: 'Canela', quantity: 2, unit: G, notes: 'opcional, por arriba' },
+    ],
+  },
+  {
+    title: 'Cheesecake sin azúcar de batata',
+    description: 'Cheesecake horneado liviano de batata, sin azúcar agregada, cremoso y fácil.',
+    servings: 8,
+    prepTimeMinutes: 50,
+    difficulty: RecipeDifficulty.EASY,
+    dietTags: ['vegetariano', 'fitness'],
+    estimatedCostTotal: 2800,
+    nutrition: { calories: 100, proteinG: 6.3, fatG: 3.1, carbsG: 11.5, fiberG: 1, sugarG: 3, sodiumMg: 90 },
+    instructions: [
+      'Cocinar la batata hasta que esté tierna y hacerla puré.',
+      'Mezclar el puré con el queso blanco light y los huevos.',
+      'Integrar bien todos los ingredientes junto con el endulzante y la esencia de vainilla.',
+      'Llevar a horno precalentado a 180°C durante 25-40 minutos, o hasta que esté firme y dorada.',
+      'Dejar enfriar antes de cortar en 8 porciones.',
+    ],
+    ingredients: [
+      { ingredientName: 'Batata', quantity: 400, unit: G },
+      { ingredientName: 'Queso crema', quantity: 250, unit: G, notes: 'blanco light' },
+      { ingredientName: 'Huevo', quantity: 4, unit: UN },
+      { ingredientName: 'Edulcorante', quantity: 12, unit: G, notes: '10-12 sobres en polvo' },
+      { ingredientName: 'Esencia de vainilla', quantity: 5, unit: G },
+    ],
+  },
+  {
+    title: 'Helado saludable de pistacho',
+    description: 'Helado cremoso de banana y pistacho, sin azúcar agregada, listo en minutos con la procesadora.',
+    servings: 1,
+    prepTimeMinutes: 10,
+    difficulty: RecipeDifficulty.EASY,
+    dietTags: ['vegetariano', 'fitness', 'vegano'],
+    estimatedCostTotal: 1500,
+    nutrition: { calories: 290, proteinG: 6, fatG: 9, carbsG: 50, fiberG: 3, sugarG: 30, sodiumMg: 20 },
+    instructions: [
+      'Cortar la banana en rodajas y congelarla previamente.',
+      'Procesar la banana congelada junto con la pasta de pistacho y la goma xántica, si se usa.',
+      'Agregar un chorrito de leche o agua de a poco hasta lograr una textura bien cremosa.',
+      'Endulzar a gusto si se desea.',
+      'Comer directamente para una textura tipo helado soft, o llevar un rato al freezer para que quede más firme.',
+    ],
+    ingredients: [
+      { ingredientName: 'Banana', quantity: 200, unit: G, notes: 'congelada' },
+      { ingredientName: 'Pasta de pistacho', quantity: 20, unit: G },
+      { ingredientName: 'Goma xántica', quantity: 1, unit: G, notes: 'o goma guar, opcional, 1/4 cdita' },
+      { ingredientName: 'Leche', quantity: 0.03, unit: L, notes: 'o agua, un chorrito' },
+      { ingredientName: 'Edulcorante', quantity: 3, unit: G, notes: 'opcional' },
+    ],
+  },
 ];
 
 async function run() {
@@ -11724,6 +11933,9 @@ async function run() {
     if (existing) {
       // no se recrea, pero sí se sincronizan dietTags e imageUrl con lo que diga el seed
       // (incluso a null), para poder limpiar fotos incorrectas de instalaciones previas.
+      // El orden de los ingredientes NO se sincroniza acá (sería una consulta extra por
+      // cada ingrediente de cada receta ya existente, muy lento) — para corregirlo en
+      // bloque después de editar el orden en el seed, usar un script de backfill puntual.
       existing.dietTags = seed.dietTags;
       existing.imageUrl = seed.imageUrl ?? null;
       existing.tips = seed.tips ?? null;
@@ -11733,7 +11945,7 @@ async function run() {
     }
 
     const recipeIngredients = [];
-    for (const ing of seed.ingredients) {
+    for (const [index, ing] of seed.ingredients.entries()) {
       const ingredient = await ingredientsRepository.findOne({
         where: { name: ILike(ing.ingredientName) },
       });
@@ -11747,6 +11959,7 @@ async function run() {
         quantity: ing.quantity,
         unit: ing.unit,
         notes: ing.notes ?? null,
+        order: index,
       });
     }
 

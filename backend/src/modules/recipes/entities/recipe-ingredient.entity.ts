@@ -30,6 +30,10 @@ export class RecipeIngredient {
   @Column({ type: 'enum', enum: IngredientUnit })
   unit: IngredientUnit;
 
+  /** Posición dentro de la lista de ingredientes de la receta (0 = ingrediente principal). */
+  @Column({ default: 0 })
+  order: number;
+
   @Column({ nullable: true })
   notes: string | null;
 }

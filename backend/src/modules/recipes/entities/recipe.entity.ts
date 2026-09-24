@@ -91,6 +91,14 @@ export class Recipe {
    */
   isFavorite?: boolean;
 
+  /**
+   * Campo transitorio (no persistido). Sólo se completa cuando la búsqueda se hizo
+   * filtrando por `ingredient`: indica si el ingrediente buscado es el "principal"
+   * de la receta (el primero de la lista, order = 0) o si sólo aparece en ella.
+   * Lo usa el front para separar los resultados en dos grupos.
+   */
+  isMainIngredientMatch?: boolean;
+
   @CreateDateColumn()
   createdAt: Date;
 

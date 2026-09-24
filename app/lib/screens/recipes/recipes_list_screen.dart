@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/diet_tags.dart';
+import '../../models/recipe.dart';
 import '../../providers/recipes_provider.dart';
 import '../../widgets/recipe_card.dart';
 import '../../widgets/empty_state.dart';
@@ -67,6 +68,41 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
       default:
         return 'Recetas';
     }
+  }
+
+  /// Cuando se busca por ingrediente, arma la lista intercalando encabezados
+  /// (String) entre las recetas donde el ingrediente buscado es el principal
+  /// y las que sólo lo contienen. Fuera de esa búsqueda, devuelve las recetas
+  /// tal cual, sin encabezados.
+  List<Object> _buildDisplayItems(RecipesProvider provider) {
+    if (provider.ingredient.isEmpty) {
+      return provider.recipes;
+    }
+    final mainMatches = provider.recipes
+        .where((r) => r.isMainIngredientMatch == true)
+        .toList();
+    final otherMatches = provider.recipes
+        .where((r) => r.isMainIngredientMatch != true)
+        .toList();
+    return [
+      if (mainMatches.isNotEmpty) 'Ingrediente principal',
+      ...mainMatches,
+      if (otherMatches.isNotEmpty) 'También lo contienen',
+      ...otherMatches,
+    ];
+  }
+
+  Widget _sectionHeader(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12, bottom: 4),
+      child: Text(
+        title,
+        style: Theme.of(context)
+            .textTheme
+            .titleSmall
+            ?.copyWith(fontWeight: FontWeight.bold),
+      ),
+    );
   }
 
   @override
@@ -204,42 +240,49 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
                                 ),
                               ],
                             )
-                          : ListView.builder(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                              ),
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              itemCount: provider.recipes.length + 1,
-                              itemBuilder: (context, index) {
-                                if (index == provider.recipes.length) {
-                                  if (provider.page < provider.totalPages) {
-                                    return Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 16,
-                                      ),
-                                      child: Center(
-                                        child: TextButton(
-                                          onPressed: provider.loadNextPage,
-                                          child: const Text('Cargar más'),
+                          : Builder(builder: (context) {
+                              final displayItems = _buildDisplayItems(provider);
+                              return ListView.builder(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                ),
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                itemCount: displayItems.length + 1,
+                                itemBuilder: (context, index) {
+                                  if (index == displayItems.length) {
+                                    if (provider.page < provider.totalPages) {
+                                      return Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 16,
+                                        ),
+                                        child: Center(
+                                          child: TextButton(
+                                            onPressed: provider.loadNextPage,
+                                            child: const Text('Cargar más'),
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                    return const SizedBox(height: 24);
+                                  }
+                                  final item = displayItems[index];
+                                  if (item is String) {
+                                    return _sectionHeader(context, item);
+                                  }
+                                  final recipe = item as Recipe;
+                                  return RecipeCard(
+                                    recipe: recipe,
+                                    onTap: () => Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) => RecipeDetailScreen(
+                                          recipeId: recipe.id,
                                         ),
                                       ),
-                                    );
-                                  }
-                                  return const SizedBox(height: 24);
-                                }
-                                final recipe = provider.recipes[index];
-                                return RecipeCard(
-                                  recipe: recipe,
-                                  onTap: () => Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) => RecipeDetailScreen(
-                                        recipeId: recipe.id,
-                                      ),
                                     ),
-                                  ),
-                                );
-                              },
-                            ),
+                                  );
+                                },
+                              );
+                            }),
                     ),
             ),
           ],

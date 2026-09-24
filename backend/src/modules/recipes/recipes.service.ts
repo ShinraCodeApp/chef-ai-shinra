@@ -56,11 +56,12 @@ export class RecipesService {
       isAiGenerated: options.isAiGenerated ?? false,
       createdByUserId: options.createdByUserId ?? null,
       nutrition: options.nutrition ?? null,
-      recipeIngredients: dto.ingredients.map((ing) => ({
+      recipeIngredients: dto.ingredients.map((ing, index) => ({
         ingredientId: ing.ingredientId,
         quantity: ing.quantity,
         unit: ing.unit,
         notes: ing.notes ?? null,
+        order: index,
       })),
     });
     return this.recipesRepository.save(recipe);
@@ -90,6 +91,7 @@ export class RecipesService {
       });
     }
     if (query.ingredient) {
+      const ingredientParam = `%${query.ingredient}%`;
       qb.andWhere(
         (subQb) => {
           const subQuery = subQb
@@ -101,7 +103,25 @@ export class RecipesService {
             .getQuery();
           return `recipe.id IN ${subQuery}`;
         },
-        { ingredient: `%${query.ingredient}%` },
+        { ingredient: ingredientParam },
+      );
+      // columna auxiliar (no persistida) que indica si el ingrediente buscado es
+      // el principal (order = 0) de esa receta, para poder separar los resultados
+      // en "ingrediente principal" vs. "también lo contienen" del lado del cliente.
+      qb.addSelect((subQb) => {
+        return subQb
+          .subQuery()
+          .select('1')
+          .from('recipe_ingredients', 'ri2')
+          .innerJoin('ingredients', 'ing2', 'ing2.id = ri2."ingredientId"')
+          .where('ri2."recipeId" = recipe.id')
+          .andWhere('ri2."order" = 0')
+          .andWhere('ing2.name ILIKE :ingredient')
+          .limit(1);
+      }, 'is_main_match');
+      qb.orderBy('is_main_match', 'DESC', 'NULLS LAST').addOrderBy(
+        'recipe.createdAt',
+        'DESC',
       );
     }
     if (query.maxPrepTimeMinutes !== undefined) {
@@ -110,7 +130,19 @@ export class RecipesService {
       });
     }
 
-    const [items, total] = await qb.getManyAndCount();
+    let items: Recipe[];
+    let total: number;
+    if (query.ingredient) {
+      const { entities, raw } = await qb.getRawAndEntities();
+      items = entities.map((recipe, index) => {
+        recipe.isMainIngredientMatch = raw[index]?.is_main_match != null;
+        return recipe;
+      });
+      total = await qb.getCount();
+    } else {
+      [items, total] = await qb.getManyAndCount();
+    }
+
     if (userId && items.length) {
       await this.attachFavoriteFlags(items, userId);
     }
