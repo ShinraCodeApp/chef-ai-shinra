@@ -91,7 +91,12 @@ export class RecipesService {
       });
     }
     if (query.ingredient) {
-      const ingredientParam = `%${query.ingredient}%`;
+      // match por palabra completa (case-insensitive), no por substring: "pollo" no
+      // debe encontrar "Repollo". \y es el ancla de límite de palabra de Postgres.
+      const escapedIngredient = query.ingredient.replace(
+        /[.*+?^${}()|[\]\\]/g,
+        '\\$&',
+      );
       qb.andWhere(
         (subQb) => {
           const subQuery = subQb
@@ -99,11 +104,11 @@ export class RecipesService {
             .select('ri.recipeId')
             .from('recipe_ingredients', 'ri')
             .innerJoin('ingredients', 'ing', 'ing.id = ri."ingredientId"')
-            .where('ing.name ILIKE :ingredient')
+            .where(`ing.name ~* ('\\y' || :ingredient || '\\y')`)
             .getQuery();
           return `recipe.id IN ${subQuery}`;
         },
-        { ingredient: ingredientParam },
+        { ingredient: escapedIngredient },
       );
       // columna auxiliar (no persistida) que indica si el ingrediente buscado es
       // el principal (order = 0) de esa receta, para poder separar los resultados
@@ -116,7 +121,7 @@ export class RecipesService {
           .innerJoin('ingredients', 'ing2', 'ing2.id = ri2."ingredientId"')
           .where('ri2."recipeId" = recipe.id')
           .andWhere('ri2."order" = 0')
-          .andWhere('ing2.name ILIKE :ingredient')
+          .andWhere(`ing2.name ~* ('\\y' || :ingredient || '\\y')`)
           .limit(1);
       }, 'is_main_match');
       qb.orderBy('is_main_match', 'DESC', 'NULLS LAST').addOrderBy(
