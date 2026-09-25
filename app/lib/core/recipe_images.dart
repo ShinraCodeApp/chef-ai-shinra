@@ -409,6 +409,14 @@ const Map<String, String> kRecipeImageAssets = {
   'Paté de champiñones': 'assets/recipe_images/pate-de-champinones.jpg',
   'Vinagreta de sirope de agave': 'assets/recipe_images/vinagreta-de-sirope-de-agave.jpg',
   'Alfajores de maicena': 'assets/recipe_images/alfajores-de-maicena.jpg',
+  'Pan viral sin harinas': 'assets/recipe_images/pan-viral-sin-harinas.jpg',
+  'Mantecol sin azúcar': 'assets/recipe_images/mantecol-sin-azucar.jpg',
+  'Cheesecake de pistacho sin horno': 'assets/recipe_images/cheesecake-de-pistacho-sin-horno.jpg',
+  'Brownie de palta y cacao': 'assets/recipe_images/brownie-de-palta-y-cacao.jpg',
+  'Brownie proteico sin harinas ni azúcar': 'assets/recipe_images/brownie-proteico-sin-harinas-ni-azucar.jpg',
+  'Torta de avena y manzana': 'assets/recipe_images/torta-de-avena-y-manzana.jpg',
+  'Cheesecake sin azúcar de batata': 'assets/recipe_images/cheesecake-sin-azucar-de-batata.jpg',
+  'Helado saludable de pistacho': 'assets/recipe_images/helado-saludable-de-pistacho.jpg',
 };
 
 /// Devuelve la ruta del asset local para una receta del catálogo base, o null si
