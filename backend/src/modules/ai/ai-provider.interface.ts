@@ -88,6 +88,17 @@ export interface MealAnalysis {
   nutrition: MealAnalysisNutrition;
 }
 
+export interface HealthAdviceInput {
+  dietTags: string[];
+  allergies: string[];
+  healthNotes?: string | null;
+  goal?: string | null;
+}
+
+export interface HealthAdvice {
+  tips: string[];
+}
+
 export const AI_PROVIDER = Symbol('AI_PROVIDER');
 
 export interface AiProvider {
@@ -105,4 +116,5 @@ export interface AiProvider {
     mimeType: string,
   ): Promise<MealAnalysis>;
   parseIngredientsFromText(text: string): Promise<DetectedIngredient[]>;
+  getHealthAdvice(input: HealthAdviceInput): Promise<HealthAdvice>;
 }

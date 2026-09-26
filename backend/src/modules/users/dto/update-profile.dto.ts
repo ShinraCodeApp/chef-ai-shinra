@@ -7,6 +7,7 @@ import {
   IsOptional,
   IsString,
   Max,
+  MaxLength,
   Min,
 } from 'class-validator';
 import { ActivityLevel, Goal, Sex } from '../../../common/enums';
@@ -67,4 +68,9 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsBoolean()
   onboardingCompleted?: boolean;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  healthNotes?: string;
 }

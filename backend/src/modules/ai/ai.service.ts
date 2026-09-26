@@ -4,6 +4,7 @@ import {
   AiProvider,
   DetectedIngredient,
   DetectedReceiptItem,
+  HealthAdvice,
   MealAnalysis,
 } from './ai-provider.interface';
 import { GenerateRecipeDto } from './dto/generate-recipe.dto';
@@ -187,6 +188,16 @@ export class AiService {
         return { ...item, ingredientId: ingredient.id };
       }),
     );
+  }
+
+  async getHealthAdviceForUser(userId: string): Promise<HealthAdvice> {
+    const user = await this.usersService.findById(userId);
+    return this.aiProvider.getHealthAdvice({
+      dietTags: user.dietPreferences ?? [],
+      allergies: user.allergies ?? [],
+      healthNotes: user.healthNotes,
+      goal: user.goal,
+    });
   }
 
   private parseUnit(unit: string): IngredientUnit {

@@ -14,6 +14,7 @@ class User {
   final List<String> dietPreferences;
   final List<String> allergies;
   final bool onboardingCompleted;
+  final String? healthNotes;
 
   User({
     required this.id,
@@ -31,6 +32,7 @@ class User {
     required this.dietPreferences,
     required this.allergies,
     this.onboardingCompleted = false,
+    this.healthNotes,
   });
 
   factory User.fromJson(Map<String, dynamic> json) => User(
@@ -52,6 +54,7 @@ class User {
         allergies:
             (json['allergies'] as List? ?? []).map((e) => e.toString()).toList(),
         onboardingCompleted: json['onboardingCompleted'] as bool? ?? false,
+        healthNotes: json['healthNotes'] as String?,
       );
 
   User copyWith({
@@ -66,6 +69,7 @@ class User {
     int? familyMembers,
     List<String>? dietPreferences,
     List<String>? allergies,
+    String? healthNotes,
   }) {
     return User(
       id: id,
@@ -82,6 +86,7 @@ class User {
       familyMembers: familyMembers ?? this.familyMembers,
       dietPreferences: dietPreferences ?? this.dietPreferences,
       allergies: allergies ?? this.allergies,
+      healthNotes: healthNotes ?? this.healthNotes,
     );
   }
 }

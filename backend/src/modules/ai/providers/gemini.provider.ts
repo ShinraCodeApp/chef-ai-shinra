@@ -11,6 +11,8 @@ import {
   DetectedReceiptItem,
   GenerateRecipeInput,
   GeneratedRecipe,
+  HealthAdvice,
+  HealthAdviceInput,
   MealAnalysis,
 } from '../ai-provider.interface';
 import { extractJson } from '../utils/extract-json';
@@ -153,6 +155,60 @@ export class GeminiProvider implements AiProvider {
         'La IA devolvió una respuesta con un formato inesperado al interpretar el dictado.',
       );
     }
+  }
+
+  async getHealthAdvice(input: HealthAdviceInput): Promise<HealthAdvice> {
+    const model = this.getClient().getGenerativeModel({ model: TEXT_MODEL });
+    const prompt = this.buildHealthAdvicePrompt(input);
+
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+
+    try {
+      return extractJson<HealthAdvice>(text);
+    } catch (error) {
+      this.logger.error(`No se pudo parsear los consejos de salud: ${text}`);
+      throw new InternalServerErrorException(
+        'La IA devolvió una respuesta con un formato inesperado al generar los consejos.',
+      );
+    }
+  }
+
+  private buildHealthAdvicePrompt(input: HealthAdviceInput): string {
+    const { dietTags, allergies, healthNotes, goal } = input;
+    const lines = [
+      'Sos un nutricionista. Dale a un usuario de una app de recetas entre 5 y 8 consejos',
+      'cortos, prácticos y específicos sobre alimentación, pensados para su situación particular.',
+      'Cada consejo debe ser una frase accionable de una sola oración (no un párrafo largo).',
+      'No repitas la condición del usuario en cada consejo, andá directo a la recomendación.',
+      '',
+    ];
+    if (healthNotes) {
+      lines.push(`Condición o necesidad especial indicada por el usuario: "${healthNotes}".`);
+    }
+    if (dietTags.length) {
+      lines.push(`Preferencias/etiquetas dietarias: ${dietTags.join(', ')}.`);
+    }
+    if (allergies.length) {
+      lines.push(`Alergias o intolerancias: ${allergies.join(', ')}.`);
+    }
+    if (goal) {
+      lines.push(`Objetivo general: ${goal}.`);
+    }
+    if (!healthNotes && !dietTags.length && !allergies.length) {
+      lines.push(
+        'El usuario no cargó ninguna condición particular: dale consejos generales de alimentación saludable.',
+      );
+    }
+    lines.push(
+      '',
+      'IMPORTANTE: aclará que estos consejos son generales y no reemplazan a un profesional de la salud.',
+      'Incluí esa aclaración como el último elemento del array de consejos, no antes.',
+      '',
+      'Respondé ÚNICAMENTE con un JSON con esta forma exacta, sin texto adicional ni markdown:',
+      '{"tips": ["consejo 1", "consejo 2", "..."]}',
+    );
+    return lines.join('\n');
   }
 
   private buildRecipePrompt(input: GenerateRecipeInput): string {

@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Get,
   Post,
   UploadedFile,
   UseGuards,
@@ -90,5 +91,10 @@ export class AiController {
   @Post('inventory/parse-voice')
   parseVoiceInventory(@Body() dto: ParseVoiceInventoryDto) {
     return this.aiService.parseVoiceInventory(dto.text);
+  }
+
+  @Get('health-advice')
+  getHealthAdvice(@CurrentUser() user: AuthenticatedUser) {
+    return this.aiService.getHealthAdviceForUser(user.userId);
   }
 }

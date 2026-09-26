@@ -58,6 +58,12 @@ export class User {
   @Column({ type: 'text', array: true, default: () => "'{}'" })
   allergies: string[];
 
+  /** Texto libre: enfermedades, condiciones o necesidades dietarias especiales
+   * que no entran en los tags fijos (ej. "gastritis", "embarazo", "resistencia
+   * a la insulina"). Se usa para pedirle a la IA consejos personalizados. */
+  @Column({ type: 'text', nullable: true })
+  healthNotes: string | null;
+
   @Column({ default: false })
   onboardingCompleted: boolean;
 
