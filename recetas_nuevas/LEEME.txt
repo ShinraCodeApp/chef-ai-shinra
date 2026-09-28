@@ -1,0 +1,7 @@
+Carpeta para dejar archivos de recetas (PDF, imágenes, capturas) que después
+se procesan y se cargan en la app. Esta carpeta NO se empaqueta dentro de la app.
+
+Poné acá los archivos y subilos con:
+  git add recetas_nuevas
+  git commit -m "Agregar recetas nuevas"
+  git push
