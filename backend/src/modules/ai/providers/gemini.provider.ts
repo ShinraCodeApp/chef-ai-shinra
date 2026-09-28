@@ -9,12 +9,15 @@ import {
   AiProvider,
   DetectedIngredient,
   DetectedReceiptItem,
+  GenerateDailyMealPlanInput,
   GenerateRecipeInput,
+  GeneratedDailyMealPlan,
   GeneratedRecipe,
   HealthAdvice,
   HealthAdviceInput,
   MealAnalysis,
 } from '../ai-provider.interface';
+import { MealType } from '../../../common/enums';
 import { extractJson } from '../utils/extract-json';
 
 // gemini-2.5-flash fue discontinuado para cuentas nuevas (jul. 2026). gemini-3.6-flash
@@ -63,6 +66,25 @@ export class GeminiProvider implements AiProvider {
       this.logger.error(`No se pudo parsear la receta generada: ${text}`);
       throw new InternalServerErrorException(
         'La IA devolvió una respuesta con un formato inesperado. Probá de nuevo.',
+      );
+    }
+  }
+
+  async generateDailyMealPlan(
+    input: GenerateDailyMealPlanInput,
+  ): Promise<GeneratedDailyMealPlan> {
+    const model = this.getClient().getGenerativeModel({ model: TEXT_MODEL });
+    const prompt = this.buildDailyMealPlanPrompt(input);
+
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+
+    try {
+      return extractJson<GeneratedDailyMealPlan>(text);
+    } catch (error) {
+      this.logger.error(`No se pudo parsear el plan diario generado: ${text}`);
+      throw new InternalServerErrorException(
+        'La IA devolvió una respuesta con un formato inesperado al generar el plan.',
       );
     }
   }
@@ -207,6 +229,80 @@ export class GeminiProvider implements AiProvider {
       '',
       'Respondé ÚNICAMENTE con un JSON con esta forma exacta, sin texto adicional ni markdown:',
       '{"tips": ["consejo 1", "consejo 2", "..."]}',
+    );
+    return lines.join('\n');
+  }
+
+  private buildDailyMealPlanPrompt(input: GenerateDailyMealPlanInput): string {
+    const {
+      mealTypes,
+      availableIngredients,
+      allergies,
+      dietTags,
+      healthNotes,
+      goal,
+      avoidTitles,
+    } = input;
+    const mealTypeLabels: Record<MealType, string> = {
+      [MealType.BREAKFAST]: 'breakfast (desayuno)',
+      [MealType.MID_MORNING]: 'mid_morning (colación de media mañana)',
+      [MealType.LUNCH]: 'lunch (almuerzo)',
+      [MealType.POST_WORKOUT]: 'post_workout (colación post-entreno)',
+      [MealType.SNACK]: 'snack (merienda)',
+      [MealType.DINNER]: 'dinner (cena)',
+    };
+    const lines = [
+      'Sos un chef profesional y nutricionista armando UN DÍA completo de un plan de comidas.',
+      `Generá exactamente estas ${mealTypes.length} comidas para el día, coherentes entre sí:`,
+      ...mealTypes.map((mt) => `- ${mealTypeLabels[mt]}`),
+      '',
+      'Variá las fuentes de proteína y los ingredientes principales entre las comidas del mismo día',
+      '(no repitas el mismo plato ni la misma proteína dos veces en el día).',
+      '',
+      `Ingredientes disponibles: ${availableIngredients.join(', ') || 'ninguno en particular'} (podés asumir sal, aceite, agua y condimentos básicos aunque no estén listados).`,
+    ];
+    if (allergies.length) {
+      lines.push(
+        `RESTRICCIÓN OBLIGATORIA: nunca uses estos ingredientes ni derivados (alergias/intolerancias del usuario): ${allergies.join(', ')}.`,
+      );
+    }
+    if (dietTags.length) {
+      lines.push(`Debe cumplir con estas dietas/etiquetas: ${dietTags.join(', ')}.`);
+    }
+    if (healthNotes) {
+      lines.push(`Condición de salud / necesidad especial del usuario: "${healthNotes}".`);
+    }
+    if (goal) {
+      lines.push(`Objetivo general del usuario: ${goal}.`);
+    }
+    if (avoidTitles.length) {
+      lines.push(
+        `No repitas estos platos, ya se usaron otros días de esta semana: ${avoidTitles.join(', ')}.`,
+      );
+    }
+    lines.push(
+      '',
+      'Respondé ÚNICAMENTE con un JSON válido (sin texto adicional, sin markdown) con esta forma exacta:',
+      `{
+  "meals": [
+    {
+      "mealType": "breakfast" | "mid_morning" | "lunch" | "post_workout" | "snack" | "dinner",
+      "recipe": {
+        "title": string,
+        "description": string,
+        "instructions": [{ "order": number, "instruction": string }],
+        "servings": number,
+        "prepTimeMinutes": number,
+        "difficulty": "easy" | "medium" | "hard",
+        "estimatedCostTotal": number,
+        "dietTags": string[],
+        "ingredients": [{ "name": string, "quantity": number, "unit": string, "notes": string | null }],
+        "nutrition": { "calories": number, "proteinG": number, "fatG": number, "carbsG": number, "fiberG": number, "sugarG": number, "sodiumMg": number }
+      }
+    }
+  ]
+}`,
+      `El array "meals" debe tener exactamente ${mealTypes.length} elementos, uno por cada comida pedida arriba, cada uno con el "mealType" correspondiente.`,
     );
     return lines.join('\n');
   }

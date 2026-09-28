@@ -1,3 +1,5 @@
+import { MealType } from '../../common/enums';
+
 export interface GenerateRecipePreferences {
   dietTags?: string[];
   maxPrepTimeMinutes?: number;
@@ -99,10 +101,32 @@ export interface HealthAdvice {
   tips: string[];
 }
 
+export interface GenerateDailyMealPlanInput {
+  mealTypes: MealType[];
+  availableIngredients: string[];
+  allergies: string[];
+  dietTags: string[];
+  healthNotes?: string | null;
+  goal?: string | null;
+  avoidTitles: string[];
+}
+
+export interface GeneratedDailyMeal {
+  mealType: MealType;
+  recipe: GeneratedRecipe;
+}
+
+export interface GeneratedDailyMealPlan {
+  meals: GeneratedDailyMeal[];
+}
+
 export const AI_PROVIDER = Symbol('AI_PROVIDER');
 
 export interface AiProvider {
   generateRecipe(input: GenerateRecipeInput): Promise<GeneratedRecipe>;
+  generateDailyMealPlan(
+    input: GenerateDailyMealPlanInput,
+  ): Promise<GeneratedDailyMealPlan>;
   detectIngredients(
     imageBuffer: Buffer,
     mimeType: string,

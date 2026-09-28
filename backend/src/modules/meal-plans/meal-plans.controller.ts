@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import {
   AuthenticatedUser,
@@ -28,5 +36,18 @@ export class MealPlansController {
   @Get(':id')
   findOne(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.mealPlansService.findOne(user.userId, id);
+  }
+
+  @Patch(':planId/entries/:entryId/toggle')
+  toggleEntryCompleted(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('planId') planId: string,
+    @Param('entryId') entryId: string,
+  ) {
+    return this.mealPlansService.toggleEntryCompleted(
+      user.userId,
+      planId,
+      entryId,
+    );
   }
 }

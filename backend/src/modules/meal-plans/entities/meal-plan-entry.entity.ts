@@ -27,4 +27,7 @@ export class MealPlanEntry {
 
   @Column()
   recipeId: string;
+
+  @Column({ default: false })
+  completed: boolean;
 }

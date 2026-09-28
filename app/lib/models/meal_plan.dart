@@ -5,12 +5,14 @@ class MealPlanEntry {
   final String date;
   final String mealType;
   final Recipe recipe;
+  bool completed;
 
   MealPlanEntry({
     required this.id,
     required this.date,
     required this.mealType,
     required this.recipe,
+    this.completed = false,
   });
 
   factory MealPlanEntry.fromJson(Map<String, dynamic> json) => MealPlanEntry(
@@ -18,6 +20,7 @@ class MealPlanEntry {
         date: json['date'] as String,
         mealType: json['mealType'] as String,
         recipe: Recipe.fromJson(json['recipe'] as Map<String, dynamic>),
+        completed: json['completed'] as bool? ?? false,
       );
 }
 

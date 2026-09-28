@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../core/diet_tags.dart';
+import '../../core/meal_type_schedule.dart';
+import '../../models/meal_plan.dart';
 import '../../models/user.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/meal_plans_provider.dart';
@@ -12,10 +15,14 @@ import '../shopping_lists/shopping_lists_screen.dart';
 
 const _mealTypeLabels = {
   'breakfast': 'Desayuno',
+  'mid_morning': 'Colación mañana',
   'lunch': 'Almuerzo',
+  'post_workout': 'Post-entreno',
   'snack': 'Merienda',
   'dinner': 'Cena',
 };
+
+const _defaultMealTypes = ['breakfast', 'lunch', 'snack', 'dinner'];
 
 const _goalLabels = {
   'lose_weight': 'Bajar de peso',
@@ -44,21 +51,15 @@ class _MealPlansScreenState extends State<MealPlansScreen> {
   }
 
   Future<void> _generate() async {
-    final days = await showDialog<int>(
+    final result = await showDialog<_GenerateChoice>(
       context: context,
-      builder: (ctx) => SimpleDialog(
-        title: const Text('¿Para cuántos días?'),
-        children: [7, 15, 30]
-            .map((d) => SimpleDialogOption(
-                  onPressed: () => Navigator.of(ctx).pop(d),
-                  child: Text('$d días'),
-                ))
-            .toList(),
-      ),
+      builder: (ctx) => const _GeneratePlanDialog(),
     );
-    if (days == null) return;
+    if (result == null || !mounted) return;
     setState(() => _isGenerating = true);
-    final plan = await context.read<MealPlansProvider>().generate(days);
+    final plan = await context
+        .read<MealPlansProvider>()
+        .generate(result.days, mealTypes: result.mealTypes);
     if (mounted) {
       setState(() => _isGenerating = false);
       if (plan == null) {
@@ -114,9 +115,17 @@ class _MealPlansScreenState extends State<MealPlansScreen> {
                   itemCount: provider.mealPlans.length,
                   itemBuilder: (context, index) {
                     final plan = provider.mealPlans[index];
-                    final entriesByDate = <String, List<dynamic>>{};
+                    final entriesByDate = <String, List<MealPlanEntry>>{};
                     for (final entry in plan.entries) {
                       entriesByDate.putIfAbsent(entry.date, () => []).add(entry);
+                    }
+                    final sortedDates = entriesByDate.keys.toList()..sort();
+                    for (final dateKey in sortedDates) {
+                      entriesByDate[dateKey]!.sort((a, b) {
+                        final orderA = kMealTypeOrder.indexOf(a.mealType);
+                        final orderB = kMealTypeOrder.indexOf(b.mealType);
+                        return orderA.compareTo(orderB);
+                      });
                     }
                     return Card(
                       margin: const EdgeInsets.symmetric(vertical: 6),
@@ -124,24 +133,37 @@ class _MealPlansScreenState extends State<MealPlansScreen> {
                         title: Text('${plan.startDate} → ${plan.endDate}'),
                         subtitle: Text('${plan.entries.length} comidas planificadas'),
                         children: [
-                          ...entriesByDate.entries.map((dateEntry) => Padding(
+                          ...sortedDates.map((dateKey) => Padding(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 16, vertical: 6),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(dateEntry.key,
+                                    Text(_formatDayHeader(dateKey),
                                         style: Theme.of(context).textTheme.titleSmall),
-                                    ...dateEntry.value.map((e) => ListTile(
-                                          dense: true,
+                                    ...entriesByDate[dateKey]!.map((e) => CheckboxListTile(
+                                          controlAffinity: ListTileControlAffinity.leading,
                                           contentPadding: EdgeInsets.zero,
-                                          title: Text(e.recipe.title),
+                                          value: e.completed,
+                                          onChanged: (_) => context
+                                              .read<MealPlansProvider>()
+                                              .toggleEntryCompleted(plan.id, e.id),
+                                          title: Text(
+                                            e.recipe.title,
+                                            style: e.completed
+                                                ? const TextStyle(
+                                                    decoration: TextDecoration.lineThrough)
+                                                : null,
+                                          ),
                                           subtitle: Text(
                                               _mealTypeLabels[e.mealType] ?? e.mealType),
-                                          onTap: () => Navigator.of(context).push(
-                                            MaterialPageRoute(
-                                              builder: (_) => RecipeDetailScreen(
-                                                  recipeId: e.recipe.id),
+                                          secondary: IconButton(
+                                            icon: const Icon(Icons.chevron_right),
+                                            onPressed: () => Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                builder: (_) => RecipeDetailScreen(
+                                                    recipeId: e.recipe.id),
+                                              ),
                                             ),
                                           ),
                                         )),
@@ -173,6 +195,90 @@ class _MealPlansScreenState extends State<MealPlansScreen> {
             : const Icon(Icons.auto_awesome),
         label: const Text('Generar plan'),
       ),
+    );
+  }
+
+  String _formatDayHeader(String dateKey) {
+    final date = DateTime.tryParse(dateKey);
+    if (date == null) return dateKey;
+    final formatted = DateFormat('EEEE d/MM', 'es').format(date);
+    return formatted[0].toUpperCase() + formatted.substring(1);
+  }
+}
+
+class _GenerateChoice {
+  final int days;
+  final List<String> mealTypes;
+  _GenerateChoice(this.days, this.mealTypes);
+}
+
+class _GeneratePlanDialog extends StatefulWidget {
+  const _GeneratePlanDialog();
+
+  @override
+  State<_GeneratePlanDialog> createState() => _GeneratePlanDialogState();
+}
+
+class _GeneratePlanDialogState extends State<_GeneratePlanDialog> {
+  int _days = 7;
+  final Set<String> _selectedMealTypes = _defaultMealTypes.toSet();
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Generar plan semanal'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('¿Para cuántos días?'),
+            const SizedBox(height: 8),
+            SegmentedButton<int>(
+              segments: const [
+                ButtonSegment(value: 7, label: Text('7 días')),
+                ButtonSegment(value: 15, label: Text('15 días')),
+                ButtonSegment(value: 30, label: Text('30 días')),
+              ],
+              selected: {_days},
+              onSelectionChanged: (s) => setState(() => _days = s.first),
+            ),
+            const SizedBox(height: 20),
+            const Text('¿Qué comidas incluye el día?'),
+            const Text(
+              'Sumá colación de media mañana o post-entreno para planes con más comidas, '
+              'como los de fisicoculturismo.',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+            ..._mealTypeLabels.entries.map((entry) => CheckboxListTile(
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(entry.value),
+                  value: _selectedMealTypes.contains(entry.key),
+                  onChanged: (checked) => setState(() {
+                    if (checked == true) {
+                      _selectedMealTypes.add(entry.key);
+                    } else {
+                      _selectedMealTypes.remove(entry.key);
+                    }
+                  }),
+                )),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancelar'),
+        ),
+        FilledButton(
+          onPressed: _selectedMealTypes.isEmpty
+              ? null
+              : () => Navigator.of(context)
+                  .pop(_GenerateChoice(_days, _selectedMealTypes.toList())),
+          child: const Text('Generar'),
+        ),
+      ],
     );
   }
 }

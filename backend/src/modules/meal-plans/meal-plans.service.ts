@@ -48,17 +48,20 @@ export class MealPlansService {
     );
 
     const entries: MealPlanEntry[] = [];
+    const usedTitles: string[] = [];
     for (let dayOffset = 0; dayOffset < dto.days; dayOffset++) {
       const date = new Date(startDate);
       date.setDate(date.getDate() + dayOffset);
 
-      for (const mealType of mealTypes) {
-        const recipe = await this.aiService.generateRecipeForUser(userId, {
-          availableIngredients,
-          dietTags: dto.dietTags,
-          freeTextRequest: `Receta para ${translateMealType(mealType)}`,
-        });
+      const dayMeals = await this.aiService.generateDailyMealPlanForUser(userId, {
+        availableIngredients,
+        mealTypes,
+        dietTags: dto.dietTags,
+        avoidTitles: usedTitles.slice(-20),
+      });
 
+      for (const { mealType, recipe } of dayMeals) {
+        usedTitles.push(recipe.title);
         entries.push(
           this.entriesRepository.create({
             mealPlanId: mealPlan.id,
@@ -72,6 +75,20 @@ export class MealPlansService {
     await this.entriesRepository.save(entries);
 
     return this.findOne(userId, mealPlan.id);
+  }
+
+  async toggleEntryCompleted(
+    userId: string,
+    planId: string,
+    entryId: string,
+  ): Promise<MealPlanEntry> {
+    const mealPlan = await this.findOne(userId, planId);
+    const entry = mealPlan.entries.find((e) => e.id === entryId);
+    if (!entry) {
+      throw new NotFoundException('Comida no encontrada en este plan');
+    }
+    entry.completed = !entry.completed;
+    return this.entriesRepository.save(entry);
   }
 
   async findOne(userId: string, id: string): Promise<MealPlan> {
@@ -96,14 +113,4 @@ export class MealPlansService {
 
 function toDateOnly(date: Date): string {
   return date.toISOString().slice(0, 10);
-}
-
-function translateMealType(mealType: MealType): string {
-  const labels: Record<MealType, string> = {
-    [MealType.BREAKFAST]: 'el desayuno',
-    [MealType.LUNCH]: 'el almuerzo',
-    [MealType.SNACK]: 'la merienda',
-    [MealType.DINNER]: 'la cena',
-  };
-  return labels[mealType];
 }

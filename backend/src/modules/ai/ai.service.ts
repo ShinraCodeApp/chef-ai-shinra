@@ -4,6 +4,7 @@ import {
   AiProvider,
   DetectedIngredient,
   DetectedReceiptItem,
+  GeneratedRecipe,
   HealthAdvice,
   MealAnalysis,
 } from './ai-provider.interface';
@@ -16,6 +17,7 @@ import { Recipe } from '../recipes/entities/recipe.entity';
 import {
   IngredientCategory,
   IngredientUnit,
+  MealType,
   RecipeDifficulty,
 } from '../../common/enums';
 
@@ -56,6 +58,47 @@ export class AiService {
       },
     });
 
+    return this.persistGeneratedRecipe(generated, userId);
+  }
+
+  /**
+   * Genera un día completo de comidas (todas las mealTypes pedidas) en UNA sola
+   * llamada a la IA, en vez de una llamada por comida — mucho más rápido y le da
+   * a la IA contexto para variar entre las comidas del mismo día.
+   */
+  async generateDailyMealPlanForUser(
+    userId: string,
+    params: {
+      availableIngredients: string[];
+      mealTypes: MealType[];
+      dietTags?: string[];
+      avoidTitles: string[];
+    },
+  ): Promise<{ mealType: MealType; recipe: Recipe }[]> {
+    const user = await this.usersService.findById(userId);
+
+    const generated = await this.aiProvider.generateDailyMealPlan({
+      mealTypes: params.mealTypes,
+      availableIngredients: params.availableIngredients,
+      allergies: user.allergies ?? [],
+      dietTags: params.dietTags ?? user.dietPreferences ?? [],
+      healthNotes: user.healthNotes,
+      goal: user.goal,
+      avoidTitles: params.avoidTitles,
+    });
+
+    return Promise.all(
+      generated.meals.map(async (meal) => ({
+        mealType: meal.mealType,
+        recipe: await this.persistGeneratedRecipe(meal.recipe, userId),
+      })),
+    );
+  }
+
+  private async persistGeneratedRecipe(
+    generated: GeneratedRecipe,
+    userId: string,
+  ): Promise<Recipe> {
     const ingredients = await Promise.all(
       generated.ingredients.map(async (ing) => {
         const ingredient = await this.ingredientsService.findOrCreateByName(

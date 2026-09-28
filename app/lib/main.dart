@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
+import 'core/notifications_service.dart';
 import 'core/theme.dart';
 import 'providers/auth_provider.dart';
 import 'providers/inventory_provider.dart';
@@ -9,7 +11,10 @@ import 'providers/shopping_lists_provider.dart';
 import 'providers/admin_provider.dart';
 import 'screens/auth/auth_gate.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('es', null);
+  await NotificationsService.instance.initialize();
   runApp(const ChefAiApp());
 }
 

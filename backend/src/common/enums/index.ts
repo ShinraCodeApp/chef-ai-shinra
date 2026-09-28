@@ -68,7 +68,9 @@ export enum RecipeDifficulty {
 
 export enum MealType {
   BREAKFAST = 'breakfast',
+  MID_MORNING = 'mid_morning',
   LUNCH = 'lunch',
+  POST_WORKOUT = 'post_workout',
   SNACK = 'snack',
   DINNER = 'dinner',
 }

@@ -1,10 +1,12 @@
 import 'package:flutter/foundation.dart';
 import '../core/api_client.dart';
+import '../core/notifications_service.dart';
 import '../models/missing_ingredient.dart';
 import '../models/shopping_list.dart';
 
 class ShoppingListsProvider extends ChangeNotifier {
   final _dio = ApiClient.instance.dio;
+  static const _shoppingReminderId = 900001;
 
   List<ShoppingList> lists = [];
   bool isLoading = false;
@@ -19,12 +21,36 @@ class ShoppingListsProvider extends ChangeNotifier {
       lists = (response.data as List)
           .map((e) => ShoppingList.fromJson(e as Map<String, dynamic>))
           .toList();
+      await _updateShoppingReminder();
     } catch (_) {
       errorMessage = 'No se pudieron cargar las listas de compras.';
     } finally {
       isLoading = false;
       notifyListeners();
     }
+  }
+
+  /// Agenda (o cancela, si ya no queda nada pendiente) un recordatorio local para
+  /// hoy 18:00 (o mañana si ya pasó) con la cantidad de ítems sin marcar. Sin cron
+  /// en el backend, se re-agenda cada vez que se recarga la pantalla de listas.
+  Future<void> _updateShoppingReminder() async {
+    final uncheckedCount =
+        lists.fold<int>(0, (sum, l) => sum + l.items.where((i) => !i.isChecked).length);
+    if (uncheckedCount == 0) {
+      await NotificationsService.instance.cancel(_shoppingReminderId);
+      return;
+    }
+    final now = DateTime.now();
+    var when = DateTime(now.year, now.month, now.day, 18, 0);
+    if (when.isBefore(now)) when = when.add(const Duration(days: 1));
+    await NotificationsService.instance.scheduleAt(
+      id: _shoppingReminderId,
+      when: when,
+      title: 'Lista de compras pendiente',
+      body: uncheckedCount == 1
+          ? 'Tenés 1 ítem pendiente en tu lista de compras.'
+          : 'Tenés $uncheckedCount ítems pendientes en tu lista de compras.',
+    );
   }
 
   Future<ShoppingList?> generateFromMealPlan(String mealPlanId) async {
@@ -109,6 +135,7 @@ class ShoppingListsProvider extends ChangeNotifier {
     final item = list.items.firstWhere((i) => i.id == itemId);
     item.isChecked = !item.isChecked;
     notifyListeners();
+    await _updateShoppingReminder();
   }
 
   Future<void> removeItem(String listId, String itemId) async {

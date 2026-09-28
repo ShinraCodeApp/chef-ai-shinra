@@ -3,6 +3,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../core/diet_tags.dart';
+import '../../core/notifications_service.dart';
 import '../../core/quantity_format.dart';
 import '../../core/recipe_images.dart';
 import '../../models/missing_ingredient.dart';
@@ -109,6 +110,10 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
         ),
       );
       if (missing.isNotEmpty) {
+        await NotificationsService.instance.showNow(
+          title: 'Te quedaste sin ingredientes',
+          body: missing.map((m) => m.name).join(', '),
+        );
         await _offerAddMissingToShoppingList(missing);
       }
     } catch (_) {
