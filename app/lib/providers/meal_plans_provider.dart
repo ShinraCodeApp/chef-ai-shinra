@@ -47,7 +47,9 @@ class MealPlansProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> toggleEntryCompleted(String planId, String entryId) async {
+  /// Marca/desmarca una comida. Devuelve `true` si con este toggle el día quedó
+  /// recién completo (todas sus comidas marcadas) — se usa para festejar el día.
+  Future<bool> toggleEntryCompleted(String planId, String entryId) async {
     try {
       final response = await _dio
           .patch('/meal-plans/$planId/entries/$entryId/toggle');
@@ -58,10 +60,46 @@ class MealPlansProvider extends ChangeNotifier {
       notifyListeners();
       if (completed) {
         await NotificationsService.instance.cancel(_notificationId(entryId));
+        if (_isDayFullyCompleted(plan, entry.date)) {
+          final streak = streakForPlan(plan);
+          await NotificationsService.instance.showNow(
+            title: '¡Día completado! 🎉',
+            body: streak > 1
+                ? 'Cumpliste todas las comidas de hoy. ¡Racha de $streak días seguidos!'
+                : 'Cumpliste todas las comidas de hoy. ¡Seguí así!',
+          );
+          return true;
+        }
       }
+      return false;
     } catch (_) {
       // si falla, la UI simplemente no refleja el cambio; el usuario puede reintentar
+      return false;
     }
+  }
+
+  bool _isDayFullyCompleted(MealPlan plan, String date) {
+    final dayEntries = plan.entries.where((e) => e.date == date).toList();
+    return dayEntries.isNotEmpty && dayEntries.every((e) => e.completed);
+  }
+
+  String _dateKey(DateTime d) =>
+      '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+  /// Días consecutivos con todas las comidas cumplidas, terminando hoy (si ya está
+  /// completo) o ayer (para no penalizar un día que todavía no terminó).
+  int streakForPlan(MealPlan plan) {
+    final now = DateTime.now();
+    var day = DateTime(now.year, now.month, now.day);
+    if (!_isDayFullyCompleted(plan, _dateKey(day))) {
+      day = day.subtract(const Duration(days: 1));
+    }
+    var streak = 0;
+    while (_isDayFullyCompleted(plan, _dateKey(day))) {
+      streak++;
+      day = day.subtract(const Duration(days: 1));
+    }
+    return streak;
   }
 
   Future<void> _scheduleRemindersForPlan(MealPlan plan) async {

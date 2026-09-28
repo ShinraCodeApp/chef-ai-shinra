@@ -70,6 +70,21 @@ class _MealPlansScreenState extends State<MealPlansScreen> {
     }
   }
 
+  Future<void> _onToggleEntry(MealPlan plan, MealPlanEntry entry) async {
+    final provider = context.read<MealPlansProvider>();
+    final dayCompleted = await provider.toggleEntryCompleted(plan.id, entry.id);
+    if (dayCompleted && mounted) {
+      final streak = provider.streakForPlan(plan);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(streak > 1
+              ? '¡Completaste el día! 🔥 Racha: $streak días seguidos'
+              : '¡Completaste el día! 🎉'),
+        ),
+      );
+    }
+  }
+
   Future<void> _generateShoppingList(String mealPlanId) async {
     final list =
         await context.read<ShoppingListsProvider>().generateFromMealPlan(mealPlanId);
@@ -127,11 +142,14 @@ class _MealPlansScreenState extends State<MealPlansScreen> {
                         return orderA.compareTo(orderB);
                       });
                     }
+                    final streak = provider.streakForPlan(plan);
                     return Card(
                       margin: const EdgeInsets.symmetric(vertical: 6),
                       child: ExpansionTile(
                         title: Text('${plan.startDate} → ${plan.endDate}'),
-                        subtitle: Text('${plan.entries.length} comidas planificadas'),
+                        subtitle: Text(streak > 0
+                            ? '${plan.entries.length} comidas planificadas · 🔥 $streak días seguidos'
+                            : '${plan.entries.length} comidas planificadas'),
                         children: [
                           ...sortedDates.map((dateKey) => Padding(
                                 padding: const EdgeInsets.symmetric(
@@ -145,9 +163,7 @@ class _MealPlansScreenState extends State<MealPlansScreen> {
                                           controlAffinity: ListTileControlAffinity.leading,
                                           contentPadding: EdgeInsets.zero,
                                           value: e.completed,
-                                          onChanged: (_) => context
-                                              .read<MealPlansProvider>()
-                                              .toggleEntryCompleted(plan.id, e.id),
+                                          onChanged: (_) => _onToggleEntry(plan, e),
                                           title: Text(
                                             e.recipe.title,
                                             style: e.completed

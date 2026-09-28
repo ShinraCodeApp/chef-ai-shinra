@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/api_client.dart';
 import '../../core/diet_tags.dart';
+import '../../core/notifications_service.dart';
 import '../../models/user.dart';
+import '../../models/weight_log.dart';
 import '../../providers/auth_provider.dart';
 
 const _sexOptions = {'male': 'Masculino', 'female': 'Femenino', 'other': 'Otro'};
@@ -66,11 +68,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isEditing = false;
   bool _loadingAdvice = false;
   List<String>? _advice;
+  List<WeightLog>? _weightLogs;
 
   @override
   void initState() {
     super.initState();
     _loadFromUser(context.read<AuthProvider>().currentUser!);
+    _loadWeightLogs();
+  }
+
+  Future<void> _loadWeightLogs() async {
+    try {
+      final response = await ApiClient.instance.dio.get('/users/me/weight-logs');
+      final logs = (response.data as List)
+          .map((e) => WeightLog.fromJson(e as Map<String, dynamic>))
+          .toList();
+      if (mounted) setState(() => _weightLogs = logs);
+    } catch (_) {
+      // sin historial disponible, la vista simplemente no muestra el resumen de progreso
+    }
   }
 
   void _loadFromUser(User user) {
@@ -103,7 +119,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _save() async {
     setState(() => _isSaving = true);
     try {
-      await context.read<AuthProvider>().updateProfile({
+      final response = await context.read<AuthProvider>().updateProfile({
         if (_ageController.text.isNotEmpty) 'age': int.tryParse(_ageController.text),
         if (_weightController.text.isNotEmpty)
           'weightKg': double.tryParse(_weightController.text),
@@ -121,12 +137,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
         'healthNotes': _healthNotesController.text,
       });
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Perfil actualizado.')));
         setState(() {
           _isEditing = false;
           _advice = null;
         });
+        await _celebrateWeightProgressIfAny(response['weightProgress']);
+        _loadWeightLogs();
+        if (mounted) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(const SnackBar(content: Text('Perfil actualizado.')));
+        }
       }
     } catch (_) {
       if (mounted) {
@@ -136,6 +156,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
+  }
+
+  Future<void> _celebrateWeightProgressIfAny(dynamic weightProgress) async {
+    if (weightProgress is! Map || weightProgress['isGoalProgress'] != true) return;
+    final deltaKg = (weightProgress['deltaKg'] as num).toDouble();
+    final message = deltaKg < 0
+        ? '¡Bajaste ${deltaKg.abs().toStringAsFixed(1)} kg! Seguí así 💪'
+        : '¡Sumaste ${deltaKg.toStringAsFixed(1)} kg! Vas por buen camino 💪';
+    await NotificationsService.instance.showNow(title: '¡Buen progreso!', body: message);
+    if (!mounted) return;
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('🎉 ¡Felicitaciones!'),
+        content: Text(message),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Genial')),
+        ],
+      ),
+    );
   }
 
   Future<void> _fetchAdvice() async {
@@ -196,6 +236,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  String? _weightProgressSummary() {
+    final logs = _weightLogs;
+    if (logs == null || logs.length < 2) return null;
+    final delta = logs.last.weightKg - logs.first.weightKg;
+    if (delta == 0) return null;
+    final sign = delta < 0 ? '-' : '+';
+    return '$sign${delta.abs().toStringAsFixed(1)} kg desde que empezaste a registrarlo';
+  }
+
   Widget _buildReadOnlyView(User? user) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -203,6 +252,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _readRow('Edad', user?.age?.toString()),
         _readRow('Sexo', user?.sex != null ? _sexOptions[user!.sex] : null),
         _readRow('Peso', user?.weightKg != null ? '${user!.weightKg} kg' : null),
+        if (_weightProgressSummary() != null)
+          Padding(
+            padding: const EdgeInsets.only(left: 160, bottom: 4),
+            child: Text(
+              _weightProgressSummary()!,
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
         _readRow('Altura', user?.heightCm != null ? '${user!.heightCm} cm' : null),
         _readRow('Objetivo', user?.goal != null ? _goalOptions[user!.goal] : null),
         _readRow('Actividad física',

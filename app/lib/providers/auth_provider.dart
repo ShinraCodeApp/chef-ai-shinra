@@ -92,10 +92,12 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> updateProfile(Map<String, dynamic> patch) async {
+  Future<Map<String, dynamic>> updateProfile(Map<String, dynamic> patch) async {
     final response = await _dio.patch('/users/me', data: patch);
-    currentUser = User.fromJson(response.data as Map<String, dynamic>);
+    final data = response.data as Map<String, dynamic>;
+    currentUser = User.fromJson(data);
     notifyListeners();
+    return data;
   }
 
   Future<void> logout() async {

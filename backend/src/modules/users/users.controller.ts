@@ -24,8 +24,14 @@ export class UsersController {
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: UpdateProfileDto,
   ) {
-    const { passwordHash: _passwordHash, ...profile } =
+    const { user: updated, weightProgress } =
       await this.usersService.updateProfile(user.userId, dto);
-    return profile;
+    const { passwordHash: _passwordHash, ...profile } = updated;
+    return { ...profile, weightProgress };
+  }
+
+  @Get('me/weight-logs')
+  getWeightLogs(@CurrentUser() user: AuthenticatedUser) {
+    return this.usersService.getWeightLogs(user.userId);
   }
 }
