@@ -3,6 +3,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../core/diet_tags.dart';
+import '../../core/health_conditions.dart';
 import '../../core/notifications_service.dart';
 import '../../core/quantity_format.dart';
 import '../../core/recipe_images.dart';
@@ -309,6 +310,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                       ],
                     ),
                   ],
+                  ..._healthSection(recipe),
                   const SizedBox(height: 28),
                   FilledButton.icon(
                     onPressed: _isCooking ? null : _cook,
@@ -325,6 +327,44 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
             ),
       ),
     );
+  }
+
+  /// Sección al pie de la receta: en qué condiciones de salud puede ayudar.
+  List<Widget> _healthSection(Recipe recipe) {
+    final conditions = healthConditionsFor(recipe);
+    if (conditions.isEmpty) return const [];
+    final textTheme = Theme.of(context).textTheme;
+    return [
+      const SizedBox(height: 20),
+      Text('Puede ayudar en…', style: textTheme.titleMedium),
+      const SizedBox(height: 8),
+      ...conditions.map(
+        (c) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.health_and_safety_outlined,
+                  size: 18, color: Theme.of(context).colorScheme.primary),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text.rich(TextSpan(children: [
+                  TextSpan(
+                      text: '${c.name}: ',
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                  TextSpan(text: c.reason),
+                ])),
+              ),
+            ],
+          ),
+        ),
+      ),
+      const SizedBox(height: 6),
+      Text(
+        'Información orientativa: no reemplaza la indicación de tu médico o nutricionista.',
+        style: textTheme.bodySmall,
+      ),
+    ];
   }
 
   Widget _infoChip(IconData icon, String label) {

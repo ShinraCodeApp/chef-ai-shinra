@@ -5,6 +5,7 @@ import * as dotenv from 'dotenv';
 import { Ingredient } from '../../modules/ingredients/entities/ingredient.entity';
 import { Recipe } from '../../modules/recipes/entities/recipe.entity';
 import { IngredientUnit, RecipeDifficulty } from '../../common/enums';
+import { withHealthTags } from './health-tags';
 
 dotenv.config();
 
@@ -19583,6 +19584,7 @@ async function run() {
   let skipped = 0;
 
   for (const seed of seedRecipes) {
+    const dietTags = withHealthTags(seed);
     const existing = await recipesRepository.findOne({
       where: { title: seed.title },
     });
@@ -19592,7 +19594,7 @@ async function run() {
       // El orden de los ingredientes NO se sincroniza acá (sería una consulta extra por
       // cada ingrediente de cada receta ya existente, muy lento) — para corregirlo en
       // bloque después de editar el orden en el seed, usar un script de backfill puntual.
-      existing.dietTags = seed.dietTags;
+      existing.dietTags = dietTags;
       existing.imageUrl = seed.imageUrl ?? null;
       existing.tips = seed.tips ?? null;
       await recipesRepository.save(existing);
@@ -19631,7 +19633,7 @@ async function run() {
       prepTimeMinutes: seed.prepTimeMinutes,
       difficulty: seed.difficulty,
       estimatedCostTotal: seed.estimatedCostTotal,
-      dietTags: seed.dietTags,
+      dietTags,
       tips: seed.tips ?? null,
       isAiGenerated: false,
       createdByUserId: null,
