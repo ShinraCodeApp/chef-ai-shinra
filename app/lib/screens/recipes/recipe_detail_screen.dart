@@ -329,14 +329,15 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     );
   }
 
-  /// Sección al pie de la receta: en qué condiciones de salud puede ayudar.
+  /// Sección al pie de la receta: para qué dietas es apta y en qué condiciones
+  /// de salud puede ayudar.
   List<Widget> _healthSection(Recipe recipe) {
     final conditions = healthConditionsFor(recipe);
     if (conditions.isEmpty) return const [];
     final textTheme = Theme.of(context).textTheme;
     return [
       const SizedBox(height: 20),
-      Text('Puede ayudar en…', style: textTheme.titleMedium),
+      Text('Dietas y salud: puede ayudar en…', style: textTheme.titleMedium),
       const SizedBox(height: 8),
       ...conditions.map(
         (c) => Padding(

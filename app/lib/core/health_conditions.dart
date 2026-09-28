@@ -40,6 +40,19 @@ const _ironRich = {
   'Mejillones', 'Riñones', 'Morcilla', 'Cordero',
 };
 
+// Mismo criterio que withHealthTags en backend/src/database/seeds/health-tags.ts.
+const _meatOrFish = {
+  ..._seafood,
+  'Pollo (pechuga)', 'Carne picada', 'Carne (bife)', 'Costillas de cerdo',
+  'Cerdo (magro)', 'Chorizo', 'Jamón', 'Manteca de cerdo', 'Charque', 'Panceta',
+  'Salchichas', 'Cochinillo', 'Manitas de cerdo', 'Chinchulines', 'Riñones',
+  'Morcilla', 'Pularda', 'Pavo', 'Mollejas', 'Mortadela', 'Conejo', 'Cordero',
+  'Salsa de pescado', 'Salsa de ostión', 'Salsa inglesa', 'Gelatina sin sabor',
+  'Malvaviscos',
+};
+const _eggDairyHoney = {..._dairy, 'Huevo', 'Mayonesa', 'Miel'};
+const _ambiguous = {'Caldo', 'Proteína en polvo', 'Galletas'};
+
 /// Deduce, a partir de las etiquetas, los ingredientes y la nutrición por
 /// porción, en qué condiciones de salud puede ayudar la receta. Es información
 /// orientativa (el detalle lo aclara): no reemplaza la indicación médica.
@@ -52,6 +65,38 @@ List<HealthCondition> healthConditionsFor(Recipe recipe) {
   final lowIodine = tags.contains('bajo_yodo');
   final n = recipe.nutrition;
   final result = <HealthCondition>[];
+
+  // Dietas: si un ingrediente es claramente de origen animal se descarta, aunque
+  // la receta venga etiquetada; si hay alguno dudoso (caldo, proteína en polvo,
+  // galletitas) se confía en la etiqueta.
+  bool isPlantSyrup(RecipeIngredientEntry ri) =>
+      ri.ingredient.name == 'Miel' &&
+      RegExp('arce|agave', caseSensitive: false).hasMatch(ri.notes ?? '');
+  final ingredientsKnown = recipe.recipeIngredients.isNotEmpty;
+  final hasMeat = names.any(_meatOrFish.contains);
+  final hasAnimalProduct = recipe.recipeIngredients.any((ri) =>
+      _eggDairyHoney.contains(ri.ingredient.name) && !isPlantSyrup(ri));
+  final hasAmbiguous = recipe.recipeIngredients.any((ri) =>
+      _ambiguous.contains(ri.ingredient.name) &&
+      !(ri.ingredient.name == 'Caldo' &&
+          (ri.notes ?? '').toLowerCase().contains('verdura')));
+  final vegan = ingredientsKnown &&
+      !hasMeat &&
+      !hasAnimalProduct &&
+      (!hasAmbiguous || tags.contains('vegano'));
+  final vegetarian = !vegan &&
+      ingredientsKnown &&
+      !hasMeat &&
+      (!hasAmbiguous ||
+          tags.contains('vegetariano') ||
+          tags.contains('vegano'));
+  if (vegan) {
+    result.add(const HealthCondition('Dieta vegana',
+        'No lleva carne, pescado, huevo, lácteos ni miel. Conviene combinar legumbres, cereales y frutos secos para completar la proteína.'));
+  } else if (vegetarian) {
+    result.add(const HealthCondition('Dieta vegetariana',
+        'No lleva carne ni pescado (puede llevar huevo, lácteos o miel).'));
+  }
 
   if (!lowIodine &&
       (tags.contains('hipotiroidismo') ||
