@@ -19,6 +19,7 @@ const _dietTagOptions = [
   'comida_cruda',
   'hipotiroidismo',
   'hipertiroidismo',
+  'bajo_yodo',
   'anime',
 ];
 
@@ -63,6 +64,8 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
         return 'Recetas para hipotiroidismo';
       case 'hipertiroidismo':
         return 'Recetas para hipertiroidismo';
+      case 'bajo_yodo':
+        return 'Recetas bajas en yodo';
       case 'anime':
         return 'Platos anime';
       default:

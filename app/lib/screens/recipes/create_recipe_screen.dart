@@ -19,6 +19,7 @@ const _dietTagOptions = [
   'comida_cruda',
   'hipotiroidismo',
   'hipertiroidismo',
+  'bajo_yodo',
 ];
 
 class _IngredientRow {

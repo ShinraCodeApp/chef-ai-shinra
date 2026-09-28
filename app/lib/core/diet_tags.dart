@@ -11,6 +11,7 @@ const Map<String, String> kDietTagLabels = {
   'comida_cruda': 'comida cruda',
   'hipotiroidismo': 'hipotiroidismo',
   'hipertiroidismo': 'hipertiroidismo',
+  'bajo_yodo': 'bajo en yodo',
   'anime': 'platos anime',
 };
 
