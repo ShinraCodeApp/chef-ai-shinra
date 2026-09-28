@@ -16,6 +16,23 @@ import {
   PaginatedResult,
 } from '../../common/dto/pagination-query.dto';
 import { IngredientUnit, UserRole } from '../../common/enums';
+import {
+  CALCIUM_RICH,
+  DAIRY,
+  HEART_FRIENDLY,
+  HealthConditionKey,
+  IRON_RICH,
+  SATURATED_FAT,
+  searchFilterFor,
+} from './search-tags';
+
+const CONDITION_PARAMS = {
+  dairy: DAIRY,
+  heartFriendly: HEART_FRIENDLY,
+  saturatedFat: SATURATED_FAT,
+  ironRich: IRON_RICH,
+  calciumRich: CALCIUM_RICH,
+};
 
 export interface MissingIngredient {
   ingredientId: string;
@@ -81,9 +98,25 @@ export class RecipesService {
       .take(limit);
 
     if (query.search) {
-      qb.andWhere('recipe.title ILIKE :search', {
-        search: `%${query.search}%`,
-      });
+      // Si lo buscado es una etiqueta o una condición de salud ("vegano",
+      // "celíaco", "diabetes"...), se devuelven todas las recetas que la cumplan,
+      // además de las que lo mencionen en el título.
+      const filter = searchFilterFor(query.search);
+      const titleMatch = 'recipe.title ILIKE :search';
+      const params = { search: `%${query.search}%` };
+      if (filter?.kind === 'tag') {
+        qb.andWhere(`(${titleMatch} OR :searchTag = ANY(recipe.dietTags))`, {
+          ...params,
+          searchTag: filter.tag,
+        });
+      } else if (filter?.kind === 'condition') {
+        qb.andWhere(
+          `(${titleMatch} OR (${this.conditionSql(filter.condition)}))`,
+          { ...params, ...CONDITION_PARAMS },
+        );
+      } else {
+        qb.andWhere(titleMatch, params);
+      }
     }
     if (query.dietTag) {
       qb.andWhere(':dietTag = ANY(recipe.dietTags)', {
@@ -152,6 +185,36 @@ export class RecipesService {
       await this.attachFavoriteFlags(items, userId);
     }
     return paginate(items, total, page, limit);
+  }
+
+  /**
+   * SQL de cada condición de salud, con los mismos criterios que el detalle de
+   * la receta en la app. Usa los parámetros de CONDITION_PARAMS.
+   */
+  private conditionSql(condition: HealthConditionKey): string {
+    const n = (key: string) => `(recipe.nutrition->>'${key}')::float`;
+    const hasIngredient = (param: string) =>
+      `EXISTS (SELECT 1 FROM recipe_ingredients hri
+        INNER JOIN ingredients hing ON hing.id = hri."ingredientId"
+        WHERE hri."recipeId" = recipe.id AND hing.name IN (:...${param}))`;
+    switch (condition) {
+      case 'diabetes':
+        return `${n('carbsG')} <= 20 AND ${n('sugarG')} <= 10`;
+      case 'hipertension':
+        return `${n('sodiumMg')} <= 300`;
+      case 'estrenimiento':
+        return `${n('fiberG')} >= 6`;
+      case 'sobrepeso':
+        return `${n('calories')} > 0 AND ${n('calories')} <= 350 AND ${n('proteinG')} >= 15`;
+      case 'lactosa':
+        return `NOT ${hasIngredient('dairy')}`;
+      case 'corazon':
+        return `${hasIngredient('heartFriendly')} AND NOT ${hasIngredient('saturatedFat')} AND ${n('fatG')} <= 25`;
+      case 'anemia':
+        return hasIngredient('ironRich');
+      case 'osteoporosis':
+        return hasIngredient('calciumRich');
+    }
   }
 
   async findOne(id: string, userId?: string): Promise<Recipe> {
