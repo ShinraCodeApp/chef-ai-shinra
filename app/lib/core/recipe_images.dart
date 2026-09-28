@@ -417,6 +417,150 @@ const Map<String, String> kRecipeImageAssets = {
   'Torta de avena y manzana': 'assets/recipe_images/torta-de-avena-y-manzana.jpg',
   'Cheesecake sin azúcar de batata': 'assets/recipe_images/cheesecake-sin-azucar-de-batata.jpg',
   'Helado saludable de pistacho': 'assets/recipe_images/helado-saludable-de-pistacho.jpg',
+  // Recetas Diarias - desayunos
+  'Carne desmechada con huevos y queso gratinado':
+      'assets/recipe_images/carne-desmechada-huevos-queso-gratinado.jpg',
+  'Huevos a la sartén con tomate, queso cremoso y albahaca':
+      'assets/recipe_images/huevos-sarten-tomate-queso-albahaca.jpg',
+  'Huevos al horno con carne picada, espinaca y queso':
+      'assets/recipe_images/huevos-horno-carne-espinaca-queso.jpg',
+  'Huevos al plato con chorizo, tomate y palta':
+      'assets/recipe_images/huevos-al-plato-chorizo-tomate-palta.jpg',
+  'Huevos cremosos con carne picada especiada y palta':
+      'assets/recipe_images/huevos-cremosos-carne-picada-especiada-palta.jpg',
+  'Huevos revueltos con carne desmechada y tomate':
+      'assets/recipe_images/huevos-revueltos-carne-desmechada-tomate.jpg',
+  'Huevos revueltos con champiñones y cebolla de verdeo':
+      'assets/recipe_images/huevos-revueltos-champinones-verdeo.jpg',
+  'Huevos revueltos con espinaca, tomate y queso cremoso':
+      'assets/recipe_images/huevos-revueltos-espinaca-tomate-queso.jpg',
+  'Huevos revueltos con palta y queso cremoso':
+      'assets/recipe_images/huevos-revueltos-palta-queso.jpg',
+  'Huevos revueltos con pollo, palta y queso':
+      'assets/recipe_images/huevos-revueltos-pollo-palta-queso.jpg',
+  'Huevos revueltos con tomate, cebolla, palta y queso cremoso':
+      'assets/recipe_images/huevos-revueltos-tomate-cebolla-palta-queso.jpg',
+  'Tortilla de zucchini y cebolla': 'assets/recipe_images/tortilla-zucchini-cebolla.jpg',
+  'Tortillitas de queso y chía con huevo y palta':
+      'assets/recipe_images/tortillitas-queso-chia-huevo-palta.jpg',
+  'Yogur griego con coco, semillas de lino y almendras':
+      'assets/recipe_images/yogur-griego-coco-lino-almendras.jpg',
+  'Yogur griego con granola keto casera y frutos rojos':
+      'assets/recipe_images/yogur-griego-granola-keto-frutos-rojos.jpg',
+  // Recetas Diarias - snacks
+  'Bolitas saladas de pollo y queso': 'assets/recipe_images/bolitas-saladas-pollo-queso.jpg',
+  'Frutillas con queso cremoso y almendras':
+      'assets/recipe_images/frutillas-queso-cremoso-almendras.jpg',
+  'Maní tostado con coco y canela': 'assets/recipe_images/mani-tostado-coco-canela.jpg',
+  'Mini tartas keto de espinaca y queso':
+      'assets/recipe_images/mini-tartas-keto-espinaca-queso.jpg',
+  'Mousse de yogur griego con cacao puro y nueces':
+      'assets/recipe_images/mousse-yogur-griego-cacao-nueces.jpg',
+  'Nueces y almendras tostadas con canela':
+      'assets/recipe_images/nueces-almendras-tostadas-canela.jpg',
+  'Pepinos rellenos de pollo al limón': 'assets/recipe_images/pepinos-rellenos-pollo-limon.jpg',
+  'Pinchos de mozzarella, tomates cherry y albahaca':
+      'assets/recipe_images/pinchos-mozzarella-cherry-albahaca.jpg',
+  'Pudín de chía con yogur natural, coco y vainilla':
+      'assets/recipe_images/pudin-chia-yogur-coco-vainilla.jpg',
+  'Rollitos de lechuga con pollo cremoso y palta':
+      'assets/recipe_images/rollitos-lechuga-pollo-cremoso-palta.jpg',
+  'Rollitos de pepino con queso crema y nueces':
+      'assets/recipe_images/rollitos-pepino-queso-crema-nueces.jpg',
+  'Tomates cherry rellenos de yogur natural y hierbas':
+      'assets/recipe_images/tomates-cherry-rellenos-yogur-hierbas.jpg',
+  'Trufas de cacao amargo, coco y almendras':
+      'assets/recipe_images/trufas-cacao-coco-almendras.jpg',
+  'Vasitos cremosos de limón y yogur': 'assets/recipe_images/vasitos-cremosos-limon-yogur.jpg',
+  'Yogur griego con frutillas, chía y nueces':
+      'assets/recipe_images/yogur-griego-frutillas-chia-nueces.jpg',
+  // Recetas Diarias - almuerzos
+  'Bife de carne en salsa cremosa de champiñones con brócoli al limón':
+      'assets/recipe_images/bife-salsa-champinones-brocoli-limon.jpg',
+  'Bife de cerdo con salsa de mostaza y hierbas, ensalada y rösti de zucchini':
+      'assets/recipe_images/bife-cerdo-mostaza-ensalada-rosti-zucchini.jpg',
+  'Bondiola de cerdo al horno con ajo y romero, ensalada y soufflé de brócoli':
+      'assets/recipe_images/bondiola-ajo-romero-ensalada-souffle-brocoli.jpg',
+  'Bondiola de cerdo al horno con ensalada de repollo y palta':
+      'assets/recipe_images/bondiola-horno-ensalada-repollo-palta.jpg',
+  'Carne al horno con ensalada de palta y pepino y repollitos de Bruselas':
+      'assets/recipe_images/carne-horno-ensalada-palta-pepino-repollitos-bruselas.jpg',
+  'Carne al horno desmenuzada con puré de zapallitos y ensalada verde':
+      'assets/recipe_images/carne-desmenuzada-pure-zapallitos-ensalada-verde.jpg',
+  'Carne al horno desmenuzada con zapallitos salteados y ensalada de repollo colorado':
+      'assets/recipe_images/carne-desmenuzada-zapallitos-repollo-colorado.jpg',
+  'Carne asada con guacamole, zapallito dorado y ensalada de repollo':
+      'assets/recipe_images/carne-asada-guacamole-zapallito-ensalada-repollo.jpg',
+  'Chuleta de cerdo dorada con puré de coliflor al ajo y ensalada verde':
+      'assets/recipe_images/chuleta-cerdo-pure-coliflor-ensalada.jpg',
+  'Lomo de cerdo al limón y cúrcuma con brócoli salteado y ensalada de pepino':
+      'assets/recipe_images/lomo-cerdo-limon-curcuma-brocoli-pepino.jpg',
+  'Paleta de cerdo al horno con coliflor dorada y ensalada de espinaca':
+      'assets/recipe_images/paleta-cerdo-coliflor-dorada-espinaca.jpg',
+  'Pollo al limón con chauchas salteadas y ensalada de pepino':
+      'assets/recipe_images/pollo-limon-chauchas-ensalada-pepino.jpg',
+  'Pollo dorado en salsa cremosa de queso y limón con brócoli y ensalada de pepino':
+      'assets/recipe_images/pollo-salsa-queso-limon-brocoli-pepino.jpg',
+  'Pollo en salsa cremosa de mostaza con berenjena dorada':
+      'assets/recipe_images/pollo-salsa-mostaza-berenjena-dorada.jpg',
+  // Recetas Diarias - cenas
+  'Berenjenas gratinadas con pollo y muzzarella':
+      'assets/recipe_images/berenjenas-gratinadas-pollo-muzzarella.jpg',
+  'Carne vacuna salteada con champiñones y repollo':
+      'assets/recipe_images/carne-salteada-champinones-repollo.jpg',
+  'Cazuela de carne desmenuzada con espinaca y muzzarella':
+      'assets/recipe_images/cazuela-carne-desmenuzada-espinaca-muzzarella.jpg',
+  'Champiñones rellenos de carne picada y muzzarella':
+      'assets/recipe_images/champinones-rellenos-carne-muzzarella.jpg',
+  'Crema de pollo, coliflor y espinaca': 'assets/recipe_images/crema-pollo-coliflor-espinaca.jpg',
+  'Hamburguesa casera con queso y ensalada de repollo y palta':
+      'assets/recipe_images/hamburguesa-casera-queso-ensalada-repollo-palta.jpg',
+  'Hamburguesas caseras de cerdo con ensalada cremosa de repollo':
+      'assets/recipe_images/hamburguesas-cerdo-ensalada-cremosa-repollo.jpg',
+  'Hojas de repollo rellenas de carne picada y palta':
+      'assets/recipe_images/hojas-repollo-rellenas-carne-palta.jpg',
+  'Lasaña de zucchini con carne picada y muzzarella':
+      'assets/recipe_images/lasana-zucchini-carne-muzzarella.jpg',
+  'Pechuga de pollo en salsa de mostaza y hierbas con espárragos al horno':
+      'assets/recipe_images/pechuga-pollo-mostaza-hierbas-esparragos.jpg',
+  'Pechuga rellena de mozzarella y espinaca con ensalada':
+      'assets/recipe_images/pechuga-rellena-mozzarella-espinaca-ensalada.jpg',
+  'Pollo al horno con salsa de ajo, brócoli y champiñones':
+      'assets/recipe_images/pollo-horno-salsa-ajo-brocoli-champinones.jpg',
+  'Pollo desmenuzado con palta, pepino y aderezo de limón':
+      'assets/recipe_images/pollo-desmenuzado-palta-pepino-limon.jpg',
+  'Rollitos de omelette con palta y repollo':
+      'assets/recipe_images/rollitos-omelette-palta-repollo.jpg',
+  'Sopa cremosa de champiñones con pollo desmenuzado':
+      'assets/recipe_images/sopa-cremosa-champinones-pollo.jpg',
+  'Zapallitos redondos rellenos de carne picada y queso cremoso':
+      'assets/recipe_images/zapallitos-redondos-rellenos-carne-queso.jpg',
+  'Zapallitos verdes rellenos de cerdo, espinaca y queso':
+      'assets/recipe_images/zapallitos-rellenos-cerdo-espinaca-queso.jpg',
+  // Recetas Diarias - bebidas
+  'Infusión de romero, limón y menta': 'assets/recipe_images/infusion-romero-limon-menta.jpg',
+  'Licuado de coco, cacao amargo y canela': 'assets/recipe_images/licuado-coco-cacao-canela.jpg',
+  'Licuado de coco, vainilla y frutillas sin azúcar':
+      'assets/recipe_images/licuado-coco-vainilla-frutillas.jpg',
+  'Licuado de frutilla y coco': 'assets/recipe_images/licuado-frutilla-coco.jpg',
+  'Licuado de frutilla, coco y canela': 'assets/recipe_images/licuado-frutilla-coco-canela.jpg',
+  'Licuado de frutilla, palta y yogur natural':
+      'assets/recipe_images/licuado-frutilla-palta-yogur.jpg',
+  'Licuado de frutilla, yogur natural y canela':
+      'assets/recipe_images/licuado-frutilla-yogur-canela.jpg',
+  'Licuado de frutillas, yogur natural y chía':
+      'assets/recipe_images/licuado-frutillas-yogur-chia.jpg',
+  'Licuado de frutos rojos con leche de coco y yogur griego':
+      'assets/recipe_images/licuado-frutos-rojos-coco-yogur-griego.jpg',
+  'Licuado de maracuyá, menta y chía': 'assets/recipe_images/licuado-maracuya-menta-chia.jpg',
+  'Licuado de palta, limón y canela': 'assets/recipe_images/licuado-palta-limon-canela.jpg',
+  'Licuado de pepino, limón, menta y jengibre':
+      'assets/recipe_images/licuado-pepino-limon-menta-jengibre.jpg',
+  'Licuado verde de palta, pepino, limón y jengibre':
+      'assets/recipe_images/licuado-verde-palta-pepino-limon-jengibre.jpg',
+  'Limonada con menta y jengibre': 'assets/recipe_images/limonada-menta-jengibre.jpg',
+  // Recetas Diarias - postres
+  'Frutillas con crema de yogur y cacao': 'assets/recipe_images/frutillas-crema-yogur-cacao.jpg',
 };
 
 /// Devuelve la ruta del asset local para una receta del catálogo base, o null si

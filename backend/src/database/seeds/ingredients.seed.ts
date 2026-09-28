@@ -2969,6 +2969,30 @@ const seedIngredients: Partial<Ingredient>[] = [
     sugarPer100g: 59,
     sodiumPer100g: 90,
   },
+  {
+    name: 'Repollitos de Bruselas',
+    category: IngredientCategory.VERDURAS,
+    unit: IngredientUnit.KILOGRAMS,
+    caloriesPer100g: 43,
+    proteinPer100g: 3.4,
+    fatPer100g: 0.3,
+    carbsPer100g: 9,
+    fiberPer100g: 3.8,
+    sugarPer100g: 2.2,
+    sodiumPer100g: 25,
+  },
+  {
+    name: 'Maracuyá',
+    category: IngredientCategory.FRUTAS,
+    unit: IngredientUnit.UNIT,
+    caloriesPer100g: 97,
+    proteinPer100g: 2.2,
+    fatPer100g: 0.7,
+    carbsPer100g: 23,
+    fiberPer100g: 10,
+    sugarPer100g: 11,
+    sodiumPer100g: 28,
+  },
 ];
 
 async function run() {
