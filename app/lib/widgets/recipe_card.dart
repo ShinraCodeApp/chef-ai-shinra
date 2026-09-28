@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/diet_tags.dart';
 import '../core/recipe_images.dart';
 import '../models/recipe.dart';
 
@@ -6,7 +7,47 @@ class RecipeCard extends StatelessWidget {
   final Recipe recipe;
   final VoidCallback onTap;
 
-  const RecipeCard({super.key, required this.recipe, required this.onTap});
+  /// Etiqueta que no hace falta repetir en la tarjeta (ej. la del filtro activo
+  /// de la lista: en "Comida vegana" no tiene sentido mostrar "vegano" en todas).
+  final String? hiddenTag;
+
+  const RecipeCard({
+    super.key,
+    required this.recipe,
+    required this.onTap,
+    this.hiddenTag,
+  });
+
+  /// Orden de prioridad para elegir qué etiquetas mostrar: primero las
+  /// restricciones (lo que la persona NO puede comer), después las de salud y
+  /// por último los estilos de comida.
+  static const _tagPriority = [
+    'vegano',
+    'vegetariano',
+    'sin_tacc',
+    'bajo_yodo',
+    'hipotiroidismo',
+    'hipertiroidismo',
+    'keto',
+    'proteico',
+    'fitness',
+    'comida_cruda',
+    'economico',
+    'anime',
+  ];
+  static const _maxTags = 3;
+
+  List<String> _visibleTags() {
+    final tags = recipe.dietTags.where((t) => t != hiddenTag).toSet();
+    // "vegano" ya implica "vegetariano".
+    if (tags.contains('vegano')) tags.remove('vegetariano');
+    int rank(String t) {
+      final i = _tagPriority.indexOf(t);
+      return i == -1 ? _tagPriority.length : i;
+    }
+
+    return tags.toList()..sort((a, b) => rank(a).compareTo(rank(b)));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +90,7 @@ class RecipeCard extends StatelessWidget {
                               recipe.estimatedCostTotal!.toStringAsFixed(0)),
                       ],
                     ),
+                    ..._tagsRow(context),
                   ],
                 ),
               ),
@@ -105,6 +147,42 @@ class RecipeCard extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
       child: SizedBox(width: 56, height: 56, child: image),
+    );
+  }
+
+  List<Widget> _tagsRow(BuildContext context) {
+    final tags = _visibleTags();
+    if (tags.isEmpty) return const [];
+    final shown = tags.take(_maxTags).toList();
+    final extra = tags.length - shown.length;
+    return [
+      const SizedBox(height: 6),
+      Wrap(
+        spacing: 6,
+        runSpacing: 4,
+        children: [
+          ...shown.map((t) => _tagPill(context, dietTagLabel(t))),
+          if (extra > 0) _tagPill(context, '+$extra'),
+        ],
+      ),
+    ];
+  }
+
+  Widget _tagPill(BuildContext context, String label) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: scheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context)
+            .textTheme
+            .labelSmall
+            ?.copyWith(color: scheme.onSecondaryContainer),
+      ),
     );
   }
 

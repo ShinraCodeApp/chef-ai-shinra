@@ -275,6 +275,7 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
                                   final recipe = item as Recipe;
                                   return RecipeCard(
                                     recipe: recipe,
+                                    hiddenTag: provider.dietTag,
                                     onTap: () => Navigator.of(context).push(
                                       MaterialPageRoute(
                                         builder: (_) => RecipeDetailScreen(
