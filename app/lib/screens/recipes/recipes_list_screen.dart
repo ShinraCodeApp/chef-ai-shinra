@@ -34,7 +34,9 @@ class RecipesListScreen extends StatefulWidget {
 
 class _RecipesListScreenState extends State<RecipesListScreen> {
   final _searchController = TextEditingController();
+  final _multiIngredientController = TextEditingController();
   bool _searchByIngredient = false;
+  bool _multiIngredientMode = false;
 
   @override
   void initState() {
@@ -51,7 +53,30 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _multiIngredientController.dispose();
     super.dispose();
+  }
+
+  void _addIngredient(RecipesProvider provider) {
+    final value = _multiIngredientController.text.trim();
+    if (value.isEmpty) return;
+    if (!provider.ingredients.contains(value)) {
+      provider.ingredients = [...provider.ingredients, value];
+      provider.loadRecipes();
+    }
+    _multiIngredientController.clear();
+  }
+
+  void _removeIngredient(RecipesProvider provider, String ing) {
+    provider.ingredients = provider.ingredients.where((i) => i != ing).toList();
+    provider.loadRecipes();
+  }
+
+  void _clearMultiMode(RecipesProvider provider) {
+    provider.ingredients = [];
+    _multiIngredientController.clear();
+    setState(() => _multiIngredientMode = false);
+    provider.loadRecipes();
   }
 
   String _titleFor(String? dietTag) {
@@ -128,19 +153,87 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
               child: Row(
                 children: [
                   Expanded(
-                    child: TextField(
-                      controller: _searchController,
-                      decoration: InputDecoration(
-                        hintText: _searchByIngredient
-                            ? 'Buscar por ingrediente…'
-                            : 'Buscar receta…',
-                        prefixIcon: const Icon(Icons.search),
+                    child: _multiIngredientMode
+                        ? TextField(
+                            controller: _multiIngredientController,
+                            decoration: InputDecoration(
+                              hintText: 'Agregar ingrediente…',
+                              prefixIcon: const Icon(Icons.add),
+                              suffixIcon: IconButton(
+                                icon: const Icon(Icons.check),
+                                onPressed: () => _addIngredient(provider),
+                              ),
+                            ),
+                            onSubmitted: (_) => _addIngredient(provider),
+                            textInputAction: TextInputAction.done,
+                          )
+                        : TextField(
+                            controller: _searchController,
+                            decoration: InputDecoration(
+                              hintText: _searchByIngredient
+                                  ? 'Buscar por ingrediente…'
+                                  : 'Buscar receta…',
+                              prefixIcon: const Icon(Icons.search),
+                            ),
+                            onSubmitted: (value) {
+                              if (_searchByIngredient) {
+                                provider.ingredient = value;
+                                provider.search = '';
+                              } else {
+                                provider.search = value;
+                                provider.ingredient = '';
+                              }
+                              provider.loadRecipes();
+                            },
+                          ),
+                  ),
+                  const SizedBox(width: 4),
+                  // Botón modo multi-ingrediente
+                  IconButton(
+                    icon: Icon(
+                      _multiIngredientMode
+                          ? Icons.kitchen
+                          : Icons.kitchen_outlined,
+                      color: _multiIngredientMode
+                          ? Theme.of(context).colorScheme.primary
+                          : null,
+                    ),
+                    tooltip: '¿Qué puedo cocinar?',
+                    onPressed: () {
+                      setState(() {
+                        _multiIngredientMode = !_multiIngredientMode;
+                        if (!_multiIngredientMode) {
+                          _clearMultiMode(provider);
+                        } else {
+                          // desactivar modo ingrediente simple
+                          _searchByIngredient = false;
+                          provider.ingredient = '';
+                          provider.search = '';
+                          _searchController.clear();
+                        }
+                      });
+                    },
+                  ),
+                  if (!_multiIngredientMode) ...[
+                    const SizedBox(width: 4),
+                    IconButton(
+                      icon: Icon(
+                        _searchByIngredient
+                            ? Icons.egg_alt
+                            : Icons.egg_alt_outlined,
                       ),
-                      onSubmitted: (value) {
+                      tooltip: _searchByIngredient
+                          ? 'Buscando por ingrediente'
+                          : 'Buscar por ingrediente',
+                      onPressed: () {
+                        setState(
+                          () => _searchByIngredient = !_searchByIngredient,
+                        );
+                        final value = _searchController.text;
                         if (_searchByIngredient) {
                           provider.ingredient = value;
                           provider.search = '';
@@ -148,35 +241,10 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
                           provider.search = value;
                           provider.ingredient = '';
                         }
-                        provider.loadRecipes();
+                        if (value.isNotEmpty) provider.loadRecipes();
                       },
                     ),
-                  ),
-                  const SizedBox(width: 4),
-                  IconButton(
-                    icon: Icon(
-                      _searchByIngredient
-                          ? Icons.egg_alt
-                          : Icons.egg_alt_outlined,
-                    ),
-                    tooltip: _searchByIngredient
-                        ? 'Buscando por ingrediente'
-                        : 'Buscar por ingrediente',
-                    onPressed: () {
-                      setState(
-                        () => _searchByIngredient = !_searchByIngredient,
-                      );
-                      final value = _searchController.text;
-                      if (_searchByIngredient) {
-                        provider.ingredient = value;
-                        provider.search = '';
-                      } else {
-                        provider.search = value;
-                        provider.ingredient = '';
-                      }
-                      if (value.isNotEmpty) provider.loadRecipes();
-                    },
-                  ),
+                  ],
                   const SizedBox(width: 4),
                   PopupMenuButton<String?>(
                     icon: const Icon(Icons.filter_list),
@@ -197,6 +265,42 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
                 ],
               ),
             ),
+            // Chips de ingredientes en modo multi
+            if (_multiIngredientMode)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (provider.ingredients.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: Text(
+                          'Agregá los ingredientes que tenés y encontrá recetas',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      )
+                    else
+                      Wrap(
+                        spacing: 6,
+                        children: [
+                          ...provider.ingredients.map(
+                            (ing) => Chip(
+                              label: Text(ing),
+                              onDeleted: () =>
+                                  _removeIngredient(provider, ing),
+                            ),
+                          ),
+                          ActionChip(
+                            label: const Text('Limpiar todo'),
+                            onPressed: () => _clearMultiMode(provider),
+                          ),
+                        ],
+                      ),
+                    const SizedBox(height: 4),
+                  ],
+                ),
+              ),
             if (provider.dietTag != null)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),

@@ -117,6 +117,30 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                               ? Theme.of(context).colorScheme.primaryContainer
                               : null,
                         ),
+                        Tooltip(
+                          message: user.aiUnlimited ? 'IA ilimitada activa' : 'IA limitada',
+                          child: IconButton(
+                            icon: Icon(
+                              user.aiUnlimited ? Icons.all_inclusive : Icons.auto_awesome_outlined,
+                              color: user.aiUnlimited
+                                  ? Theme.of(context).colorScheme.primary
+                                  : null,
+                            ),
+                            onPressed: () async {
+                              final ok = await context
+                                  .read<AdminProvider>()
+                                  .setAiUnlimited(user.id, !user.aiUnlimited);
+                              if (!mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                content: Text(ok
+                                    ? (!user.aiUnlimited
+                                        ? 'IA ilimitada activada para ${user.name}'
+                                        : 'IA ilimitada desactivada para ${user.name}')
+                                    : 'No se pudo actualizar'),
+                              ));
+                            },
+                          ),
+                        ),
                         if (!isSelf)
                           IconButton(
                             icon: Icon(Icons.delete_outline,

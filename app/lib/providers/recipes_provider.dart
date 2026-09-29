@@ -19,6 +19,9 @@ class RecipesProvider extends ChangeNotifier {
   List<Recipe> favorites = [];
   bool isLoadingFavorites = false;
 
+  /// Lista de ingredientes para el modo "¿qué puedo cocinar?"
+  List<String> ingredients = [];
+
   Future<void> loadRecipes({bool reset = true}) async {
     if (reset) page = 1;
     isLoading = true;
@@ -31,6 +34,7 @@ class RecipesProvider extends ChangeNotifier {
         if (search.isNotEmpty) 'search': search,
         if (dietTag != null) 'dietTag': dietTag,
         if (ingredient.isNotEmpty) 'ingredient': ingredient,
+        if (ingredients.isNotEmpty) 'ingredients': ingredients.join(','),
       });
       final paginated = Paginated<Recipe>.fromJson(
         response.data as Map<String, dynamic>,

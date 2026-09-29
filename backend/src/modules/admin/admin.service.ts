@@ -62,6 +62,13 @@ export class AdminService {
     await this.usersRepository.remove(user);
   }
 
+  async setAiUnlimited(userId: string, unlimited: boolean): Promise<User> {
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('Usuario no encontrado');
+    user.aiUnlimited = unlimited;
+    return this.usersRepository.save(user);
+  }
+
   async getStats(): Promise<AdminStats> {
     const [totalUsers, totalRecipes, aiGeneratedRecipes, totalIngredients, totalInventoryItems] =
       await Promise.all([

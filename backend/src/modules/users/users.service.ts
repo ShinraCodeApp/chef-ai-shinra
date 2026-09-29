@@ -1,10 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { WeightLog } from './entities/weight-log.entity';
 import { UpdateProfileDto } from './dto/update-profile.dto';
-import { Goal } from '../../common/enums';
+import { Goal, UserRole } from '../../common/enums';
+
+export const AI_MONTHLY_LIMIT = 5;
 
 export interface WeightProgress {
   previousWeightKg: number;
@@ -82,6 +84,46 @@ export class UsersService {
     Object.assign(user, dto);
     const saved = await this.usersRepository.save(user);
     return { user: saved, weightProgress };
+  }
+
+  async checkAndConsumeAiGeneration(userId: string): Promise<void> {
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('Usuario no encontrado');
+
+    if (user.role === UserRole.ADMIN || user.aiUnlimited) return;
+
+    const now = new Date();
+    const resetAt = user.aiGenerationsResetAt;
+    const isNewPeriod =
+      !resetAt ||
+      now.getFullYear() > resetAt.getFullYear() ||
+      now.getMonth() > resetAt.getMonth() ||
+      (now.getFullYear() === resetAt.getFullYear() &&
+        now.getMonth() === resetAt.getMonth() &&
+        now.getDate() - resetAt.getDate() >= 30);
+
+    if (isNewPeriod) {
+      user.aiGenerationsUsed = 0;
+      user.aiGenerationsResetAt = now;
+    }
+
+    if (user.aiGenerationsUsed >= AI_MONTHLY_LIMIT) {
+      throw new ForbiddenException(
+        `Límite mensual de ${AI_MONTHLY_LIMIT} generaciones de IA alcanzado`,
+      );
+    }
+
+    user.aiGenerationsUsed += 1;
+    await this.usersRepository.save(user);
+  }
+
+  async getAiGenerationsInfo(userId: string): Promise<{ used: number; limit: number; unlimited: boolean }> {
+    const user = await this.findById(userId);
+    return {
+      used: user.aiUnlimited || user.role === UserRole.ADMIN ? 0 : user.aiGenerationsUsed,
+      limit: AI_MONTHLY_LIMIT,
+      unlimited: user.aiUnlimited || user.role === UserRole.ADMIN,
+    };
   }
 
   getWeightLogs(userId: string): Promise<WeightLog[]> {

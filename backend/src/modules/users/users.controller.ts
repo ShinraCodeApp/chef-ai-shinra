@@ -34,4 +34,9 @@ export class UsersController {
   getWeightLogs(@CurrentUser() user: AuthenticatedUser) {
     return this.usersService.getWeightLogs(user.userId);
   }
+
+  @Get('me/ai-info')
+  getAiInfo(@CurrentUser() user: AuthenticatedUser) {
+    return this.usersService.getAiGenerationsInfo(user.userId);
+  }
 }

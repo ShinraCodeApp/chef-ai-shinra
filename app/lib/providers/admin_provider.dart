@@ -77,6 +77,24 @@ class AdminProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> setAiUnlimited(String userId, bool unlimited) async {
+    try {
+      final response = await _dio.patch(
+        '/admin/users/$userId/ai-unlimited',
+        data: {'unlimited': unlimited},
+      );
+      final updated = User.fromJson(response.data as Map<String, dynamic>);
+      final index = users.indexWhere((u) => u.id == userId);
+      if (index != -1) {
+        users[index] = updated;
+        notifyListeners();
+      }
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   Future<bool> deleteUser(String userId) async {
     try {
       await _dio.delete('/admin/users/$userId');

@@ -84,6 +84,7 @@ class Recipe {
   final List<String> tips;
   bool isFavorite;
   final bool? isMainIngredientMatch;
+  final int? matchCount;
 
   Recipe({
     required this.id,
@@ -102,6 +103,7 @@ class Recipe {
     this.tips = const [],
     this.isFavorite = false,
     this.isMainIngredientMatch,
+    this.matchCount,
   });
 
   factory Recipe.fromJson(Map<String, dynamic> json) => Recipe(
@@ -128,5 +130,6 @@ class Recipe {
         tips: (json['tips'] as List? ?? []).map((e) => e.toString()).toList(),
         isFavorite: json['isFavorite'] as bool? ?? false,
         isMainIngredientMatch: json['isMainIngredientMatch'] as bool?,
+        matchCount: (json['matchCount'] as num?)?.toInt(),
       );
 }

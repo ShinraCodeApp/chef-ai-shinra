@@ -43,6 +43,7 @@ export class AiService {
     userId: string,
     dto: GenerateRecipeDto,
   ): Promise<Recipe> {
+    await this.usersService.checkAndConsumeAiGeneration(userId);
     const user = await this.usersService.findById(userId);
 
     const generated = await this.aiProvider.generateRecipe({

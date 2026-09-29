@@ -7,6 +7,7 @@ import {
   Patch,
   Query,
   UseGuards,
+  ParseBoolPipe,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
@@ -42,6 +43,14 @@ export class AdminController {
     @Param('id') id: string,
   ) {
     return this.adminService.deleteUser(id, requester.userId);
+  }
+
+  @Patch('users/:id/ai-unlimited')
+  setAiUnlimited(
+    @Param('id') id: string,
+    @Body('unlimited', ParseBoolPipe) unlimited: boolean,
+  ) {
+    return this.adminService.setAiUnlimited(id, unlimited);
   }
 
   @Get('stats')

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../core/api_client.dart';
 import '../../providers/recipes_provider.dart';
 import '../recipes/recipe_detail_screen.dart';
 
@@ -19,6 +20,27 @@ class _GenerateRecipeScreenState extends State<GenerateRecipeScreen> {
   int? _maxPrepTimeMinutes;
   bool _isGenerating = false;
   String? _error;
+  int? _aiUsed;
+  int? _aiLimit;
+  bool _aiUnlimited = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAiInfo();
+  }
+
+  Future<void> _loadAiInfo() async {
+    try {
+      final res = await ApiClient.instance.dio.get('/users/me/ai-info');
+      if (!mounted) return;
+      setState(() {
+        _aiUsed = res.data['used'] as int?;
+        _aiLimit = res.data['limit'] as int?;
+        _aiUnlimited = res.data['unlimited'] as bool? ?? false;
+      });
+    } catch (_) {}
+  }
 
   void _addIngredient() {
     final value = _ingredientController.text.trim();
@@ -48,6 +70,7 @@ class _GenerateRecipeScreenState extends State<GenerateRecipeScreen> {
                 : _freeTextController.text.trim(),
           );
       if (!mounted) return;
+      _loadAiInfo();
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => RecipeDetailScreen(initialRecipe: recipe)),
       );
@@ -85,6 +108,31 @@ class _GenerateRecipeScreenState extends State<GenerateRecipeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (_aiUsed != null && _aiLimit != null) ...[
+              if (_aiUnlimited)
+                Row(children: [
+                  Icon(Icons.all_inclusive,
+                      size: 16,
+                      color: Theme.of(context).colorScheme.primary),
+                  const SizedBox(width: 6),
+                  Text('IA ilimitada activada',
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary)),
+                ])
+              else ...[
+                LinearProgressIndicator(
+                  value: _aiUsed! / _aiLimit!,
+                  backgroundColor:
+                      Theme.of(context).colorScheme.surfaceContainerHighest,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '$_aiUsed/$_aiLimit generaciones de IA usadas este mes',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+              const SizedBox(height: 12),
+            ],
             Text('¿Qué ingredientes tenés?',
                 style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),

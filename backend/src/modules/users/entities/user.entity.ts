@@ -67,6 +67,18 @@ export class User {
   @Column({ default: false })
   onboardingCompleted: boolean;
 
+  /** Usos de IA (generación de recetas) en el mes en curso. */
+  @Column({ type: 'int', default: 0 })
+  aiGenerationsUsed: number;
+
+  /** Inicio del período mensual actual para resetear el contador. */
+  @Column({ type: 'timestamptz', nullable: true })
+  aiGenerationsResetAt: Date | null;
+
+  /** Si true, el usuario tiene generaciones de IA ilimitadas (activado por admin). */
+  @Column({ default: false })
+  aiUnlimited: boolean;
+
   @OneToMany(() => RefreshToken, (token) => token.user)
   refreshTokens: RefreshToken[];
 

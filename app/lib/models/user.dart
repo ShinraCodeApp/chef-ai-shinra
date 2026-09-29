@@ -15,6 +15,7 @@ class User {
   final List<String> allergies;
   final bool onboardingCompleted;
   final String? healthNotes;
+  final bool aiUnlimited;
 
   User({
     required this.id,
@@ -33,6 +34,7 @@ class User {
     required this.allergies,
     this.onboardingCompleted = false,
     this.healthNotes,
+    this.aiUnlimited = false,
   });
 
   factory User.fromJson(Map<String, dynamic> json) => User(
@@ -55,6 +57,7 @@ class User {
             (json['allergies'] as List? ?? []).map((e) => e.toString()).toList(),
         onboardingCompleted: json['onboardingCompleted'] as bool? ?? false,
         healthNotes: json['healthNotes'] as String?,
+        aiUnlimited: json['aiUnlimited'] as bool? ?? false,
       );
 
   User copyWith({
