@@ -111,19 +111,12 @@ class RecipeCard extends StatelessWidget {
       color: scheme.primaryContainer,
       child: Icon(Icons.restaurant, color: scheme.onPrimaryContainer),
     );
-    final localAsset = localRecipeImageAsset(recipe.title);
-    final url = recipe.imageUrl;
+    final imageUrl = recipeImageUrl(recipe.title) ?? recipe.imageUrl;
 
     Widget image;
-    if (localAsset != null) {
-      image = Image.asset(
-        localAsset,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => placeholder,
-      );
-    } else if (url != null && url.isNotEmpty) {
+    if (imageUrl != null && imageUrl.isNotEmpty) {
       image = Image.network(
-        url,
+        imageUrl,
         fit: BoxFit.cover,
         loadingBuilder: (context, child, progress) {
           if (progress == null) return child;

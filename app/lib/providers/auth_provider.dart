@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import '../core/api_client.dart';
 import '../core/auth_storage.dart';
@@ -32,9 +33,16 @@ class AuthProvider extends ChangeNotifier {
       final response = await _dio.get('/users/me');
       currentUser = User.fromJson(response.data as Map<String, dynamic>);
       status = AuthStatus.authenticated;
-    } catch (_) {
-      await AuthStorage.instance.clear();
-      status = AuthStatus.unauthenticated;
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionError ||
+          e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        // Sin conexión — mantener sesión local para no desloguear offline
+        status = AuthStatus.authenticated;
+      } else {
+        await AuthStorage.instance.clear();
+        status = AuthStatus.unauthenticated;
+      }
     }
     notifyListeners();
   }
@@ -116,16 +124,12 @@ class AuthProvider extends ChangeNotifier {
   }
 
   String _extractErrorMessage(Object error) {
-    if (error is Exception) {
-      final dioError = error;
-      try {
-        // ignore: avoid_dynamic_calls
-        final data = (dioError as dynamic).response?.data;
-        if (data is Map && data['message'] != null) {
-          final message = data['message'];
-          return message is List ? message.join(', ') : message.toString();
-        }
-      } catch (_) {}
+    if (error is DioException) {
+      final data = error.response?.data;
+      if (data is Map && data['message'] != null) {
+        final message = data['message'];
+        return message is List ? message.join(', ') : message.toString();
+      }
     }
     return 'Ocurrió un error. Probá de nuevo.';
   }

@@ -204,7 +204,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Builder(builder: (context) {
-                    final localAsset = localRecipeImageAsset(recipe.title);
+                    final imageUrl = recipeImageUrl(recipe.title) ?? recipe.imageUrl;
                     final placeholder = Container(
                       height: 200,
                       color: Theme.of(context).colorScheme.surfaceContainerHighest,
@@ -212,17 +212,9 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                           size: 48, color: Theme.of(context).colorScheme.outline),
                     );
                     Widget? image;
-                    if (localAsset != null) {
-                      image = Image.asset(
-                        localAsset,
-                        height: 200,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => placeholder,
-                      );
-                    } else if (recipe.imageUrl != null && recipe.imageUrl!.isNotEmpty) {
+                    if (imageUrl != null && imageUrl.isNotEmpty) {
                       image = Image.network(
-                        recipe.imageUrl!,
+                        imageUrl,
                         height: 200,
                         width: double.infinity,
                         fit: BoxFit.cover,

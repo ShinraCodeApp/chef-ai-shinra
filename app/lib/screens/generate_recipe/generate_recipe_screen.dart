@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/recipes_provider.dart';
@@ -50,9 +51,18 @@ class _GenerateRecipeScreenState extends State<GenerateRecipeScreen> {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => RecipeDetailScreen(initialRecipe: recipe)),
       );
-    } catch (_) {
-      setState(() => _error =
-          'No se pudo generar la receta. Revisá que el backend tenga GEMINI_API_KEY configurada.');
+    } on DioException catch (e) {
+      final data = e.response?.data;
+      String msg = 'No se pudo generar la receta. Intentá de nuevo.';
+      if (data is Map && data['message'] != null) {
+        msg = data['message'].toString();
+      } else if (e.type == DioExceptionType.connectionError ||
+          e.type == DioExceptionType.connectionTimeout) {
+        msg = 'Sin conexión. Verificá tu internet e intentá de nuevo.';
+      }
+      setState(() => _error = msg);
+    } catch (e) {
+      setState(() => _error = 'Error inesperado: ${e.toString()}');
     } finally {
       if (mounted) setState(() => _isGenerating = false);
     }

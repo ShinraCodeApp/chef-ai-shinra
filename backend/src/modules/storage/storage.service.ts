@@ -2,10 +2,12 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { randomUUID } from 'crypto';
+import { Readable } from 'stream';
 
 @Injectable()
 export class StorageService {
@@ -15,24 +17,24 @@ export class StorageService {
   private readonly publicUrl: string | undefined;
 
   constructor(private readonly configService: ConfigService) {
-    const accountId = this.configService.get<string>('R2_ACCOUNT_ID');
-    const accessKeyId = this.configService.get<string>('R2_ACCESS_KEY_ID');
-    const secretAccessKey = this.configService.get<string>(
-      'R2_SECRET_ACCESS_KEY',
-    );
-    this.bucketName = this.configService.get<string>('R2_BUCKET_NAME');
-    this.publicUrl = this.configService.get<string>('R2_PUBLIC_URL');
+    const endpoint = this.configService.get<string>('S3_ENDPOINT');
+    const accessKeyId = this.configService.get<string>('S3_ACCESS_KEY_ID');
+    const secretAccessKey = this.configService.get<string>('S3_SECRET_ACCESS_KEY');
+    const region = this.configService.get<string>('S3_REGION') ?? 'us-east-1';
+    this.bucketName = this.configService.get<string>('S3_BUCKET_NAME');
+    this.publicUrl = this.configService.get<string>('S3_PUBLIC_URL');
 
-    if (accountId && accessKeyId && secretAccessKey) {
+    if (endpoint && accessKeyId && secretAccessKey) {
       this.client = new S3Client({
-        region: 'auto',
-        endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
+        region,
+        endpoint,
         credentials: { accessKeyId, secretAccessKey },
+        forcePathStyle: true, // requerido por IDrive e2 y otros S3-compatibles
       });
     } else {
       this.client = null;
       this.logger.warn(
-        'Cloudflare R2 no está configurado (faltan R2_* env vars) — la subida de imágenes fallará hasta que se configure.',
+        'Storage S3 no está configurado (faltan S3_* env vars) — la subida de imágenes fallará hasta que se configure.',
       );
     }
   }
@@ -48,7 +50,7 @@ export class StorageService {
   ): Promise<string> {
     if (!this.client || !this.bucketName || !this.publicUrl) {
       throw new InternalServerErrorException(
-        'El almacenamiento de imágenes (Cloudflare R2) no está configurado en el servidor.',
+        'El almacenamiento de imágenes no está configurado en el servidor (faltan S3_* env vars).',
       );
     }
     const extension = contentType.split('/')[1] ?? 'bin';
@@ -64,5 +66,22 @@ export class StorageService {
     );
 
     return `${this.publicUrl.replace(/\/$/, '')}/${key}`;
+  }
+
+  async getObject(key: string): Promise<{ stream: Readable; contentType: string }> {
+    if (!this.client || !this.bucketName) {
+      throw new InternalServerErrorException('Storage no configurado.');
+    }
+    try {
+      const res = await this.client.send(
+        new GetObjectCommand({ Bucket: this.bucketName, Key: key }),
+      );
+      return {
+        stream: res.Body as Readable,
+        contentType: res.ContentType ?? 'application/octet-stream',
+      };
+    } catch {
+      throw new NotFoundException('Imagen no encontrada.');
+    }
   }
 }
