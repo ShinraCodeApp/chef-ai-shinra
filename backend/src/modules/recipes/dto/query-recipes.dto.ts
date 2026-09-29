@@ -17,6 +17,11 @@ export class QueryRecipesDto extends PaginationQueryDto {
   @IsString()
   ingredient?: string;
 
+  /** Filtra recetas que contengan AL MENOS UNO de estos ingredientes (comma-separated). Ordena por cantidad de matches. */
+  @IsOptional()
+  @IsString()
+  ingredients?: string;
+
   @IsOptional()
   @Type(() => Number)
   @IsInt()

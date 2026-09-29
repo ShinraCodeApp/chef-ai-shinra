@@ -4,7 +4,7 @@ import { DataSource, ILike } from 'typeorm';
 import * as dotenv from 'dotenv';
 import { Ingredient } from '../../modules/ingredients/entities/ingredient.entity';
 import { Recipe } from '../../modules/recipes/entities/recipe.entity';
-import { IngredientUnit, RecipeDifficulty } from '../../common/enums';
+import { IngredientCategory, IngredientUnit, RecipeDifficulty } from '../../common/enums';
 import { withHealthTags } from './health-tags';
 
 dotenv.config();
@@ -20170,9 +20170,20 @@ async function run() {
         where: { name: ILike(ing.ingredientName) },
       });
       if (!ingredient) {
-        throw new Error(
-          `Ingrediente "${ing.ingredientName}" no encontrado — corré primero el seed de ingredientes.`,
-        );
+        const created = ingredientsRepository.create({
+          name: ing.ingredientName,
+          category: IngredientCategory.OTROS,
+          unit: ing.unit,
+        });
+        await ingredientsRepository.save(created);
+        recipeIngredients.push({
+          ingredientId: created.id,
+          quantity: ing.quantity,
+          unit: ing.unit,
+          notes: ing.notes ?? null,
+          order: index,
+        });
+        continue;
       }
       recipeIngredients.push({
         ingredientId: ingredient.id,

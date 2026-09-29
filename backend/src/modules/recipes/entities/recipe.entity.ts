@@ -99,6 +99,9 @@ export class Recipe {
    */
   isMainIngredientMatch?: boolean;
 
+  /** Cuántos de los ingredientes buscados (multi-ingrediente) tiene esta receta. Campo transitorio. */
+  matchCount?: number;
+
   @CreateDateColumn()
   createdAt: Date;
 

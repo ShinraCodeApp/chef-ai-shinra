@@ -168,12 +168,57 @@ export class RecipesService {
       });
     }
 
+    // Búsqueda multi-ingrediente: filtra recetas que contengan AL MENOS UNO
+    // de los ingredientes indicados y ordena por cantidad de matches (más primero).
+    const ingredientList = query.ingredients
+      ? query.ingredients
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [];
+
+    if (ingredientList.length > 0) {
+      const escaped = ingredientList.map((ing) =>
+        ing.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+      );
+      const regexPattern = escaped.map((e) => `\\y${e}\\y`).join('|');
+      qb.andWhere(
+        (subQb) => {
+          const subQuery = subQb
+            .subQuery()
+            .select('ri.recipeId')
+            .from('recipe_ingredients', 'ri')
+            .innerJoin('ingredients', 'ing', 'ing.id = ri."ingredientId"')
+            .where(`ing.name ~* :multiPattern`)
+            .getQuery();
+          return `recipe.id IN ${subQuery}`;
+        },
+        { multiPattern: regexPattern },
+      );
+      // Columna auxiliar: cuántos de los ingredientes buscados tiene la receta
+      qb.addSelect((subQb) => {
+        return subQb
+          .subQuery()
+          .select('COUNT(*)')
+          .from('recipe_ingredients', 'rim')
+          .innerJoin('ingredients', 'ingm', 'ingm.id = rim."ingredientId"')
+          .where('rim."recipeId" = recipe.id')
+          .andWhere(`ingm.name ~* :multiPattern`);
+      }, 'match_count');
+      qb.orderBy('match_count', 'DESC').addOrderBy('recipe.createdAt', 'DESC');
+    }
+
     let items: Recipe[];
     let total: number;
-    if (query.ingredient) {
+    if (query.ingredient || ingredientList.length > 0) {
       const { entities, raw } = await qb.getRawAndEntities();
       items = entities.map((recipe, index) => {
-        recipe.isMainIngredientMatch = raw[index]?.is_main_match != null;
+        if (query.ingredient) {
+          recipe.isMainIngredientMatch = raw[index]?.is_main_match != null;
+        }
+        if (ingredientList.length > 0) {
+          recipe.matchCount = Number(raw[index]?.match_count ?? 0);
+        }
         return recipe;
       });
       total = await qb.getCount();
