@@ -392,7 +392,7 @@ export class RecipesService {
   }> {
     const recipe = await this.recipesRepository.findOne({
       where: { id: recipeId },
-      relations: { ingredients: { ingredient: true } },
+      relations: { recipeIngredients: { ingredient: true } },
     });
     if (!recipe) throw new NotFoundException('Receta no encontrada');
 
@@ -400,7 +400,7 @@ export class RecipesService {
     let totalCost = 0;
     let missingPrices = 0;
 
-    for (const ri of recipe.ingredients) {
+    for (const ri of recipe.recipeIngredients) {
       const latestPrice = await this.pricesRepository.findOne({
         where: { ingredientId: ri.ingredientId },
         order: { updatedAt: 'DESC' },
