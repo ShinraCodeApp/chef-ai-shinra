@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Patch,
+  Post,
   Query,
   UseGuards,
   ParseBoolPipe,
@@ -51,6 +52,11 @@ export class AdminController {
     @Body('unlimited', ParseBoolPipe) unlimited: boolean,
   ) {
     return this.adminService.setAiUnlimited(id, unlimited);
+  }
+
+  @Post('ingredients/enrich-nutrition')
+  enrichIngredientsNutrition() {
+    return this.adminService.enrichIngredientsNutrition();
   }
 
   @Get('stats')

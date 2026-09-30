@@ -98,4 +98,26 @@ export class IngredientsService {
     const ingredient = await this.findOne(id);
     await this.ingredientsRepository.remove(ingredient);
   }
+
+  async updateNutrition(
+    id: string,
+    data: {
+      caloriesPer100g: number | null;
+      proteinPer100g: number | null;
+      fatPer100g: number | null;
+      carbsPer100g: number | null;
+      fiberPer100g: number | null;
+    },
+  ): Promise<void> {
+    await this.ingredientsRepository.update(id, data);
+  }
+
+  async findMissingNutrition(): Promise<{ id: string; name: string }[]> {
+    const ingredients = await this.ingredientsRepository
+      .createQueryBuilder('ingredient')
+      .where('ingredient.proteinPer100g IS NULL')
+      .select(['ingredient.id', 'ingredient.name'])
+      .getMany();
+    return ingredients.map((i) => ({ id: i.id, name: i.name }));
+  }
 }

@@ -11,6 +11,8 @@ import { Ingredient } from '../ingredients/entities/ingredient.entity';
 import { InventoryItem } from '../inventory/entities/inventory-item.entity';
 import { UserRole } from '../../common/enums';
 import { paginate, PaginatedResult } from '../../common/dto/pagination-query.dto';
+import { AiService } from '../ai/ai.service';
+import { IngredientsService } from '../ingredients/ingredients.service';
 
 export interface AdminStats {
   totalUsers: number;
@@ -31,6 +33,8 @@ export class AdminService {
     private readonly ingredientsRepository: Repository<Ingredient>,
     @InjectRepository(InventoryItem)
     private readonly inventoryRepository: Repository<InventoryItem>,
+    private readonly aiService: AiService,
+    private readonly ingredientsService: IngredientsService,
   ) {}
 
   async findUsers(page: number, limit: number): Promise<PaginatedResult<User>> {
@@ -67,6 +71,19 @@ export class AdminService {
     if (!user) throw new NotFoundException('Usuario no encontrado');
     user.aiUnlimited = unlimited;
     return this.usersRepository.save(user);
+  }
+
+  async enrichIngredientsNutrition(batchSize = 20): Promise<{ enriched: number; failed: number; total: number }> {
+    const ingredients = await this.ingredientsService.findMissingNutrition();
+    let enriched = 0;
+    let failed = 0;
+    for (let i = 0; i < ingredients.length; i += batchSize) {
+      const batch = ingredients.slice(i, i + batchSize);
+      const result = await this.aiService.enrichIngredientsNutrition(batch);
+      enriched += result.enriched;
+      failed += result.failed;
+    }
+    return { enriched, failed, total: ingredients.length };
   }
 
   async getStats(): Promise<AdminStats> {

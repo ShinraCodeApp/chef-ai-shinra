@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter_contacts/flutter_contacts.dart' as fc;
 import '../core/api_client.dart';
 import '../models/contact.dart';
 import '../models/inventory_item.dart';
@@ -63,6 +64,50 @@ class ContactsProvider extends ChangeNotifier {
       return null;
     } catch (_) {
       return 'No se pudo eliminar el contacto';
+    }
+  }
+
+  Future<String?> toggleFavorite(String contactId) async {
+    try {
+      await _dio.patch('/contacts/$contactId/favorite');
+      final idx = contacts.indexWhere((c) => c.contactId == contactId);
+      if (idx != -1) {
+        contacts[idx].isFavorite = !contacts[idx].isFavorite;
+        // Reordenar: favoritos primero
+        contacts.sort((a, b) {
+          if (a.isFavorite == b.isFavorite) return 0;
+          return a.isFavorite ? -1 : 1;
+        });
+        notifyListeners();
+      }
+      return null;
+    } catch (_) {
+      return 'No se pudo actualizar favorito';
+    }
+  }
+
+  /// Lee los contactos del teléfono, extrae los emails y pregunta al backend
+  /// cuáles tienen cuenta en la app.
+  Future<List<PhoneContactWithApp>> findContactsWithApp() async {
+    final hasPermission = await fc.FlutterContacts.requestPermission(readonly: true);
+    if (!hasPermission) return [];
+
+    final phoneContacts = await fc.FlutterContacts.getContacts(withProperties: true);
+    final emails = phoneContacts
+        .expand((c) => c.emails.map((e) => e.address.trim().toLowerCase()))
+        .where((e) => e.isNotEmpty)
+        .toSet()
+        .toList();
+
+    if (emails.isEmpty) return [];
+
+    try {
+      final res = await _dio.post('/contacts/find-by-emails', data: {'emails': emails});
+      return (res.data as List)
+          .map((e) => PhoneContactWithApp.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } catch (_) {
+      return [];
     }
   }
 

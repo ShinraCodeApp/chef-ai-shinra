@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
+import { IngredientPrice } from '../ingredients/entities/ingredient-price.entity';
 import { Recipe, RecipeNutrition } from './entities/recipe.entity';
 import { Favorite } from './entities/favorite.entity';
 import { CreateRecipeDto } from './dto/create-recipe.dto';
@@ -48,6 +49,8 @@ export class RecipesService {
     private readonly recipesRepository: Repository<Recipe>,
     @InjectRepository(Favorite)
     private readonly favoritesRepository: Repository<Favorite>,
+    @InjectRepository(IngredientPrice)
+    private readonly pricesRepository: Repository<IngredientPrice>,
     private readonly inventoryService: InventoryService,
   ) {}
 
@@ -380,6 +383,48 @@ export class RecipesService {
       this.favoritesRepository.create({ userId, recipeId }),
     );
     return { favorited: true };
+  }
+
+  async getEstimatedCost(recipeId: string): Promise<{
+    totalCost: number | null;
+    breakdown: { ingredientName: string; quantity: number; unit: string; unitPrice: number | null; lineCost: number | null }[];
+    hasPartialPrices: boolean;
+  }> {
+    const recipe = await this.recipesRepository.findOne({
+      where: { id: recipeId },
+      relations: { ingredients: { ingredient: true } },
+    });
+    if (!recipe) throw new NotFoundException('Receta no encontrada');
+
+    const breakdown: { ingredientName: string; quantity: number; unit: string; unitPrice: number | null; lineCost: number | null }[] = [];
+    let totalCost = 0;
+    let missingPrices = 0;
+
+    for (const ri of recipe.ingredients) {
+      const latestPrice = await this.pricesRepository.findOne({
+        where: { ingredientId: ri.ingredientId },
+        order: { updatedAt: 'DESC' },
+      });
+
+      const unitPrice = latestPrice?.price ?? null;
+      const lineCost = unitPrice !== null ? unitPrice * ri.quantity : null;
+      if (lineCost !== null) totalCost += lineCost;
+      else missingPrices++;
+
+      breakdown.push({
+        ingredientName: ri.ingredient?.name ?? ri.ingredientId,
+        quantity: ri.quantity,
+        unit: ri.unit,
+        unitPrice,
+        lineCost,
+      });
+    }
+
+    return {
+      totalCost: missingPrices === breakdown.length ? null : totalCost,
+      breakdown,
+      hasPartialPrices: missingPrices > 0 && missingPrices < breakdown.length,
+    };
   }
 
   async findFavorites(userId: string): Promise<Recipe[]> {

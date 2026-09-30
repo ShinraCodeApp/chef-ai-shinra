@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/api_client.dart';
+import '../../providers/inventory_provider.dart';
 import '../../providers/recipes_provider.dart';
 import '../recipes/recipe_detail_screen.dart';
 
@@ -19,6 +20,7 @@ class _GenerateRecipeScreenState extends State<GenerateRecipeScreen> {
   String? _budget;
   int? _maxPrepTimeMinutes;
   bool _isGenerating = false;
+  bool _loadingInventory = false;
   String? _error;
   int? _aiUsed;
   int? _aiLimit;
@@ -28,6 +30,31 @@ class _GenerateRecipeScreenState extends State<GenerateRecipeScreen> {
   void initState() {
     super.initState();
     _loadAiInfo();
+  }
+
+  Future<void> _loadFromInventory() async {
+    setState(() { _loadingInventory = true; _error = null; });
+    try {
+      final provider = context.read<InventoryProvider>();
+      await provider.load();
+      if (!mounted) return;
+      final names = provider.items
+          .map((item) => item.ingredient.name)
+          .toSet()
+          .toList();
+      if (names.isEmpty) {
+        setState(() => _error = 'Tu inventario está vacío.');
+        return;
+      }
+      setState(() {
+        _ingredients.clear();
+        _ingredients.addAll(names);
+      });
+    } catch (_) {
+      if (mounted) setState(() => _error = 'No se pudo cargar el inventario.');
+    } finally {
+      if (mounted) setState(() => _loadingInventory = false);
+    }
   }
 
   Future<void> _loadAiInfo() async {
@@ -133,8 +160,24 @@ class _GenerateRecipeScreenState extends State<GenerateRecipeScreen> {
               ],
               const SizedBox(height: 12),
             ],
-            Text('¿Qué ingredientes tenés?',
-                style: Theme.of(context).textTheme.titleMedium),
+            Row(
+              children: [
+                Expanded(
+                  child: Text('¿Qué ingredientes tenés?',
+                      style: Theme.of(context).textTheme.titleMedium),
+                ),
+                TextButton.icon(
+                  onPressed: _loadingInventory ? null : _loadFromInventory,
+                  icon: _loadingInventory
+                      ? const SizedBox(
+                          height: 14,
+                          width: 14,
+                          child: CircularProgressIndicator(strokeWidth: 2))
+                      : const Icon(Icons.inventory_2_outlined, size: 18),
+                  label: const Text('Usar mi inventario'),
+                ),
+              ],
+            ),
             const SizedBox(height: 8),
             Row(
               children: [

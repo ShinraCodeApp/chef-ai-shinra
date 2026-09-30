@@ -6,6 +6,7 @@ import '../../core/diet_tags.dart';
 import '../../core/health_conditions.dart';
 import '../../core/notifications_service.dart';
 import '../../core/quantity_format.dart';
+import '../../core/api_client.dart';
 import '../../core/recipe_images.dart';
 import '../../models/missing_ingredient.dart';
 import '../../models/recipe.dart';
@@ -29,21 +30,36 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   bool _isCooking = false;
   final _tts = FlutterTts();
   bool _isSpeaking = false;
+  Map<String, dynamic>? _costData;
+  bool _loadingCost = false;
 
   @override
   void initState() {
     super.initState();
     if (widget.initialRecipe != null) {
       _recipe = widget.initialRecipe;
+      _loadEstimatedCost(widget.initialRecipe!.id);
     } else {
       context.read<RecipesProvider>().fetchOne(widget.recipeId!).then((recipe) {
-        if (mounted) setState(() => _recipe = recipe);
+        if (mounted) {
+          setState(() => _recipe = recipe);
+          _loadEstimatedCost(recipe.id);
+        }
       });
     }
     _tts.setLanguage('es-AR');
     _tts.setCompletionHandler(() {
       if (mounted) setState(() => _isSpeaking = false);
     });
+  }
+
+  Future<void> _loadEstimatedCost(String recipeId) async {
+    setState(() => _loadingCost = true);
+    try {
+      final res = await ApiClient.instance.dio.get('/recipes/$recipeId/estimated-cost');
+      if (mounted) setState(() => _costData = res.data as Map<String, dynamic>);
+    } catch (_) {}
+    if (mounted) setState(() => _loadingCost = false);
   }
 
   @override
@@ -263,6 +279,73 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                       child: Text('• ${formatQuantity(ri.quantity, ri.unit)} — ${ri.ingredient.name}'),
                     ),
                   ),
+                  // Costo estimado
+                  if (_loadingCost)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      child: LinearProgressIndicator(),
+                    )
+                  else if (_costData != null) ...[
+                    const SizedBox(height: 20),
+                    Text('Costo estimado', style: Theme.of(context).textTheme.titleMedium),
+                    const SizedBox(height: 8),
+                    ...(_costData!['breakdown'] as List).map((b) {
+                      final lineCost = b['lineCost'] as num?;
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                '• ${b['ingredientName']} (${b['quantity']} ${b['unit']})',
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ),
+                            Text(
+                              lineCost != null
+                                  ? '\$${lineCost.toStringAsFixed(2)}'
+                                  : 'sin precio',
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: lineCost == null
+                                        ? Theme.of(context).colorScheme.onSurfaceVariant
+                                        : null,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            _costData!['hasPartialPrices'] == true
+                                ? 'Total estimado (parcial)'
+                                : 'Total estimado',
+                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                ),
+                          ),
+                          Text(
+                            _costData!['totalCost'] != null
+                                ? '\$${(_costData!['totalCost'] as num).toStringAsFixed(2)}'
+                                : 'Sin datos de precios',
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 20),
                   Text('Preparación', style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 8),

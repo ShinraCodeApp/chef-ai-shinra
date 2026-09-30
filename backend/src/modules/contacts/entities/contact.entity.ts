@@ -4,6 +4,7 @@ import {
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 
@@ -35,6 +36,13 @@ export class Contact {
   @Column({ type: 'enum', enum: ContactStatus, default: ContactStatus.PENDING })
   status: ContactStatus;
 
+  /** El usuario que inició la relación puede marcar al otro como favorito */
+  @Column({ default: false })
+  isFavorite: boolean;
+
   @CreateDateColumn()
   createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

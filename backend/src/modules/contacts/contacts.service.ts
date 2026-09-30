@@ -72,6 +72,7 @@ export class ContactsService {
         userId: contact.id,
         name: contact.name,
         email: contact.email,
+        isFavorite: c.isFavorite,
       };
     });
   }
@@ -107,6 +108,56 @@ export class ContactsService {
       throw new ForbiddenException('No tenés permiso para eliminar este contacto');
     }
     await this.contactsRepo.remove(contact);
+  }
+
+  async findByEmails(
+    userId: string,
+    emails: string[],
+  ): Promise<{ userId: string; name: string; email: string; isContact: boolean }[]> {
+    if (emails.length === 0) return [];
+
+    const users = await this.usersRepo
+      .createQueryBuilder('user')
+      .where('user.email IN (:...emails)', { emails })
+      .andWhere('user.id != :userId', { userId })
+      .select(['user.id', 'user.name', 'user.email'])
+      .getMany();
+
+    if (users.length === 0) return [];
+
+    const userIds = users.map((u) => u.id);
+    const existingContacts = await this.contactsRepo.find({
+      where: [
+        { requesterId: userId, status: ContactStatus.ACCEPTED },
+        { addresseeId: userId, status: ContactStatus.ACCEPTED },
+      ],
+    });
+    const contactUserIds = new Set(
+      existingContacts.map((c) =>
+        c.requesterId === userId ? c.addresseeId : c.requesterId,
+      ),
+    );
+
+    return users.map((u) => ({
+      userId: u.id,
+      name: u.name,
+      email: u.email,
+      isContact: contactUserIds.has(u.id),
+    }));
+  }
+
+  async toggleFavorite(userId: string, contactId: string): Promise<boolean> {
+    const contact = await this.contactsRepo.findOne({ where: { id: contactId } });
+    if (!contact) throw new NotFoundException('Contacto no encontrado');
+    if (contact.requesterId !== userId && contact.addresseeId !== userId) {
+      throw new ForbiddenException('No tenés permiso');
+    }
+    if (contact.status !== ContactStatus.ACCEPTED) {
+      throw new BadRequestException('Solo podés marcar como favorito a contactos aceptados');
+    }
+    contact.isFavorite = !contact.isFavorite;
+    await this.contactsRepo.save(contact);
+    return contact.isFavorite;
   }
 
   async getContactInventory(userId: string, contactUserId: string): Promise<InventoryItem[]> {

@@ -17,12 +17,14 @@ class Contact {
   final String userId;
   final String name;
   final String email;
+  bool isFavorite;
 
   Contact({
     required this.contactId,
     required this.userId,
     required this.name,
     required this.email,
+    this.isFavorite = false,
   });
 
   factory Contact.fromJson(Map<String, dynamic> json) => Contact(
@@ -30,6 +32,29 @@ class Contact {
         userId: json['userId'] as String,
         name: json['name'] as String,
         email: json['email'] as String,
+        isFavorite: json['isFavorite'] as bool? ?? false,
+      );
+}
+
+class PhoneContactWithApp {
+  final String userId;
+  final String name;
+  final String email;
+  final bool isContact;
+
+  PhoneContactWithApp({
+    required this.userId,
+    required this.name,
+    required this.email,
+    required this.isContact,
+  });
+
+  factory PhoneContactWithApp.fromJson(Map<String, dynamic> json) =>
+      PhoneContactWithApp(
+        userId: json['userId'] as String,
+        name: json['name'] as String,
+        email: json['email'] as String,
+        isContact: json['isContact'] as bool? ?? false,
       );
 }
 

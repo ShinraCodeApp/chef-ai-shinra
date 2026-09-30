@@ -76,6 +76,11 @@ export class RecipesController {
     return this.recipesService.cook(user.userId, id, servingsMultiplier ?? 1);
   }
 
+  @Get(':id/estimated-cost')
+  getEstimatedCost(@Param('id') id: string) {
+    return this.recipesService.getEstimatedCost(id);
+  }
+
   @Post(':id/favorite')
   toggleFavorite(
     @CurrentUser() user: AuthenticatedUser,

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../models/contact.dart';
 import '../../providers/contacts_provider.dart';
 import 'contact_inventory_screen.dart';
+import 'phone_contacts_screen.dart';
 
 class ContactsScreen extends StatefulWidget {
   const ContactsScreen({super.key});
@@ -39,9 +40,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
         const SnackBar(content: Text('Invitación enviada')),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error)),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
     }
   }
 
@@ -69,7 +68,18 @@ class _ContactsScreenState extends State<ContactsScreen> {
   Widget build(BuildContext context) {
     final provider = context.watch<ContactsProvider>();
     return Scaffold(
-      appBar: AppBar(title: const Text('Contactos')),
+      appBar: AppBar(
+        title: const Text('Contactos'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.contacts_outlined),
+            tooltip: 'Buscar contactos con la app',
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const PhoneContactsScreen()),
+            ),
+          ),
+        ],
+      ),
       body: provider.isLoading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
@@ -78,8 +88,15 @@ class _ContactsScreenState extends State<ContactsScreen> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(16),
                 children: [
-                  // Invitar
-                  Text('Invitar contacto', style: Theme.of(context).textTheme.titleMedium),
+                  // Invitar por email
+                  Text('Invitar por email', style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: 4),
+                  Text(
+                    'O usá el ícono de contactos arriba para ver quiénes ya tienen la app.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                  ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
@@ -138,7 +155,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 24),
                       child: Center(
                         child: Text(
-                          'Todavía no tenés contactos.\nInvitá a alguien por email.',
+                          'Todavía no tenés contactos.\nInvitá a alguien por email o buscá tus contactos del celular.',
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -150,14 +167,42 @@ class _ContactsScreenState extends State<ContactsScreen> {
                     ...provider.contacts.map((c) => Card(
                           child: ListTile(
                             leading: CircleAvatar(
+                              backgroundColor: c.isFavorite
+                                  ? Theme.of(context).colorScheme.primaryContainer
+                                  : null,
                               child: Text(c.name[0].toUpperCase()),
                             ),
-                            title: Text(c.name),
+                            title: Row(
+                              children: [
+                                Text(c.name),
+                                if (c.isFavorite) ...[
+                                  const SizedBox(width: 4),
+                                  Icon(Icons.favorite,
+                                      size: 14,
+                                      color: Theme.of(context).colorScheme.error),
+                                ],
+                              ],
+                            ),
                             subtitle: Text(c.email),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.delete_outline),
-                              tooltip: 'Eliminar contacto',
-                              onPressed: () => _removeContact(c),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: Icon(
+                                    c.isFavorite ? Icons.favorite : Icons.favorite_border,
+                                    color: c.isFavorite
+                                        ? Theme.of(context).colorScheme.error
+                                        : null,
+                                  ),
+                                  tooltip: c.isFavorite ? 'Quitar favorito' : 'Agregar a favoritos',
+                                  onPressed: () => provider.toggleFavorite(c.contactId),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete_outline),
+                                  tooltip: 'Eliminar contacto',
+                                  onPressed: () => _removeContact(c),
+                                ),
+                              ],
                             ),
                             onTap: () => Navigator.of(context).push(
                               MaterialPageRoute(

@@ -8,9 +8,9 @@ import '../../providers/inventory_provider.dart';
 
 class _DetectedReceiptItem {
   final String name;
-  final double quantity;
+  double quantity;
   final String unit;
-  final double unitPrice;
+  double unitPrice;
   final String ingredientId;
   bool selected = true;
   late final TextEditingController quantityController;
@@ -24,12 +24,18 @@ class _DetectedReceiptItem {
     required this.ingredientId,
   }) {
     quantityController = TextEditingController(text: quantity.toString());
-    priceController = TextEditingController(text: unitPrice.toString());
+    priceController = TextEditingController(text: unitPrice.toStringAsFixed(2));
   }
+
+  void dispose() {
+    quantityController.dispose();
+    priceController.dispose();
+  }
+
+  double get currentPrice => double.tryParse(priceController.text) ?? unitPrice;
+  double get currentQuantity => double.tryParse(quantityController.text) ?? quantity;
 }
 
-/// Escanea una foto de un ticket de compra: detecta producto, cantidad/peso y
-/// precio con IA, y al confirmar carga los ítems al inventario junto con su precio.
 class ScanReceiptScreen extends StatefulWidget {
   const ScanReceiptScreen({super.key});
 
@@ -39,53 +45,88 @@ class ScanReceiptScreen extends StatefulWidget {
 
 class _ScanReceiptScreenState extends State<ScanReceiptScreen> {
   final _picker = ImagePicker();
-  File? _image;
+  final List<File> _images = [];
   bool _isAnalyzing = false;
   bool _isSaving = false;
   String? _error;
   List<_DetectedReceiptItem>? _results;
 
+  @override
+  void dispose() {
+    _results?.forEach((i) => i.dispose());
+    super.dispose();
+  }
+
   Future<void> _pickImage(ImageSource source) async {
     final picked = await _picker.pickImage(source: source, imageQuality: 85);
     if (picked == null) return;
     setState(() {
-      _image = File(picked.path);
-      _results = null;
+      _images.add(File(picked.path));
       _error = null;
     });
   }
 
+  void _removeImage(int index) {
+    setState(() => _images.removeAt(index));
+  }
+
   Future<void> _analyze() async {
-    if (_image == null) return;
+    if (_images.isEmpty) return;
     setState(() {
       _isAnalyzing = true;
       _error = null;
+      _results?.forEach((i) => i.dispose());
+      _results = null;
     });
+
+    final dio = ApiClient.instance.dio;
+    final allItems = <_DetectedReceiptItem>[];
+
     try {
-      final formData = FormData.fromMap({
-        'image': await MultipartFile.fromFile(_image!.path),
-      });
-      final response = await ApiClient.instance.dio.post(
-        '/ai/receipt/scan',
-        data: formData,
-      );
-      final items = (response.data as List)
-          .map((e) => _DetectedReceiptItem(
-                name: e['name'] as String,
-                quantity: (e['quantity'] as num).toDouble(),
-                unit: e['unit'] as String,
-                unitPrice: (e['unitPrice'] as num).toDouble(),
-                ingredientId: e['ingredientId'] as String,
-              ))
-          .toList();
-      setState(() => _results = items);
+      for (final image in _images) {
+        final formData = FormData.fromMap({
+          'image': await MultipartFile.fromFile(image.path),
+        });
+        final response = await dio.post('/ai/receipt/scan', data: formData);
+        final items = (response.data as List).map((e) => _DetectedReceiptItem(
+              name: e['name'] as String,
+              quantity: (e['quantity'] as num).toDouble(),
+              unit: e['unit'] as String,
+              unitPrice: (e['unitPrice'] as num).toDouble(),
+              ingredientId: e['ingredientId'] as String,
+            ));
+        allItems.addAll(items);
+      }
+
+      // Fusionar duplicados sumando cantidades
+      final merged = <String, _DetectedReceiptItem>{};
+      for (final item in allItems) {
+        if (merged.containsKey(item.ingredientId)) {
+          final existing = merged[item.ingredientId]!;
+          existing.quantity += item.quantity;
+          existing.unitPrice += item.unitPrice;
+          existing.quantityController.text = existing.quantity.toString();
+          existing.priceController.text = existing.unitPrice.toStringAsFixed(2);
+          item.dispose();
+        } else {
+          merged[item.ingredientId] = item;
+        }
+      }
+
+      setState(() => _results = merged.values.toList());
     } catch (_) {
       setState(() => _error =
-          'No se pudo analizar el ticket. Revisá que el backend tenga GEMINI_API_KEY configurada.');
+          'No se pudo analizar el ticket. Verificá que el backend tenga GEMINI_API_KEY configurada.');
     } finally {
       if (mounted) setState(() => _isAnalyzing = false);
     }
   }
+
+  double get _total => _results == null
+      ? 0
+      : _results!
+          .where((i) => i.selected)
+          .fold(0, (sum, i) => sum + i.currentPrice);
 
   Future<void> _addSelectedToInventory() async {
     final selected = _results!.where((item) => item.selected).toList();
@@ -95,23 +136,19 @@ class _ScanReceiptScreenState extends State<ScanReceiptScreen> {
     final dio = ApiClient.instance.dio;
     var successCount = 0;
     for (final item in selected) {
-      final quantity = double.tryParse(item.quantityController.text) ?? item.quantity;
-      final price = double.tryParse(item.priceController.text) ?? item.unitPrice;
       final ok = await inventory.addItem(
         ingredientId: item.ingredientId,
-        quantity: quantity,
+        quantity: item.currentQuantity,
         unit: item.unit,
         source: 'photo',
       );
-      if (ok && price > 0) {
+      if (ok && item.currentPrice > 0) {
         try {
           await dio.post('/ingredients/${item.ingredientId}/prices', data: {
-            'price': price,
+            'price': item.currentPrice,
             'unit': item.unit,
           });
-        } catch (_) {
-          // el precio es un plus informativo: si falla, igual se guarda el ítem en inventario
-        }
+        } catch (_) {}
       }
       if (ok) successCount++;
     }
@@ -125,124 +162,198 @@ class _ScanReceiptScreenState extends State<ScanReceiptScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Escanear ticket de compra')),
       body: SafeArea(
         child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (_image != null)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.file(_image!, height: 220, fit: BoxFit.cover),
-              )
-            else
-              Container(
-                height: 220,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Center(
-                  child: Icon(Icons.receipt_long_outlined, size: 64),
-                ),
-              ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => _pickImage(ImageSource.camera),
-                    icon: const Icon(Icons.camera_alt_outlined),
-                    label: const Text('Sacar foto'),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Galería de fotos
+              if (_images.isEmpty)
+                Container(
+                  height: 160,
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => _pickImage(ImageSource.gallery),
-                    icon: const Icon(Icons.photo_library_outlined),
-                    label: const Text('Galería'),
+                  child: const Center(
+                    child: Icon(Icons.receipt_long_outlined, size: 64),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            if (_image != null)
-              FilledButton.icon(
-                onPressed: _isAnalyzing ? null : _analyze,
-                icon: _isAnalyzing
-                    ? const SizedBox(
-                        height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Icon(Icons.auto_awesome),
-                label: const Text('Analizar con IA'),
-              ),
-            if (_error != null) ...[
-              const SizedBox(height: 12),
-              Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
-            ],
-            if (_results != null) ...[
-              const SizedBox(height: 24),
-              Text('Productos detectados', style: Theme.of(context).textTheme.titleMedium),
-              const SizedBox(height: 8),
-              if (_results!.isEmpty)
-                const Text('No se detectó ningún producto en el ticket.')
+                )
               else
-                ..._results!.map((item) => Card(
-                      child: CheckboxListTile(
-                        value: item.selected,
-                        onChanged: (value) =>
-                            setState(() => item.selected = value ?? false),
-                        title: Text(item.name),
-                        subtitle: Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: item.quantityController,
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(decimal: true),
-                                decoration: InputDecoration(
-                                  isDense: true,
-                                  labelText: 'Cantidad',
-                                  suffixText: item.unit,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: TextField(
-                                controller: item.priceController,
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(decimal: true),
-                                decoration: const InputDecoration(
-                                  isDense: true,
-                                  labelText: 'Precio',
-                                  prefixText: '\$',
-                                ),
-                              ),
-                            ),
-                          ],
+                SizedBox(
+                  height: 160,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: _images.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 8),
+                    itemBuilder: (_, index) => Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.file(_images[index],
+                              width: 120, height: 160, fit: BoxFit.cover),
                         ),
-                      ),
-                    )),
-              if (_results!.isNotEmpty) ...[
+                        Positioned(
+                          top: 4,
+                          right: 4,
+                          child: GestureDetector(
+                            onTap: () => _removeImage(index),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: colorScheme.errorContainer,
+                                shape: BoxShape.circle,
+                              ),
+                              padding: const EdgeInsets.all(4),
+                              child: Icon(Icons.close,
+                                  size: 16, color: colorScheme.onErrorContainer),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 16),
+
+              // Botones de foto
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => _pickImage(ImageSource.camera),
+                      icon: const Icon(Icons.camera_alt_outlined),
+                      label: Text(_images.isEmpty ? 'Sacar foto' : 'Agregar foto'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => _pickImage(ImageSource.gallery),
+                      icon: const Icon(Icons.photo_library_outlined),
+                      label: const Text('Galería'),
+                    ),
+                  ),
+                ],
+              ),
+
+              if (_images.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Text(
+                  '${_images.length} foto${_images.length > 1 ? 's' : ''} — tocá × para quitar',
+                  style: Theme.of(context).textTheme.bodySmall,
+                  textAlign: TextAlign.center,
+                ),
                 const SizedBox(height: 12),
                 FilledButton.icon(
-                  onPressed: _isSaving ? null : _addSelectedToInventory,
-                  icon: _isSaving
+                  onPressed: _isAnalyzing ? null : _analyze,
+                  icon: _isAnalyzing
                       ? const SizedBox(
                           height: 16,
                           width: 16,
                           child: CircularProgressIndicator(strokeWidth: 2))
-                      : const Icon(Icons.add_shopping_cart),
-                  label: const Text('Agregar seleccionados al inventario'),
+                      : const Icon(Icons.auto_awesome),
+                  label: Text(_images.length > 1
+                      ? 'Analizar ${_images.length} fotos con IA'
+                      : 'Analizar con IA'),
                 ),
               ],
+
+              if (_error != null) ...[
+                const SizedBox(height: 12),
+                Text(_error!, style: TextStyle(color: colorScheme.error)),
+              ],
+
+              if (_results != null) ...[
+                const SizedBox(height: 24),
+                Text('Productos detectados',
+                    style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 8),
+                if (_results!.isEmpty)
+                  const Text('No se detectó ningún producto en el ticket.')
+                else ...[
+                  ..._results!.map((item) => Card(
+                        child: CheckboxListTile(
+                          value: item.selected,
+                          onChanged: (value) =>
+                              setState(() => item.selected = value ?? false),
+                          title: Text(item.name),
+                          subtitle: Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  controller: item.quantityController,
+                                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                  decoration: InputDecoration(
+                                    isDense: true,
+                                    labelText: 'Cantidad',
+                                    suffixText: item.unit,
+                                  ),
+                                  onChanged: (_) => setState(() {}),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: TextField(
+                                  controller: item.priceController,
+                                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                  decoration: const InputDecoration(
+                                    isDense: true,
+                                    labelText: 'Precio',
+                                    prefixText: '\$',
+                                  ),
+                                  onChanged: (_) => setState(() {}),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )),
+
+                  // Total
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Total seleccionado',
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: colorScheme.onPrimaryContainer,
+                                )),
+                        Text(
+                          '\$${_total.toStringAsFixed(2)}',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                color: colorScheme.onPrimaryContainer,
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  FilledButton.icon(
+                    onPressed: _isSaving ? null : _addSelectedToInventory,
+                    icon: _isSaving
+                        ? const SizedBox(
+                            height: 16,
+                            width: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2))
+                        : const Icon(Icons.add_shopping_cart),
+                    label: const Text('Agregar seleccionados al inventario'),
+                  ),
+                ],
+              ],
             ],
-          ],
-        ),
+          ),
         ),
       ),
     );

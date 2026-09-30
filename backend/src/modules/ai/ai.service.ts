@@ -244,6 +244,56 @@ export class AiService {
     });
   }
 
+  async enrichIngredientsNutrition(
+    ingredients: { id: string; name: string }[],
+  ): Promise<{ enriched: number; failed: number }> {
+    if (ingredients.length === 0) return { enriched: 0, failed: 0 };
+
+    const model = (this.aiProvider as any).client
+      ? (this.aiProvider as any).client.getGenerativeModel({ model: 'gemini-1.5-flash' })
+      : null;
+    if (!model) return { enriched: 0, failed: 0 };
+
+    const prompt = `Dado los siguientes ingredientes de cocina, devolvé un JSON array con los valores nutricionales aproximados POR CADA 100 gramos (o 100ml para líquidos).
+Para cada ingrediente incluí: id, caloriesPer100g, proteinPer100g, fatPer100g, carbsPer100g, fiberPer100g.
+Usá valores nutricionales estándar. Si es un alimento procesado genérico (como "Jamón del diablo") usá valores típicos.
+Devolvé SOLO el JSON array, sin texto extra.
+
+Ingredientes:
+${ingredients.map((i) => `- id: "${i.id}", nombre: "${i.name}"`).join('\n')}
+
+Formato de respuesta:
+[{"id":"...","caloriesPer100g":200,"proteinPer100g":15,"fatPer100g":8,"carbsPer100g":5,"fiberPer100g":0}]`;
+
+    let enriched = 0;
+    let failed = 0;
+
+    try {
+      const result = await model.generateContent(prompt);
+      const text = result.response.text();
+      const data = JSON.parse(text.match(/\[[\s\S]*\]/)?.[0] ?? '[]') as any[];
+
+      for (const item of data) {
+        try {
+          await this.ingredientsService.updateNutrition(item.id, {
+            caloriesPer100g: item.caloriesPer100g ?? null,
+            proteinPer100g: item.proteinPer100g ?? null,
+            fatPer100g: item.fatPer100g ?? null,
+            carbsPer100g: item.carbsPer100g ?? null,
+            fiberPer100g: item.fiberPer100g ?? null,
+          });
+          enriched++;
+        } catch {
+          failed++;
+        }
+      }
+    } catch {
+      failed += ingredients.length;
+    }
+
+    return { enriched, failed };
+  }
+
   private parseUnit(unit: string): IngredientUnit {
     const normalized = unit.trim().toLowerCase();
     const match = Object.values(IngredientUnit).find(

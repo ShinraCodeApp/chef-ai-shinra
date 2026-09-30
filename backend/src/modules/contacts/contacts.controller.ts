@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   ParseBoolPipe,
+  Patch,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -48,6 +49,16 @@ export class ContactsController {
   @Get('sent')
   getSent(@CurrentUser() user: AuthenticatedUser) {
     return this.contactsService.getSentInvites(user.userId);
+  }
+
+  @Post('find-by-emails')
+  findByEmails(@CurrentUser() user: AuthenticatedUser, @Body('emails') emails: string[]) {
+    return this.contactsService.findByEmails(user.userId, emails ?? []);
+  }
+
+  @Patch(':id/favorite')
+  toggleFavorite(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.contactsService.toggleFavorite(user.userId, id);
   }
 
   @Delete(':id')

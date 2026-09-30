@@ -106,7 +106,11 @@ class RecipesProvider extends ChangeNotifier {
       if (freeTextRequest != null && freeTextRequest.isNotEmpty)
         'freeTextRequest': freeTextRequest,
     });
-    return Recipe.fromJson(response.data as Map<String, dynamic>);
+    final data = response.data;
+    if (data == null || data is! Map<String, dynamic>) {
+      throw Exception('El servidor no pudo generar la receta. Verificá la conexión e intentá de nuevo.');
+    }
+    return Recipe.fromJson(data);
   }
 
   Future<List<MissingIngredient>> cook(String recipeId,
