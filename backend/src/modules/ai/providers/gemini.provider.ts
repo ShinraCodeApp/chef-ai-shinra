@@ -75,7 +75,9 @@ export class GeminiProvider implements AiProvider {
         const msg = error instanceof Error ? error.message : String(error);
         this.logger.warn(`Gemini [${context}] failed with ${modelName}: ${msg}`);
         lastError = error;
-        if (!msg.includes('503')) break; // solo reintenta en alta demanda
+        // continúa al siguiente modelo si el actual no está disponible (503/404)
+        const retryable = msg.includes('503') || msg.includes('404');
+        if (!retryable) break;
       }
     }
     this.handleGeminiError(lastError, context);
@@ -83,12 +85,7 @@ export class GeminiProvider implements AiProvider {
 
   async generateRecipe(input: GenerateRecipeInput): Promise<GeneratedRecipe> {
     const prompt = this.buildRecipePrompt(input);
-    let text: string;
-    try {
-      text = await this.generateWithFallback(TEXT_MODELS, () => prompt, 'generateRecipe');
-    } catch (error) {
-      this.handleGeminiError(error, 'generateRecipe');
-    }
+    const text = await this.generateWithFallback(TEXT_MODELS, () => prompt, 'generateRecipe');
 
     try {
       return extractJson<GeneratedRecipe>(text!);
@@ -104,12 +101,7 @@ export class GeminiProvider implements AiProvider {
     input: GenerateDailyMealPlanInput,
   ): Promise<GeneratedDailyMealPlan> {
     const prompt = this.buildDailyMealPlanPrompt(input);
-    let text: string;
-    try {
-      text = await this.generateWithFallback(TEXT_MODELS, () => prompt, 'generateDailyMealPlan');
-    } catch (error) {
-      this.handleGeminiError(error, 'generateDailyMealPlan');
-    }
+    const text = await this.generateWithFallback(TEXT_MODELS, () => prompt, 'generateDailyMealPlan');
 
     try {
       return extractJson<GeneratedDailyMealPlan>(text!);
@@ -130,12 +122,7 @@ export class GeminiProvider implements AiProvider {
       { text: prompt },
       { inlineData: { data: imageBuffer.toString('base64'), mimeType } },
     ];
-    let text: string;
-    try {
-      text = await this.generateWithFallback(VISION_MODELS, () => parts, 'detectIngredients');
-    } catch (error) {
-      this.handleGeminiError(error, 'detectIngredients');
-    }
+    const text = await this.generateWithFallback(VISION_MODELS, () => parts, 'detectIngredients');
 
     try {
       return extractJson<DetectedIngredient[]>(text!);
@@ -158,12 +145,7 @@ export class GeminiProvider implements AiProvider {
       { text: prompt },
       { inlineData: { data: imageBuffer.toString('base64'), mimeType } },
     ];
-    let text: string;
-    try {
-      text = await this.generateWithFallback(VISION_MODELS, () => parts, 'detectReceiptItems');
-    } catch (error) {
-      this.handleGeminiError(error, 'detectReceiptItems');
-    }
+    const text = await this.generateWithFallback(VISION_MODELS, () => parts, 'detectReceiptItems');
 
     try {
       return extractJson<DetectedReceiptItem[]>(text!);
@@ -184,12 +166,7 @@ export class GeminiProvider implements AiProvider {
       { text: prompt },
       { inlineData: { data: imageBuffer.toString('base64'), mimeType } },
     ];
-    let text: string;
-    try {
-      text = await this.generateWithFallback(VISION_MODELS, () => parts, 'analyzeMealPhoto');
-    } catch (error) {
-      this.handleGeminiError(error, 'analyzeMealPhoto');
-    }
+    const text = await this.generateWithFallback(VISION_MODELS, () => parts, 'analyzeMealPhoto');
 
     try {
       return extractJson<MealAnalysis>(text!);
@@ -203,12 +180,7 @@ export class GeminiProvider implements AiProvider {
 
   async parseIngredientsFromText(text: string): Promise<DetectedIngredient[]> {
     const prompt = this.buildVoiceInventoryPrompt(text);
-    let responseText: string;
-    try {
-      responseText = await this.generateWithFallback(TEXT_MODELS, () => prompt, 'parseIngredientsFromText');
-    } catch (error) {
-      this.handleGeminiError(error, 'parseIngredientsFromText');
-    }
+    const responseText = await this.generateWithFallback(TEXT_MODELS, () => prompt, 'parseIngredientsFromText');
 
     try {
       return extractJson<DetectedIngredient[]>(responseText!);
@@ -224,12 +196,7 @@ export class GeminiProvider implements AiProvider {
 
   async getHealthAdvice(input: HealthAdviceInput): Promise<HealthAdvice> {
     const prompt = this.buildHealthAdvicePrompt(input);
-    let text: string;
-    try {
-      text = await this.generateWithFallback(TEXT_MODELS, () => prompt, 'getHealthAdvice');
-    } catch (error) {
-      this.handleGeminiError(error, 'getHealthAdvice');
-    }
+    const text = await this.generateWithFallback(TEXT_MODELS, () => prompt, 'getHealthAdvice');
 
     try {
       return extractJson<HealthAdvice>(text!);
