@@ -250,7 +250,7 @@ export class AiService {
     if (ingredients.length === 0) return { enriched: 0, failed: 0 };
 
     const model = (this.aiProvider as any).client
-      ? (this.aiProvider as any).client.getGenerativeModel({ model: 'gemini-1.5-flash' })
+      ? (this.aiProvider as any).client.getGenerativeModel({ model: 'gemini-3.8-flash' })
       : null;
     if (!model) return { enriched: 0, failed: 0 };
 

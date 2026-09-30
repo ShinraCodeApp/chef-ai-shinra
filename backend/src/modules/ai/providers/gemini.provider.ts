@@ -24,8 +24,8 @@ import { extractJson } from '../utils/extract-json';
 // (la generación "estable" recomendada) devolvía 503 "high demand" de forma persistente
 // al momento de escribir esto — gemini-3-flash-preview es multimodal (texto + visión) y
 // respondía con normalidad. Si 3.6-flash vuelve a estar disponible, se puede volver a él.
-const TEXT_MODEL = 'gemini-3.8-flash';
-const VISION_MODEL = 'gemini-3.8-flash';
+const TEXT_MODELS = ['gemini-3.8-flash', 'gemini-2.5-flash', 'gemini-1.5-flash'];
+const VISION_MODELS = ['gemini-3.8-flash', 'gemini-2.5-flash', 'gemini-1.5-flash'];
 
 @Injectable()
 export class GeminiProvider implements AiProvider {
@@ -59,14 +59,33 @@ export class GeminiProvider implements AiProvider {
     throw new InternalServerErrorException(`IA no disponible: ${msg}`);
   }
 
-  async generateRecipe(input: GenerateRecipeInput): Promise<GeneratedRecipe> {
-    const model = this.getClient().getGenerativeModel({ model: TEXT_MODEL });
-    const prompt = this.buildRecipePrompt(input);
+  private async generateWithFallback(
+    models: string[],
+    buildParts: (model: string) => string | Array<{ text?: string; inlineData?: { data: string; mimeType: string } }>,
+    context: string,
+  ): Promise<string> {
+    let lastError: unknown;
+    for (const modelName of models) {
+      try {
+        const model = this.getClient().getGenerativeModel({ model: modelName });
+        const result = await model.generateContent(buildParts(modelName) as any);
+        this.logger.log(`Gemini [${context}] OK with ${modelName}`);
+        return result.response.text();
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        this.logger.warn(`Gemini [${context}] failed with ${modelName}: ${msg}`);
+        lastError = error;
+        if (!msg.includes('503')) break; // solo reintenta en alta demanda
+      }
+    }
+    this.handleGeminiError(lastError, context);
+  }
 
+  async generateRecipe(input: GenerateRecipeInput): Promise<GeneratedRecipe> {
+    const prompt = this.buildRecipePrompt(input);
     let text: string;
     try {
-      const result = await model.generateContent(prompt);
-      text = result.response.text();
+      text = await this.generateWithFallback(TEXT_MODELS, () => prompt, 'generateRecipe');
     } catch (error) {
       this.handleGeminiError(error, 'generateRecipe');
     }
@@ -84,13 +103,10 @@ export class GeminiProvider implements AiProvider {
   async generateDailyMealPlan(
     input: GenerateDailyMealPlanInput,
   ): Promise<GeneratedDailyMealPlan> {
-    const model = this.getClient().getGenerativeModel({ model: TEXT_MODEL });
     const prompt = this.buildDailyMealPlanPrompt(input);
-
     let text: string;
     try {
-      const result = await model.generateContent(prompt);
-      text = result.response.text();
+      text = await this.generateWithFallback(TEXT_MODELS, () => prompt, 'generateDailyMealPlan');
     } catch (error) {
       this.handleGeminiError(error, 'generateDailyMealPlan');
     }
@@ -109,16 +125,14 @@ export class GeminiProvider implements AiProvider {
     imageBuffer: Buffer,
     mimeType: string,
   ): Promise<DetectedIngredient[]> {
-    const model = this.getClient().getGenerativeModel({ model: VISION_MODEL });
     const prompt = this.buildDetectionPrompt();
-
+    const parts = [
+      { text: prompt },
+      { inlineData: { data: imageBuffer.toString('base64'), mimeType } },
+    ];
     let text: string;
     try {
-      const result = await model.generateContent([
-        { text: prompt },
-        { inlineData: { data: imageBuffer.toString('base64'), mimeType } },
-      ]);
-      text = result.response.text();
+      text = await this.generateWithFallback(VISION_MODELS, () => parts, 'detectIngredients');
     } catch (error) {
       this.handleGeminiError(error, 'detectIngredients');
     }
@@ -139,16 +153,14 @@ export class GeminiProvider implements AiProvider {
     imageBuffer: Buffer,
     mimeType: string,
   ): Promise<DetectedReceiptItem[]> {
-    const model = this.getClient().getGenerativeModel({ model: VISION_MODEL });
     const prompt = this.buildReceiptPrompt();
-
+    const parts = [
+      { text: prompt },
+      { inlineData: { data: imageBuffer.toString('base64'), mimeType } },
+    ];
     let text: string;
     try {
-      const result = await model.generateContent([
-        { text: prompt },
-        { inlineData: { data: imageBuffer.toString('base64'), mimeType } },
-      ]);
-      text = result.response.text();
+      text = await this.generateWithFallback(VISION_MODELS, () => parts, 'detectReceiptItems');
     } catch (error) {
       this.handleGeminiError(error, 'detectReceiptItems');
     }
@@ -167,16 +179,14 @@ export class GeminiProvider implements AiProvider {
     imageBuffer: Buffer,
     mimeType: string,
   ): Promise<MealAnalysis> {
-    const model = this.getClient().getGenerativeModel({ model: VISION_MODEL });
     const prompt = this.buildMealAnalysisPrompt();
-
+    const parts = [
+      { text: prompt },
+      { inlineData: { data: imageBuffer.toString('base64'), mimeType } },
+    ];
     let text: string;
     try {
-      const result = await model.generateContent([
-        { text: prompt },
-        { inlineData: { data: imageBuffer.toString('base64'), mimeType } },
-      ]);
-      text = result.response.text();
+      text = await this.generateWithFallback(VISION_MODELS, () => parts, 'analyzeMealPhoto');
     } catch (error) {
       this.handleGeminiError(error, 'analyzeMealPhoto');
     }
@@ -192,13 +202,10 @@ export class GeminiProvider implements AiProvider {
   }
 
   async parseIngredientsFromText(text: string): Promise<DetectedIngredient[]> {
-    const model = this.getClient().getGenerativeModel({ model: TEXT_MODEL });
     const prompt = this.buildVoiceInventoryPrompt(text);
-
     let responseText: string;
     try {
-      const result = await model.generateContent(prompt);
-      responseText = result.response.text();
+      responseText = await this.generateWithFallback(TEXT_MODELS, () => prompt, 'parseIngredientsFromText');
     } catch (error) {
       this.handleGeminiError(error, 'parseIngredientsFromText');
     }
@@ -216,16 +223,18 @@ export class GeminiProvider implements AiProvider {
   }
 
   async getHealthAdvice(input: HealthAdviceInput): Promise<HealthAdvice> {
-    const model = this.getClient().getGenerativeModel({ model: TEXT_MODEL });
     const prompt = this.buildHealthAdvicePrompt(input);
-
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
+    let text: string;
+    try {
+      text = await this.generateWithFallback(TEXT_MODELS, () => prompt, 'getHealthAdvice');
+    } catch (error) {
+      this.handleGeminiError(error, 'getHealthAdvice');
+    }
 
     try {
-      return extractJson<HealthAdvice>(text);
-    } catch (error) {
-      this.logger.error(`No se pudo parsear los consejos de salud: ${text}`);
+      return extractJson<HealthAdvice>(text!);
+    } catch {
+      this.logger.error(`No se pudo parsear los consejos de salud: ${text!}`);
       throw new InternalServerErrorException(
         'La IA devolvió una respuesta con un formato inesperado al generar los consejos.',
       );
