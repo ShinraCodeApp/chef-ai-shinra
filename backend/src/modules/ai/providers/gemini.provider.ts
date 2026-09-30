@@ -53,17 +53,28 @@ export class GeminiProvider implements AiProvider {
     return this.client;
   }
 
+  private handleGeminiError(error: unknown, context: string): never {
+    const msg = error instanceof Error ? error.message : String(error);
+    this.logger.error(`Gemini error [${context}]: ${msg}`);
+    throw new InternalServerErrorException(`IA no disponible: ${msg}`);
+  }
+
   async generateRecipe(input: GenerateRecipeInput): Promise<GeneratedRecipe> {
     const model = this.getClient().getGenerativeModel({ model: TEXT_MODEL });
     const prompt = this.buildRecipePrompt(input);
 
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
+    let text: string;
+    try {
+      const result = await model.generateContent(prompt);
+      text = result.response.text();
+    } catch (error) {
+      this.handleGeminiError(error, 'generateRecipe');
+    }
 
     try {
-      return extractJson<GeneratedRecipe>(text);
-    } catch (error) {
-      this.logger.error(`No se pudo parsear la receta generada: ${text}`);
+      return extractJson<GeneratedRecipe>(text!);
+    } catch {
+      this.logger.error(`No se pudo parsear la receta generada: ${text!}`);
       throw new InternalServerErrorException(
         'La IA devolvió una respuesta con un formato inesperado. Probá de nuevo.',
       );
@@ -76,13 +87,18 @@ export class GeminiProvider implements AiProvider {
     const model = this.getClient().getGenerativeModel({ model: TEXT_MODEL });
     const prompt = this.buildDailyMealPlanPrompt(input);
 
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
+    let text: string;
+    try {
+      const result = await model.generateContent(prompt);
+      text = result.response.text();
+    } catch (error) {
+      this.handleGeminiError(error, 'generateDailyMealPlan');
+    }
 
     try {
-      return extractJson<GeneratedDailyMealPlan>(text);
-    } catch (error) {
-      this.logger.error(`No se pudo parsear el plan diario generado: ${text}`);
+      return extractJson<GeneratedDailyMealPlan>(text!);
+    } catch {
+      this.logger.error(`No se pudo parsear el plan diario generado: ${text!}`);
       throw new InternalServerErrorException(
         'La IA devolvió una respuesta con un formato inesperado al generar el plan.',
       );
@@ -96,17 +112,22 @@ export class GeminiProvider implements AiProvider {
     const model = this.getClient().getGenerativeModel({ model: VISION_MODEL });
     const prompt = this.buildDetectionPrompt();
 
-    const result = await model.generateContent([
-      { text: prompt },
-      { inlineData: { data: imageBuffer.toString('base64'), mimeType } },
-    ]);
-    const text = result.response.text();
+    let text: string;
+    try {
+      const result = await model.generateContent([
+        { text: prompt },
+        { inlineData: { data: imageBuffer.toString('base64'), mimeType } },
+      ]);
+      text = result.response.text();
+    } catch (error) {
+      this.handleGeminiError(error, 'detectIngredients');
+    }
 
     try {
-      return extractJson<DetectedIngredient[]>(text);
-    } catch (error) {
+      return extractJson<DetectedIngredient[]>(text!);
+    } catch {
       this.logger.error(
-        `No se pudo parsear la detección de ingredientes: ${text}`,
+        `No se pudo parsear la detección de ingredientes: ${text!}`,
       );
       throw new InternalServerErrorException(
         'La IA devolvió una respuesta con un formato inesperado al analizar la imagen.',
@@ -121,16 +142,21 @@ export class GeminiProvider implements AiProvider {
     const model = this.getClient().getGenerativeModel({ model: VISION_MODEL });
     const prompt = this.buildReceiptPrompt();
 
-    const result = await model.generateContent([
-      { text: prompt },
-      { inlineData: { data: imageBuffer.toString('base64'), mimeType } },
-    ]);
-    const text = result.response.text();
+    let text: string;
+    try {
+      const result = await model.generateContent([
+        { text: prompt },
+        { inlineData: { data: imageBuffer.toString('base64'), mimeType } },
+      ]);
+      text = result.response.text();
+    } catch (error) {
+      this.handleGeminiError(error, 'detectReceiptItems');
+    }
 
     try {
-      return extractJson<DetectedReceiptItem[]>(text);
-    } catch (error) {
-      this.logger.error(`No se pudo parsear el ticket de compra: ${text}`);
+      return extractJson<DetectedReceiptItem[]>(text!);
+    } catch {
+      this.logger.error(`No se pudo parsear el ticket de compra: ${text!}`);
       throw new InternalServerErrorException(
         'La IA devolvió una respuesta con un formato inesperado al analizar el ticket.',
       );
@@ -144,16 +170,21 @@ export class GeminiProvider implements AiProvider {
     const model = this.getClient().getGenerativeModel({ model: VISION_MODEL });
     const prompt = this.buildMealAnalysisPrompt();
 
-    const result = await model.generateContent([
-      { text: prompt },
-      { inlineData: { data: imageBuffer.toString('base64'), mimeType } },
-    ]);
-    const text = result.response.text();
+    let text: string;
+    try {
+      const result = await model.generateContent([
+        { text: prompt },
+        { inlineData: { data: imageBuffer.toString('base64'), mimeType } },
+      ]);
+      text = result.response.text();
+    } catch (error) {
+      this.handleGeminiError(error, 'analyzeMealPhoto');
+    }
 
     try {
-      return extractJson<MealAnalysis>(text);
-    } catch (error) {
-      this.logger.error(`No se pudo parsear el análisis nutricional: ${text}`);
+      return extractJson<MealAnalysis>(text!);
+    } catch {
+      this.logger.error(`No se pudo parsear el análisis nutricional: ${text!}`);
       throw new InternalServerErrorException(
         'La IA devolvió una respuesta con un formato inesperado al analizar el plato.',
       );
@@ -164,14 +195,19 @@ export class GeminiProvider implements AiProvider {
     const model = this.getClient().getGenerativeModel({ model: TEXT_MODEL });
     const prompt = this.buildVoiceInventoryPrompt(text);
 
-    const result = await model.generateContent(prompt);
-    const responseText = result.response.text();
+    let responseText: string;
+    try {
+      const result = await model.generateContent(prompt);
+      responseText = result.response.text();
+    } catch (error) {
+      this.handleGeminiError(error, 'parseIngredientsFromText');
+    }
 
     try {
-      return extractJson<DetectedIngredient[]>(responseText);
-    } catch (error) {
+      return extractJson<DetectedIngredient[]>(responseText!);
+    } catch {
       this.logger.error(
-        `No se pudo parsear los ingredientes dictados: ${responseText}`,
+        `No se pudo parsear los ingredientes dictados: ${responseText!}`,
       );
       throw new InternalServerErrorException(
         'La IA devolvió una respuesta con un formato inesperado al interpretar el dictado.',
