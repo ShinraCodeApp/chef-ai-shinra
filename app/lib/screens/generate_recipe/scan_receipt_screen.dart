@@ -114,9 +114,19 @@ class _ScanReceiptScreenState extends State<ScanReceiptScreen> {
       }
 
       setState(() => _results = merged.values.toList());
-    } catch (_) {
-      setState(() => _error =
-          'No se pudo analizar el ticket. Verificá que el backend tenga GEMINI_API_KEY configurada.');
+    } catch (e) {
+      String msg = 'No se pudo analizar el ticket.';
+      if (e is DioException) {
+        final data = e.response?.data;
+        if (data is Map && data['message'] != null) {
+          msg = data['message'].toString();
+        } else {
+          msg = 'Error ${e.response?.statusCode ?? ''}: ${e.message}';
+        }
+      } else {
+        msg = 'Error: ${e.toString()}';
+      }
+      setState(() => _error = msg);
     } finally {
       if (mounted) setState(() => _isAnalyzing = false);
     }
