@@ -17,6 +17,7 @@ import { AiModule } from './modules/ai/ai.module';
 import { MealPlansModule } from './modules/meal-plans/meal-plans.module';
 import { ShoppingListsModule } from './modules/shopping-lists/shopping-lists.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { ContactsModule } from './modules/contacts/contacts.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { AdminModule } from './modules/admin/admin.module';
     MealPlansModule,
     ShoppingListsModule,
     AdminModule,
+    ContactsModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

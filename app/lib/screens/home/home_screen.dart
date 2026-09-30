@@ -15,6 +15,7 @@ import '../meal_plans/meal_plans_screen.dart';
 import '../shopping_lists/shopping_lists_screen.dart';
 import '../profile/profile_screen.dart';
 import '../admin/admin_stats_screen.dart';
+import '../contacts/contacts_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -59,6 +60,8 @@ class HomeScreen extends StatelessWidget {
           (ctx) => const MealPlansScreen()),
       _QuickAction('Listas de compras', Icons.shopping_cart,
           (ctx) => const ShoppingListsScreen()),
+      _QuickAction('Contactos', Icons.people_outline,
+          (ctx) => const ContactsScreen()),
       if (auth.currentUser?.role == 'admin')
         _QuickAction('Panel Admin', Icons.admin_panel_settings,
             (ctx) => const AdminStatsScreen()),

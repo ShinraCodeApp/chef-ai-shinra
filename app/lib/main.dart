@@ -9,6 +9,7 @@ import 'providers/recipes_provider.dart';
 import 'providers/meal_plans_provider.dart';
 import 'providers/shopping_lists_provider.dart';
 import 'providers/admin_provider.dart';
+import 'providers/contacts_provider.dart';
 import 'screens/auth/auth_gate.dart';
 
 Future<void> main() async {
@@ -31,6 +32,7 @@ class ChefAiApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => MealPlansProvider()),
         ChangeNotifierProvider(create: (_) => ShoppingListsProvider()),
         ChangeNotifierProvider(create: (_) => AdminProvider()),
+        ChangeNotifierProvider(create: (_) => ContactsProvider()),
         ChangeNotifierProvider(create: (_) => ThemeModeController()..load()),
       ],
       child: Consumer<ThemeModeController>(
