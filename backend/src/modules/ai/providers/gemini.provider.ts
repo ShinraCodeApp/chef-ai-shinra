@@ -24,12 +24,12 @@ import { extractJson } from '../utils/extract-json';
 // (la generación "estable" recomendada) devolvía 503 "high demand" de forma persistente
 // al momento de escribir esto — gemini-3-flash-preview es multimodal (texto + visión) y
 // respondía con normalidad. Si 3.6-flash vuelve a estar disponible, se puede volver a él.
-// Solo gemini-3.8-flash está disponible en v1beta (SDK 0.24.x).
-// Los demás retornan 404 en esta versión de API.
-const TEXT_MODELS = ['gemini-3.8-flash'];
-const VISION_MODELS = ['gemini-3.8-flash'];
-const MAX_RETRIES = 4;
-const RETRY_DELAY_MS = 3000;
+// gemini-3.8-flash solo existe en v1beta pero tiene alta demanda (503).
+// gemini-1.5-flash existe en v1 y es el fallback estable.
+const TEXT_MODELS = ['gemini-3.8-flash', 'gemini-1.5-flash'];
+const VISION_MODELS = ['gemini-3.8-flash', 'gemini-1.5-flash'];
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 2000;
 
 @Injectable()
 export class GeminiProvider implements AiProvider {
@@ -63,6 +63,11 @@ export class GeminiProvider implements AiProvider {
     throw new InternalServerErrorException(`IA no disponible: ${msg}`);
   }
 
+  // gemini-3.8-flash solo existe en v1beta; gemini-1.5-flash requiere v1
+  private getApiVersion(modelName: string): string {
+    return modelName.startsWith('gemini-1.') ? 'v1' : 'v1beta';
+  }
+
   private async generateWithFallback(
     models: string[],
     buildParts: (model: string) => string | Array<{ text?: string; inlineData?: { data: string; mimeType: string } }>,
@@ -70,11 +75,15 @@ export class GeminiProvider implements AiProvider {
   ): Promise<string> {
     let lastError: unknown;
     for (const modelName of models) {
+      const apiVersion = this.getApiVersion(modelName);
       for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
         try {
-          const model = this.getClient().getGenerativeModel({ model: modelName });
+          const model = this.getClient().getGenerativeModel(
+            { model: modelName },
+            { apiVersion },
+          );
           const result = await model.generateContent(buildParts(modelName) as any);
-          this.logger.log(`Gemini [${context}] OK with ${modelName} (attempt ${attempt})`);
+          this.logger.log(`Gemini [${context}] OK with ${modelName} (${apiVersion}, attempt ${attempt})`);
           return result.response.text();
         } catch (error) {
           const msg = error instanceof Error ? error.message : String(error);
@@ -84,12 +93,12 @@ export class GeminiProvider implements AiProvider {
           if (is503 && attempt < MAX_RETRIES) {
             this.logger.warn(`Gemini [${context}] ${modelName} sobrecargado, reintento ${attempt}/${MAX_RETRIES} en ${RETRY_DELAY_MS}ms...`);
             await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
-          } else if (is404) {
-            this.logger.warn(`Gemini [${context}] ${modelName} no disponible en esta API, probando siguiente modelo...`);
-            break; // saltar al siguiente modelo
+          } else if (is404 || is503) {
+            this.logger.warn(`Gemini [${context}] ${modelName} no disponible, probando siguiente modelo...`);
+            break;
           } else {
             this.logger.warn(`Gemini [${context}] ${modelName} error: ${msg}`);
-            break; // error no recuperable
+            break;
           }
         }
       }
