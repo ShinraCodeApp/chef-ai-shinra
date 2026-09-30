@@ -249,10 +249,8 @@ export class AiService {
   ): Promise<{ enriched: number; failed: number }> {
     if (ingredients.length === 0) return { enriched: 0, failed: 0 };
 
-    const model = (this.aiProvider as any).client
-      ? (this.aiProvider as any).client.getGenerativeModel({ model: 'gemini-3.8-flash' })
-      : null;
-    if (!model) return { enriched: 0, failed: 0 };
+    const aiClient = (this.aiProvider as any).client as import('@google/genai').GoogleGenAI | null;
+    if (!aiClient) return { enriched: 0, failed: 0 };
 
     const prompt = `Dado los siguientes ingredientes de cocina, devolvé un JSON array con los valores nutricionales aproximados POR CADA 100 gramos (o 100ml para líquidos).
 Para cada ingrediente incluí: id, caloriesPer100g, proteinPer100g, fatPer100g, carbsPer100g, fiberPer100g.
@@ -269,8 +267,8 @@ Formato de respuesta:
     let failed = 0;
 
     try {
-      const result = await model.generateContent(prompt);
-      const text = result.response.text();
+      const result = await aiClient.models.generateContent({ model: 'gemini-2.0-flash', contents: [{ text: prompt }] });
+      const text = result.text ?? '';
       const data = JSON.parse(text.match(/\[[\s\S]*\]/)?.[0] ?? '[]') as any[];
 
       for (const item of data) {

@@ -4,7 +4,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 import {
   AiProvider,
   DetectedIngredient,
@@ -20,26 +20,22 @@ import {
 import { MealType } from '../../../common/enums';
 import { extractJson } from '../utils/extract-json';
 
-// gemini-2.5-flash fue discontinuado para cuentas nuevas (jul. 2026). gemini-3.6-flash
-// (la generación "estable" recomendada) devolvía 503 "high demand" de forma persistente
-// al momento de escribir esto — gemini-3-flash-preview es multimodal (texto + visión) y
-// respondía con normalidad. Si 3.6-flash vuelve a estar disponible, se puede volver a él.
-// gemini-3.8-flash solo existe en v1beta pero tiene alta demanda (503).
-// gemini-1.5-flash existe en v1 y es el fallback estable.
-const TEXT_MODELS = ['gemini-3.8-flash', 'gemini-1.5-flash'];
-const VISION_MODELS = ['gemini-3.8-flash', 'gemini-1.5-flash'];
+// Usando @google/genai (SDK v2) que reemplaza @google/generative-ai.
+// Si el modelo principal está sobrecargado (503), se reintenta con el siguiente.
+const TEXT_MODELS = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash'];
+const VISION_MODELS = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash'];
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 2000;
 
 @Injectable()
 export class GeminiProvider implements AiProvider {
   private readonly logger = new Logger(GeminiProvider.name);
-  private readonly client: GoogleGenerativeAI | null;
+  private readonly client: GoogleGenAI | null;
 
   constructor(private readonly configService: ConfigService) {
     const apiKey = this.configService.get<string>('GEMINI_API_KEY');
     if (apiKey) {
-      this.client = new GoogleGenerativeAI(apiKey);
+      this.client = new GoogleGenAI({ apiKey });
     } else {
       this.client = null;
       this.logger.warn(
@@ -48,7 +44,7 @@ export class GeminiProvider implements AiProvider {
     }
   }
 
-  private getClient(): GoogleGenerativeAI {
+  private getClient(): GoogleGenAI {
     if (!this.client) {
       throw new InternalServerErrorException(
         'La IA (Gemini) no está configurada en el servidor. Falta GEMINI_API_KEY.',
@@ -63,28 +59,21 @@ export class GeminiProvider implements AiProvider {
     throw new InternalServerErrorException(`IA no disponible: ${msg}`);
   }
 
-  // gemini-3.8-flash solo existe en v1beta; gemini-1.5-flash requiere v1
-  private getApiVersion(modelName: string): string {
-    return modelName.startsWith('gemini-1.') ? 'v1' : 'v1beta';
-  }
-
   private async generateWithFallback(
     models: string[],
-    buildParts: (model: string) => string | Array<{ text?: string; inlineData?: { data: string; mimeType: string } }>,
+    buildContents: () => string | Array<{ text?: string; inlineData?: { data: string; mimeType: string } }>,
     context: string,
   ): Promise<string> {
     let lastError: unknown;
     for (const modelName of models) {
-      const apiVersion = this.getApiVersion(modelName);
       for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
         try {
-          const model = this.getClient().getGenerativeModel(
-            { model: modelName },
-            { apiVersion },
-          );
-          const result = await model.generateContent(buildParts(modelName) as any);
-          this.logger.log(`Gemini [${context}] OK with ${modelName} (${apiVersion}, attempt ${attempt})`);
-          return result.response.text();
+          const result = await this.getClient().models.generateContent({
+            model: modelName,
+            contents: buildContents() as any,
+          });
+          this.logger.log(`Gemini [${context}] OK with ${modelName} (attempt ${attempt})`);
+          return result.text ?? '';
         } catch (error) {
           const msg = error instanceof Error ? error.message : String(error);
           lastError = error;
@@ -108,7 +97,7 @@ export class GeminiProvider implements AiProvider {
 
   async generateRecipe(input: GenerateRecipeInput): Promise<GeneratedRecipe> {
     const prompt = this.buildRecipePrompt(input);
-    const text = await this.generateWithFallback(TEXT_MODELS, () => prompt, 'generateRecipe');
+    const text = await this.generateWithFallback(TEXT_MODELS, () => [{ text: prompt }], 'generateRecipe');
 
     try {
       return extractJson<GeneratedRecipe>(text!);
@@ -124,7 +113,7 @@ export class GeminiProvider implements AiProvider {
     input: GenerateDailyMealPlanInput,
   ): Promise<GeneratedDailyMealPlan> {
     const prompt = this.buildDailyMealPlanPrompt(input);
-    const text = await this.generateWithFallback(TEXT_MODELS, () => prompt, 'generateDailyMealPlan');
+    const text = await this.generateWithFallback(TEXT_MODELS, () => [{ text: prompt }], 'generateDailyMealPlan');
 
     try {
       return extractJson<GeneratedDailyMealPlan>(text!);
@@ -203,7 +192,7 @@ export class GeminiProvider implements AiProvider {
 
   async parseIngredientsFromText(text: string): Promise<DetectedIngredient[]> {
     const prompt = this.buildVoiceInventoryPrompt(text);
-    const responseText = await this.generateWithFallback(TEXT_MODELS, () => prompt, 'parseIngredientsFromText');
+    const responseText = await this.generateWithFallback(TEXT_MODELS, () => [{ text: prompt }], 'parseIngredientsFromText');
 
     try {
       return extractJson<DetectedIngredient[]>(responseText!);
@@ -219,7 +208,7 @@ export class GeminiProvider implements AiProvider {
 
   async getHealthAdvice(input: HealthAdviceInput): Promise<HealthAdvice> {
     const prompt = this.buildHealthAdvicePrompt(input);
-    const text = await this.generateWithFallback(TEXT_MODELS, () => prompt, 'getHealthAdvice');
+    const text = await this.generateWithFallback(TEXT_MODELS, () => [{ text: prompt }], 'getHealthAdvice');
 
     try {
       return extractJson<HealthAdvice>(text!);
