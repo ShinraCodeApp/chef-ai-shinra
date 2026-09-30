@@ -24,8 +24,8 @@ import { extractJson } from '../utils/extract-json';
 // (la generación "estable" recomendada) devolvía 503 "high demand" de forma persistente
 // al momento de escribir esto — gemini-3-flash-preview es multimodal (texto + visión) y
 // respondía con normalidad. Si 3.6-flash vuelve a estar disponible, se puede volver a él.
-const TEXT_MODEL = 'gemini-2.0-flash';
-const VISION_MODEL = 'gemini-2.0-flash';
+const TEXT_MODEL = 'gemini-3.8-flash';
+const VISION_MODEL = 'gemini-3.8-flash';
 
 @Injectable()
 export class GeminiProvider implements AiProvider {
