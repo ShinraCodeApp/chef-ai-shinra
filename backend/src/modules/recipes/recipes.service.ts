@@ -84,7 +84,11 @@ export class RecipesService {
         order: index,
       })),
     });
-    return this.recipesRepository.save(recipe);
+    const saved = await this.recipesRepository.save(recipe);
+    return this.recipesRepository.findOne({
+      where: { id: saved.id },
+      relations: { recipeIngredients: { ingredient: true } },
+    }) as Promise<Recipe>;
   }
 
   async findAll(
@@ -268,7 +272,7 @@ export class RecipesService {
   async findOne(id: string, userId?: string): Promise<Recipe> {
     const recipe = await this.recipesRepository.findOne({
       where: { id },
-      relations: { recipeIngredients: true },
+      relations: { recipeIngredients: { ingredient: true } },
     });
     if (!recipe) {
       throw new NotFoundException('Receta no encontrada');
