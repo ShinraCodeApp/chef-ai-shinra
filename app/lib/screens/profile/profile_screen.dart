@@ -6,6 +6,7 @@ import '../../core/notifications_service.dart';
 import '../../models/user.dart';
 import '../../models/weight_log.dart';
 import '../../providers/auth_provider.dart';
+import '../../widgets/voice_text_field.dart';
 
 const _sexOptions = {'male': 'Masculino', 'female': 'Femenino', 'other': 'Otro'};
 const _goalOptions = {
@@ -423,10 +424,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ?.copyWith(color: Colors.grey.shade600),
         ),
         const SizedBox(height: 8),
-        TextField(
+        VoiceTextField(
           controller: _healthNotesController,
           maxLines: 3,
-          maxLength: 500,
+          appendMode: true,
           decoration: const InputDecoration(
             hintText: 'Ej: gastritis, embarazo, resistencia a la insulina...',
             border: OutlineInputBorder(),

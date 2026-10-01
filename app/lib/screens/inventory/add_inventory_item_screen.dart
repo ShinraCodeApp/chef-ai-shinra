@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../core/ingredients_api.dart';
 import '../../models/ingredient.dart';
 import '../../providers/inventory_provider.dart';
+import '../../widgets/voice_text_field.dart';
 
 const _units = ['g', 'kg', 'ml', 'l', 'unidad'];
 const _categories = [
@@ -136,7 +137,12 @@ class _AddInventoryItemScreenState extends State<AddInventoryItemScreen> {
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: _selected != null
                     ? const Icon(Icons.check_circle, color: Colors.green)
-                    : null,
+                    : VoiceInputButton(
+                        onResult: (text) {
+                          _nameController.text = text;
+                          _onNameChanged(text);
+                        },
+                      ),
               ),
             ),
             if (_results.isNotEmpty)

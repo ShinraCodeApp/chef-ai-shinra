@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../core/api_client.dart';
 import '../../providers/inventory_provider.dart';
 import '../../providers/recipes_provider.dart';
+import '../../widgets/voice_text_field.dart';
 import '../recipes/recipe_detail_screen.dart';
 
 class GenerateRecipeScreen extends StatefulWidget {
@@ -182,7 +183,7 @@ class _GenerateRecipeScreenState extends State<GenerateRecipeScreen> {
             Row(
               children: [
                 Expanded(
-                  child: TextField(
+                  child: VoiceTextField(
                     controller: _ingredientController,
                     decoration: const InputDecoration(
                       hintText: 'Ej: arroz, pollo, cebolla…',
@@ -232,12 +233,13 @@ class _GenerateRecipeScreenState extends State<GenerateRecipeScreen> {
                   _maxPrepTimeMinutes = int.tryParse(value),
             ),
             const SizedBox(height: 12),
-            TextField(
+            VoiceTextField(
               controller: _freeTextController,
               decoration: const InputDecoration(
                 labelText: 'Pedido libre (ej: "quiero algo dulce")',
               ),
               maxLines: 2,
+              appendMode: true,
             ),
             if (_error != null) ...[
               const SizedBox(height: 12),

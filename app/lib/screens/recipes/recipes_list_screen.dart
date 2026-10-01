@@ -5,6 +5,7 @@ import '../../models/recipe.dart';
 import '../../providers/recipes_provider.dart';
 import '../../widgets/recipe_card.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/voice_text_field.dart';
 import 'recipe_detail_screen.dart';
 import 'create_recipe_screen.dart';
 
@@ -163,9 +164,19 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
                             decoration: InputDecoration(
                               hintText: 'Agregar ingrediente…',
                               prefixIcon: const Icon(Icons.add),
-                              suffixIcon: IconButton(
-                                icon: const Icon(Icons.check),
-                                onPressed: () => _addIngredient(provider),
+                              suffixIcon: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  VoiceInputButton(
+                                    onResult: (text) {
+                                      _multiIngredientController.text = text;
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.check),
+                                    onPressed: () => _addIngredient(provider),
+                                  ),
+                                ],
                               ),
                             ),
                             onSubmitted: (_) => _addIngredient(provider),
@@ -178,6 +189,19 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
                                   ? 'Buscar por ingrediente…'
                                   : 'Buscar receta…',
                               prefixIcon: const Icon(Icons.search),
+                              suffixIcon: VoiceInputButton(
+                                onResult: (text) {
+                                  _searchController.text = text;
+                                  if (_searchByIngredient) {
+                                    provider.ingredient = text;
+                                    provider.search = '';
+                                  } else {
+                                    provider.search = text;
+                                    provider.ingredient = '';
+                                  }
+                                  provider.loadRecipes();
+                                },
+                              ),
                             ),
                             onSubmitted: (value) {
                               if (_searchByIngredient) {
