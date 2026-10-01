@@ -248,47 +248,23 @@ export class AiService {
     ingredients: { id: string; name: string }[],
   ): Promise<{ enriched: number; failed: number }> {
     if (ingredients.length === 0) return { enriched: 0, failed: 0 };
-
-    const aiClient = (this.aiProvider as any).client as import('@google/genai').GoogleGenAI | null;
-    if (!aiClient) return { enriched: 0, failed: 0 };
-
-    const prompt = `Dado los siguientes ingredientes de cocina, devolvé un JSON array con los valores nutricionales aproximados POR CADA 100 gramos (o 100ml para líquidos).
-Para cada ingrediente incluí: id, caloriesPer100g, proteinPer100g, fatPer100g, carbsPer100g, fiberPer100g.
-Usá valores nutricionales estándar. Si es un alimento procesado genérico (como "Jamón del diablo") usá valores típicos.
-Devolvé SOLO el JSON array, sin texto extra.
-
-Ingredientes:
-${ingredients.map((i) => `- id: "${i.id}", nombre: "${i.name}"`).join('\n')}
-
-Formato de respuesta:
-[{"id":"...","caloriesPer100g":200,"proteinPer100g":15,"fatPer100g":8,"carbsPer100g":5,"fiberPer100g":0}]`;
-
+    const nutritionData = await this.aiProvider.fetchIngredientsNutrition(ingredients);
     let enriched = 0;
-    let failed = 0;
-
-    try {
-      const result = await aiClient.models.generateContent({ model: 'gemini-2.0-flash', contents: [{ text: prompt }] });
-      const text = result.text ?? '';
-      const data = JSON.parse(text.match(/\[[\s\S]*\]/)?.[0] ?? '[]') as any[];
-
-      for (const item of data) {
-        try {
-          await this.ingredientsService.updateNutrition(item.id, {
-            caloriesPer100g: item.caloriesPer100g ?? null,
-            proteinPer100g: item.proteinPer100g ?? null,
-            fatPer100g: item.fatPer100g ?? null,
-            carbsPer100g: item.carbsPer100g ?? null,
-            fiberPer100g: item.fiberPer100g ?? null,
-          });
-          enriched++;
-        } catch {
-          failed++;
-        }
+    let failed = ingredients.length - nutritionData.length;
+    for (const item of nutritionData) {
+      try {
+        await this.ingredientsService.updateNutrition(item.id, {
+          caloriesPer100g: item.caloriesPer100g,
+          proteinPer100g: item.proteinPer100g,
+          fatPer100g: item.fatPer100g,
+          carbsPer100g: item.carbsPer100g,
+          fiberPer100g: item.fiberPer100g,
+        });
+        enriched++;
+      } catch {
+        failed++;
       }
-    } catch {
-      failed += ingredients.length;
     }
-
     return { enriched, failed };
   }
 

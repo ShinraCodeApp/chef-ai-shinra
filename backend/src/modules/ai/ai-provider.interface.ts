@@ -122,7 +122,19 @@ export interface GeneratedDailyMealPlan {
 
 export const AI_PROVIDER = Symbol('AI_PROVIDER');
 
+export interface IngredientNutritionData {
+  id: string;
+  caloriesPer100g: number | null;
+  proteinPer100g: number | null;
+  fatPer100g: number | null;
+  carbsPer100g: number | null;
+  fiberPer100g: number | null;
+}
+
 export interface AiProvider {
+  fetchIngredientsNutrition(
+    ingredients: { id: string; name: string }[],
+  ): Promise<IngredientNutritionData[]>;
   generateRecipe(input: GenerateRecipeInput): Promise<GeneratedRecipe>;
   generateDailyMealPlan(
     input: GenerateDailyMealPlanInput,

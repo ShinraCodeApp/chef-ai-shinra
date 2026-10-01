@@ -50,9 +50,14 @@ class InventoryProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> removeItem(String id) async {
-    await _dio.delete('/inventory/$id');
-    items.removeWhere((item) => item.id == id);
-    notifyListeners();
+  Future<bool> removeItem(String id) async {
+    try {
+      await _dio.delete('/inventory/$id');
+      items.removeWhere((item) => item.id == id);
+      notifyListeners();
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 }

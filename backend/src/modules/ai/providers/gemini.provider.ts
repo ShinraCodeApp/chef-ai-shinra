@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { GoogleGenAI } from '@google/genai';
 import {
   AiProvider,
+  IngredientNutritionData,
   DetectedIngredient,
   DetectedReceiptItem,
   GenerateDailyMealPlanInput,
@@ -451,5 +452,31 @@ export class GeminiProvider implements AiProvider {
       'confidence es un número entre 0 y 1 que indica qué tan seguro estás de la identificación y la estimación.',
       'Si la imagen no muestra comida, igual respondé con el JSON, usando dishName "No se detectó comida" y confidence 0.',
     ].join('\n');
+  }
+
+  async fetchIngredientsNutrition(
+    ingredients: { id: string; name: string }[],
+  ): Promise<IngredientNutritionData[]> {
+    if (ingredients.length === 0) return [];
+    const prompt = `Dado los siguientes ingredientes de cocina, devolvé un JSON array con los valores nutricionales aproximados POR CADA 100 gramos (o 100ml para líquidos).
+Para cada ingrediente incluí: id, caloriesPer100g, proteinPer100g, fatPer100g, carbsPer100g, fiberPer100g.
+Usá valores nutricionales estándar. Devolvé SOLO el JSON array, sin texto extra.
+
+Ingredientes:
+${ingredients.map((i) => `- id: "${i.id}", nombre: "${i.name}"`).join('\n')}
+
+Formato:
+[{"id":"...","caloriesPer100g":200,"proteinPer100g":15,"fatPer100g":8,"carbsPer100g":5,"fiberPer100g":0}]`;
+
+    try {
+      const text = await this.generateWithFallback(
+        TEXT_MODELS,
+        () => [{ text: prompt }],
+        'fetchIngredientsNutrition',
+      );
+      return JSON.parse(text.match(/\[[\s\S]*\]/)?.[0] ?? '[]') as IngredientNutritionData[];
+    } catch {
+      return [];
+    }
   }
 }

@@ -154,6 +154,8 @@ class RecipesProvider extends ChangeNotifier {
       favorites = (response.data as List)
           .map((e) => Recipe.fromJson(e as Map<String, dynamic>))
           .toList();
+    } catch (_) {
+      // fallo silencioso — favoritos quedan como estaban
     } finally {
       isLoadingFavorites = false;
       notifyListeners();

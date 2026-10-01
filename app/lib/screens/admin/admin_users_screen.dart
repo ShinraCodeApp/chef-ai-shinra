@@ -42,6 +42,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
       ),
     );
     if (newRole == null || newRole == user.role) return;
+    if (!mounted) return;
     final ok = await context.read<AdminProvider>().updateUserRole(user.id, newRole);
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(

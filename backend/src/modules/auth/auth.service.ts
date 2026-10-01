@@ -88,7 +88,12 @@ export class AuthService {
     matching.revoked = true;
     await this.refreshTokensRepository.save(matching);
 
-    const user = await this.usersService.findById(payload.sub);
+    let user;
+    try {
+      user = await this.usersService.findById(payload.sub);
+    } catch {
+      throw new UnauthorizedException('Usuario no encontrado');
+    }
     return this.issueTokens(user);
   }
 
