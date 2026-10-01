@@ -54,7 +54,7 @@ export class RecipesService {
     private readonly inventoryService: InventoryService,
   ) {}
 
-  create(
+  async create(
     dto: CreateRecipeDto,
     options: {
       createdByUserId?: string;
