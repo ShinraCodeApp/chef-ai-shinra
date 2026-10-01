@@ -21,12 +21,12 @@ import {
 import { MealType } from '../../../common/enums';
 import { extractJson } from '../utils/extract-json';
 
-// Usando @google/genai (SDK v2) que reemplaza @google/generative-ai.
-// Si el modelo principal está sobrecargado (503), se reintenta con el siguiente.
-const TEXT_MODELS = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash'];
-const VISION_MODELS = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash'];
-const MAX_RETRIES = 3;
-const RETRY_DELAY_MS = 2000;
+// Esta API key solo tiene acceso a gemini-3.8-flash.
+// Si da 503 (alta demanda), se reintenta hasta MAX_RETRIES veces.
+const TEXT_MODELS = ['gemini-3.8-flash'];
+const VISION_MODELS = ['gemini-3.8-flash'];
+const MAX_RETRIES = 6;
+const RETRY_DELAY_MS = 5000;
 
 @Injectable()
 export class GeminiProvider implements AiProvider {
