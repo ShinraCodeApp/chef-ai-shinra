@@ -43,7 +43,7 @@ class _VoiceInputButtonState extends State<VoiceInputButton>
     if (!_available) return;
     setState(() => _listening = true);
     await _stt.listen(
-      localeId: widget.locale,
+      listenOptions: SpeechListenOptions(localeId: widget.locale),
       onResult: (result) {
         if (result.finalResult) {
           widget.onResult(result.recognizedWords);
@@ -71,7 +71,7 @@ class _VoiceInputButtonState extends State<VoiceInputButton>
     final color = Theme.of(context).colorScheme;
     return AnimatedBuilder(
       animation: _pulse,
-      builder: (_, __) => IconButton(
+      builder: (_, _) => IconButton(
         icon: Icon(
           _listening ? Icons.mic : Icons.mic_none,
           color: _listening

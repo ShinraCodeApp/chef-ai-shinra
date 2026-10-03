@@ -40,8 +40,8 @@ class InventoryProvider extends ChangeNotifier {
         'quantity': quantity,
         'unit': unit,
         'state': state,
-        if (expirationDate != null) 'expirationDate': expirationDate,
-        if (source != null) 'source': source,
+        'expirationDate': ?expirationDate,
+        'source': ?source,
       });
       await load();
       return true;

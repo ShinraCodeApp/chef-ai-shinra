@@ -11,10 +11,16 @@ dotenv.config();
 const SALT_ROUNDS = 10;
 
 const ADMIN_EMAIL = 'admin@chefai.com';
-const ADMIN_PASSWORD = 'admin132';
 const ADMIN_NAME = 'Super Admin';
 
 async function run() {
+  // La contraseña no va en el código (el repo es público): se pasa por env.
+  //   ADMIN_PASSWORD='...' npm run seed:admin
+  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? '';
+  if (ADMIN_PASSWORD.length < 8) {
+    throw new Error('Definí ADMIN_PASSWORD (mínimo 8 caracteres) para correr el seed.');
+  }
+
   const dataSource = new DataSource({
     type: 'postgres',
     host: process.env.DB_HOST,

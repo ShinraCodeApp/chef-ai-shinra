@@ -96,9 +96,7 @@ class _AddInventoryItemScreenState extends State<AddInventoryItemScreen> {
           quantity: quantity,
           unit: _unit,
           state: _state,
-          expirationDate: _expirationDate == null
-              ? null
-              : _expirationDate!.toIso8601String().split('T').first,
+          expirationDate: _expirationDate?.toIso8601String().split('T').first,
         );
     if (!mounted) return;
     if (ok) {

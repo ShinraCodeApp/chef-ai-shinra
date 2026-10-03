@@ -77,7 +77,7 @@ class RecipesProvider extends ChangeNotifier {
       'servings': servings,
       'prepTimeMinutes': prepTimeMinutes,
       'difficulty': difficulty,
-      if (estimatedCostTotal != null) 'estimatedCostTotal': estimatedCostTotal,
+      'estimatedCostTotal': ?estimatedCostTotal,
       'dietTags': dietTags,
       'ingredients': ingredients,
     });
@@ -100,9 +100,9 @@ class RecipesProvider extends ChangeNotifier {
     final response = await _dio.post('/ai/recipes/generate', data: {
       'availableIngredients': availableIngredients,
       if (dietTags != null && dietTags.isNotEmpty) 'dietTags': dietTags,
-      if (maxPrepTimeMinutes != null) 'maxPrepTimeMinutes': maxPrepTimeMinutes,
-      if (budget != null) 'budget': budget,
-      if (servings != null) 'servings': servings,
+      'maxPrepTimeMinutes': ?maxPrepTimeMinutes,
+      'budget': ?budget,
+      'servings': ?servings,
       if (freeTextRequest != null && freeTextRequest.isNotEmpty)
         'freeTextRequest': freeTextRequest,
     });

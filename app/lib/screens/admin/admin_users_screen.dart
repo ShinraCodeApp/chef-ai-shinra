@@ -128,11 +128,12 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                                   : null,
                             ),
                             onPressed: () async {
+                              final messenger = ScaffoldMessenger.of(context);
                               final ok = await context
                                   .read<AdminProvider>()
                                   .setAiUnlimited(user.id, !user.aiUnlimited);
                               if (!mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              messenger.showSnackBar(SnackBar(
                                 content: Text(ok
                                     ? (!user.aiUnlimited
                                         ? 'IA ilimitada activada para ${user.name}'

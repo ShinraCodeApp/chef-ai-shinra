@@ -43,6 +43,7 @@ describe('RecipesService', () => {
     recipesService = new RecipesService(
       recipesRepository as any,
       favoritesRepository as any,
+      { find: jest.fn().mockResolvedValue([]) } as any, // pricesRepository
       inventoryService as any,
     );
   });

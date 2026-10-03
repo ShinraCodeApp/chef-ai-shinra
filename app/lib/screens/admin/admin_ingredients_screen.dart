@@ -68,7 +68,7 @@ class _AdminIngredientsScreenState extends State<AdminIngredientsScreen> {
               await Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const AdminIngredientEditScreen()),
               );
-              if (mounted) context.read<AdminProvider>().loadIngredients();
+              if (mounted) provider.loadIngredients();
             },
           ),
         ],
@@ -122,7 +122,7 @@ class _AdminIngredientsScreenState extends State<AdminIngredientsScreen> {
                                 builder: (_) => AdminIngredientEditScreen(ingredient: ingredient),
                               ),
                             );
-                            if (mounted) context.read<AdminProvider>().loadIngredients();
+                            if (mounted) provider.loadIngredients();
                           },
                           trailing: IconButton(
                             icon: Icon(Icons.delete_outline,
