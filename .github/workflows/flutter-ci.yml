@@ -24,7 +24,8 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.32.x'
+          # la misma que en local (pubspec pide Dart ^3.12.2)
+          flutter-version: '3.44.2'
           channel: stable
           cache: true
 

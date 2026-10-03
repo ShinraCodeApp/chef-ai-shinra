@@ -125,7 +125,6 @@ export class ContactsService {
 
     if (users.length === 0) return [];
 
-    const userIds = users.map((u) => u.id);
     const existingContacts = await this.contactsRepo.find({
       where: [
         { requesterId: userId, status: ContactStatus.ACCEPTED },

@@ -7,6 +7,15 @@ import {
 import { UsersService } from './users.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 
+/** El hash de la contraseña nunca sale en las respuestas. */
+function withoutPassword<T extends { passwordHash?: unknown }>(
+  user: T,
+): Omit<T, 'passwordHash'> {
+  const profile = { ...user };
+  delete profile.passwordHash;
+  return profile;
+}
+
 @Controller('users')
 @UseGuards(JwtAuthGuard)
 export class UsersController {
@@ -14,9 +23,7 @@ export class UsersController {
 
   @Get('me')
   async getMe(@CurrentUser() user: AuthenticatedUser) {
-    const { passwordHash: _passwordHash, ...profile } =
-      await this.usersService.findById(user.userId);
-    return profile;
+    return withoutPassword(await this.usersService.findById(user.userId));
   }
 
   @Patch('me')
@@ -26,8 +33,7 @@ export class UsersController {
   ) {
     const { user: updated, weightProgress } =
       await this.usersService.updateProfile(user.userId, dto);
-    const { passwordHash: _passwordHash, ...profile } = updated;
-    return { ...profile, weightProgress };
+    return { ...withoutPassword(updated), weightProgress };
   }
 
   @Get('me/weight-logs')
