@@ -1,0 +1,270 @@
+
+<!-- saved from url=(0130)file:///C:/Users/Yamil/AppData/Local/Temp/claude/D-%2DClaude/59a7fef9-40fe-4a83-b84e-334fea333b94/scratchpad/chef-ai-graphics.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Chef AI — Play Store Graphics</title>
+<link rel="stylesheet" href="./Chef AI — Play Store Graphics_files/css2">
+<style>
+  :root {
+    --bg: #0f1a14;
+    --fg: #e8f0eb;
+    --muted: #7a9a82;
+    --green: #2d6a4f;
+    --green-light: #52b788;
+    --green-bright: #74c69d;
+    --gold: #d4a84b;
+    --card: #1a2e20;
+    color-scheme: dark;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; }
+  body {
+    background: #0a0f0c;
+    color: var(--fg);
+    font-family: 'Inter', system-ui, sans-serif;
+    padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3rem;
+  }
+
+  h2 {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+    text-align: center;
+  }
+
+  /* ── ICON 512×512 ── */
+  .icon-wrap {
+    width: 512px;
+    height: 512px;
+    border-radius: 96px;
+    overflow: hidden;
+    background: linear-gradient(145deg, #1a3d28 0%, #0d2118 60%, #162d1e 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-shadow: 0 0 0 1px rgba(82,183,136,0.15), 0 32px 80px rgba(0,0,0,0.6);
+  }
+
+  .icon-wrap svg {
+    width: 320px;
+    height: 320px;
+  }
+
+  /* ── FEATURE GRAPHIC 1024×500 ── */
+  .feature-wrap {
+    width: 1024px;
+    height: 500px;
+    background: linear-gradient(135deg, #0d2118 0%, #162d1e 40%, #1a3d28 100%);
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 80px;
+    position: relative;
+    box-shadow: 0 0 0 1px rgba(82,183,136,0.15), 0 32px 80px rgba(0,0,0,0.6);
+  }
+
+  .feature-wrap::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 600px 400px at 70% 50%, rgba(45,106,79,0.25) 0%, transparent 70%);
+  }
+
+  .feat-left {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .feat-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(82,183,136,0.15);
+    border: 1px solid rgba(82,183,136,0.3);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--green-bright);
+    width: fit-content;
+  }
+
+  .feat-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 4rem;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--fg);
+    text-wrap: balance;
+  }
+
+  .feat-title span {
+    color: var(--green-bright);
+  }
+
+  .feat-sub {
+    font-size: 1.05rem;
+    color: var(--muted);
+    line-height: 1.5;
+    max-width: 380px;
+  }
+
+  .feat-pills {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .pill {
+    background: rgba(45,106,79,0.35);
+    border: 1px solid rgba(82,183,136,0.25);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 0.8rem;
+    color: var(--green-bright);
+    font-weight: 500;
+  }
+
+  .feat-right {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .feat-icon {
+    width: 220px;
+    height: 220px;
+    border-radius: 44px;
+    background: linear-gradient(145deg, #1a3d28, #0d2118);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 60px rgba(82,183,136,0.2), 0 20px 40px rgba(0,0,0,0.4);
+    border: 1px solid rgba(82,183,136,0.2);
+  }
+
+  .feat-icon svg {
+    width: 140px;
+    height: 140px;
+  }
+
+  .note {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-align: center;
+    max-width: 600px;
+  }
+</style>
+
+</head><body><h2>Ícono — 512 × 512 px</h2>
+<div class="icon-wrap">
+  <svg viewBox="0 0 320 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Plato / bowl base -->
+    <ellipse cx="160" cy="200" rx="105" ry="18" fill="rgba(45,106,79,0.25)"></ellipse>
+    <!-- Bowl -->
+    <path d="M 60 155 Q 60 240 160 240 Q 260 240 260 155 Z" fill="url(#bowl-grad)"></path>
+    <!-- Bowl rim highlight -->
+    <ellipse cx="160" cy="155" rx="100" ry="14" fill="url(#rim-grad)"></ellipse>
+    <!-- Steam lines -->
+    <path d="M 120 118 Q 115 105 122 92 Q 129 79 124 66" stroke="#74c69d" stroke-width="3.5" stroke-linecap="round" fill="none" opacity="0.7"></path>
+    <path d="M 160 110 Q 155 97 162 84 Q 169 71 164 58" stroke="#52b788" stroke-width="3.5" stroke-linecap="round" fill="none" opacity="0.85"></path>
+    <path d="M 200 118 Q 195 105 202 92 Q 209 79 204 66" stroke="#74c69d" stroke-width="3.5" stroke-linecap="round" fill="none" opacity="0.7"></path>
+    <!-- Fork -->
+    <rect x="52" y="120" width="6" height="90" rx="3" fill="#52b788" opacity="0.9"></rect>
+    <rect x="48" y="100" width="3" height="28" rx="1.5" fill="#52b788" opacity="0.7"></rect>
+    <rect x="53" y="100" width="3" height="28" rx="1.5" fill="#52b788" opacity="0.7"></rect>
+    <rect x="58" y="100" width="3" height="28" rx="1.5" fill="#52b788" opacity="0.7"></rect>
+    <!-- Knife -->
+    <rect x="262" y="100" width="6" height="110" rx="3" fill="#74c69d" opacity="0.9"></rect>
+    <path d="M 262 100 Q 255 115 262 130" fill="#74c69d" opacity="0.6"></path>
+    <!-- Food in bowl: lettuce leaf shape -->
+    <ellipse cx="140" cy="175" rx="28" ry="18" fill="#40916c" opacity="0.9"></ellipse>
+    <ellipse cx="180" cy="178" rx="22" ry="15" fill="#52b788" opacity="0.8"></ellipse>
+    <!-- Tomato -->
+    <circle cx="155" cy="168" r="12" fill="#d62828" opacity="0.85"></circle>
+    <circle cx="155" cy="164" r="3" fill="#9a0000" opacity="0.6"></circle>
+    <!-- Pasta / noodle swirl -->
+    <path d="M 170 185 Q 185 175 190 185 Q 195 195 180 195 Q 165 195 170 185" fill="#d4a84b" opacity="0.8"></path>
+    <!-- AI spark -->
+    <circle cx="230" cy="80" r="18" fill="rgba(82,183,136,0.12)" stroke="#52b788" stroke-width="1.5"></circle>
+    <path d="M 230 68 L 233 77 L 242 80 L 233 83 L 230 92 L 227 83 L 218 80 L 227 77 Z" fill="#74c69d"></path>
+    <defs>
+      <lineargradient id="bowl-grad" x1="60" y1="155" x2="260" y2="240" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stop-color="#1a3d28"></stop>
+        <stop offset="100%" stop-color="#0d2118"></stop>
+      </lineargradient>
+      <lineargradient id="rim-grad" x1="60" y1="155" x2="260" y2="155" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stop-color="#2d6a4f"></stop>
+        <stop offset="50%" stop-color="#52b788"></stop>
+        <stop offset="100%" stop-color="#2d6a4f"></stop>
+      </lineargradient>
+    </defs>
+  </svg>
+</div>
+
+<h2>Gráfico de funciones — 1024 × 500 px</h2>
+<div class="feature-wrap">
+  <div class="feat-left">
+    <div class="feat-badge">✦ Inteligencia artificial</div>
+    <div class="feat-title">Chef <span>AI</span></div>
+    <div class="feat-sub">Recetas personalizadas, inventario inteligente y planificación de comidas con IA.</div>
+    <div class="feat-pills">
+      <span class="pill">Generar recetas</span>
+      <span class="pill">Escanear ingredientes</span>
+      <span class="pill">Plan semanal</span>
+    </div>
+  </div>
+  <div class="feat-right">
+    <div class="feat-icon">
+      <svg viewBox="0 0 280 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="140" cy="185" rx="90" ry="14" fill="rgba(45,106,79,0.2)"></ellipse>
+        <path d="M 55 140 Q 55 215 140 215 Q 225 215 225 140 Z" fill="url(#bowl2)"></path>
+        <ellipse cx="140" cy="140" rx="85" ry="12" fill="url(#rim2)"></ellipse>
+        <path d="M 108 105 Q 103 94 109 83 Q 115 72 111 61" stroke="#74c69d" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.7"></path>
+        <path d="M 140 98 Q 135 87 141 76 Q 147 65 143 54" stroke="#52b788" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.85"></path>
+        <path d="M 172 105 Q 167 94 173 83 Q 179 72 175 61" stroke="#74c69d" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.7"></path>
+        <rect x="42" y="106" width="5" height="80" rx="2.5" fill="#52b788" opacity="0.9"></rect>
+        <rect x="38" y="88" width="2.5" height="24" rx="1.25" fill="#52b788" opacity="0.7"></rect>
+        <rect x="42.5" y="88" width="2.5" height="24" rx="1.25" fill="#52b788" opacity="0.7"></rect>
+        <rect x="47" y="88" width="2.5" height="24" rx="1.25" fill="#52b788" opacity="0.7"></rect>
+        <rect x="233" y="88" width="5" height="97" rx="2.5" fill="#74c69d" opacity="0.9"></rect>
+        <path d="M 233 88 Q 227 101 233 114" fill="#74c69d" opacity="0.6"></path>
+        <ellipse cx="124" cy="158" rx="24" ry="15" fill="#40916c" opacity="0.9"></ellipse>
+        <ellipse cx="158" cy="161" rx="19" ry="13" fill="#52b788" opacity="0.8"></ellipse>
+        <circle cx="137" cy="152" r="10" fill="#d62828" opacity="0.85"></circle>
+        <path d="M 150 168 Q 163 159 167 168 Q 171 177 158 177 Q 145 177 150 168" fill="#d4a84b" opacity="0.8"></path>
+        <circle cx="205" cy="72" r="15" fill="rgba(82,183,136,0.12)" stroke="#52b788" stroke-width="1.5"></circle>
+        <path d="M 205 62 L 208 70 L 216 72 L 208 74 L 205 82 L 202 74 L 194 72 L 202 70 Z" fill="#74c69d"></path>
+        <defs>
+          <lineargradient id="bowl2" x1="55" y1="140" x2="225" y2="215" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#1a3d28"></stop>
+            <stop offset="100%" stop-color="#0d2118"></stop>
+          </lineargradient>
+          <lineargradient id="rim2" x1="55" y1="140" x2="225" y2="140" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#2d6a4f"></stop>
+            <stop offset="50%" stop-color="#52b788"></stop>
+            <stop offset="100%" stop-color="#2d6a4f"></stop>
+          </lineargradient>
+        </defs>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<p class="note">Para guardar: clic derecho → "Guardar imagen como" en cada gráfico, o hacé una captura de pantalla seleccionando exactamente cada elemento.</p>
+</body></html>
