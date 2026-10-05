@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/ingredient.dart';
 import '../../providers/admin_provider.dart';
+import '../../core/i18n.dart';
 
 const _units = ['g', 'kg', 'ml', 'l', 'unidad'];
 const _categories = [
@@ -79,7 +80,7 @@ class _AdminIngredientEditScreenState extends State<AdminIngredientEditScreen> {
   Future<void> _save() async {
     final name = _nameController.text.trim();
     if (name.isEmpty) {
-      setState(() => _error = 'El nombre es obligatorio.');
+      setState(() => _error = tr('El nombre es obligatorio.'));
       return;
     }
     setState(() {
@@ -116,7 +117,7 @@ class _AdminIngredientEditScreenState extends State<AdminIngredientEditScreen> {
     } else {
       setState(() {
         _isSaving = false;
-        _error = 'No se pudo guardar el ingrediente.';
+        _error = tr('No se pudo guardar el ingrediente.');
       });
     }
   }
@@ -124,7 +125,7 @@ class _AdminIngredientEditScreenState extends State<AdminIngredientEditScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(_isEditing ? 'Editar ingrediente' : 'Nuevo ingrediente')),
+      appBar: AppBar(title: Text(_isEditing ? tr('Editar ingrediente') : tr('Nuevo ingrediente'))),
       body: SafeArea(
         child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -133,7 +134,7 @@ class _AdminIngredientEditScreenState extends State<AdminIngredientEditScreen> {
           children: [
             TextField(
               controller: _nameController,
-              decoration: const InputDecoration(labelText: 'Nombre'),
+              decoration: InputDecoration(labelText: tr('Nombre')),
             ),
             const SizedBox(height: 12),
             Row(
@@ -141,7 +142,7 @@ class _AdminIngredientEditScreenState extends State<AdminIngredientEditScreen> {
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     initialValue: _category,
-                    decoration: const InputDecoration(labelText: 'Categoría'),
+                    decoration: InputDecoration(labelText: tr('Categoría')),
                     items: _categories
                         .map((c) => DropdownMenuItem(value: c, child: Text(c)))
                         .toList(),
@@ -152,7 +153,7 @@ class _AdminIngredientEditScreenState extends State<AdminIngredientEditScreen> {
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     initialValue: _unit,
-                    decoration: const InputDecoration(labelText: 'Unidad'),
+                    decoration: InputDecoration(labelText: tr('Unidad')),
                     items: _units
                         .map((u) => DropdownMenuItem(value: u, child: Text(u)))
                         .toList(),
@@ -164,10 +165,10 @@ class _AdminIngredientEditScreenState extends State<AdminIngredientEditScreen> {
             const SizedBox(height: 12),
             TextField(
               controller: _barcodeController,
-              decoration: const InputDecoration(labelText: 'Código de barras (opcional)'),
+              decoration: InputDecoration(labelText: tr('Código de barras (opcional)')),
             ),
             const SizedBox(height: 20),
-            Text('Info. nutricional cada 100g (opcional)',
+            Text(tr('Info. nutricional cada 100g (opcional)'),
                 style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             Row(
@@ -176,7 +177,7 @@ class _AdminIngredientEditScreenState extends State<AdminIngredientEditScreen> {
                   child: TextField(
                     controller: _caloriesController,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(labelText: 'Calorías'),
+                    decoration: InputDecoration(labelText: tr('Calorías')),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -184,7 +185,7 @@ class _AdminIngredientEditScreenState extends State<AdminIngredientEditScreen> {
                   child: TextField(
                     controller: _proteinController,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(labelText: 'Proteína (g)'),
+                    decoration: InputDecoration(labelText: tr('Proteína (g)')),
                   ),
                 ),
               ],
@@ -196,7 +197,7 @@ class _AdminIngredientEditScreenState extends State<AdminIngredientEditScreen> {
                   child: TextField(
                     controller: _fatController,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(labelText: 'Grasas (g)'),
+                    decoration: InputDecoration(labelText: tr('Grasas (g)')),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -204,7 +205,7 @@ class _AdminIngredientEditScreenState extends State<AdminIngredientEditScreen> {
                   child: TextField(
                     controller: _carbsController,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(labelText: 'Carbs (g)'),
+                    decoration: InputDecoration(labelText: tr('Carbs (g)')),
                   ),
                 ),
               ],
@@ -216,7 +217,7 @@ class _AdminIngredientEditScreenState extends State<AdminIngredientEditScreen> {
                   child: TextField(
                     controller: _fiberController,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(labelText: 'Fibra (g)'),
+                    decoration: InputDecoration(labelText: tr('Fibra (g)')),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -224,7 +225,7 @@ class _AdminIngredientEditScreenState extends State<AdminIngredientEditScreen> {
                   child: TextField(
                     controller: _sugarController,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(labelText: 'Azúcares (g)'),
+                    decoration: InputDecoration(labelText: tr('Azúcares (g)')),
                   ),
                 ),
               ],
@@ -233,7 +234,7 @@ class _AdminIngredientEditScreenState extends State<AdminIngredientEditScreen> {
             TextField(
               controller: _sodiumController,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(labelText: 'Sodio (mg)'),
+              decoration: InputDecoration(labelText: tr('Sodio (mg)')),
             ),
             if (_error != null) ...[
               const SizedBox(height: 12),
@@ -245,7 +246,7 @@ class _AdminIngredientEditScreenState extends State<AdminIngredientEditScreen> {
               child: _isSaving
                   ? const SizedBox(
                       height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Text('Guardar'),
+                  : Text(tr('Guardar')),
             ),
           ],
         ),

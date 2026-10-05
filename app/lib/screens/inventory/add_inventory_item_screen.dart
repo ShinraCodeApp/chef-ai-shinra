@@ -5,6 +5,7 @@ import '../../core/ingredients_api.dart';
 import '../../models/ingredient.dart';
 import '../../providers/inventory_provider.dart';
 import '../../widgets/voice_text_field.dart';
+import '../../core/i18n.dart';
 
 const _units = ['g', 'kg', 'ml', 'l', 'unidad'];
 const _categories = [
@@ -19,11 +20,11 @@ const _categories = [
   'condimentos',
   'otros',
 ];
-const _states = {
-  'fresh': 'Fresco',
-  'frozen': 'Congelado',
-  'opened': 'Abierto',
-  'cooked': 'Cocido',
+Map<String, String> get _states => {
+  'fresh': tr('Fresco'),
+  'frozen': tr('Congelado'),
+  'opened': tr('Abierto'),
+  'cooked': tr('Cocido'),
 };
 
 class AddInventoryItemScreen extends StatefulWidget {
@@ -73,18 +74,18 @@ class _AddInventoryItemScreenState extends State<AddInventoryItemScreen> {
         _results = [];
       });
     } catch (_) {
-      setState(() => _error = 'No se pudo crear el ingrediente.');
+      setState(() => _error = tr('No se pudo crear el ingrediente.'));
     }
   }
 
   Future<void> _save() async {
     if (_selected == null) {
-      setState(() => _error = 'Elegí o creá un ingrediente primero.');
+      setState(() => _error = tr('Elegí o creá un ingrediente primero.'));
       return;
     }
     final quantity = double.tryParse(_quantityController.text);
     if (quantity == null || quantity <= 0) {
-      setState(() => _error = 'Ingresá una cantidad válida.');
+      setState(() => _error = tr('Ingresá una cantidad válida.'));
       return;
     }
     setState(() {
@@ -104,7 +105,7 @@ class _AddInventoryItemScreenState extends State<AddInventoryItemScreen> {
     } else {
       setState(() {
         _isSaving = false;
-        _error = 'No se pudo agregar el ítem.';
+        _error = tr('No se pudo agregar el ítem.');
       });
     }
   }
@@ -120,7 +121,7 @@ class _AddInventoryItemScreenState extends State<AddInventoryItemScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Agregar al inventario')),
+      appBar: AppBar(title: Text(tr('Agregar al inventario'))),
       body: SafeArea(
         child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -131,7 +132,7 @@ class _AddInventoryItemScreenState extends State<AddInventoryItemScreen> {
               controller: _nameController,
               onChanged: _onNameChanged,
               decoration: InputDecoration(
-                labelText: 'Ingrediente',
+                labelText: tr('Ingrediente'),
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: _selected != null
                     ? const Icon(Icons.check_circle, color: Colors.green)
@@ -162,12 +163,12 @@ class _AddInventoryItemScreenState extends State<AddInventoryItemScreen> {
               ),
             if (_selected == null && _nameController.text.trim().isNotEmpty) ...[
               const SizedBox(height: 8),
-              Text('¿No está en el catálogo? Crealo:',
+              Text(tr('¿No está en el catálogo? Crealo:'),
                   style: Theme.of(context).textTheme.bodySmall),
               const SizedBox(height: 4),
               DropdownButtonFormField<String>(
                 initialValue: _newIngredientCategory,
-                decoration: const InputDecoration(labelText: 'Categoría'),
+                decoration: InputDecoration(labelText: tr('Categoría')),
                 items: _categories
                     .map((c) => DropdownMenuItem(value: c, child: Text(c)))
                     .toList(),
@@ -178,7 +179,7 @@ class _AddInventoryItemScreenState extends State<AddInventoryItemScreen> {
               OutlinedButton.icon(
                 onPressed: _createNewIngredient,
                 icon: const Icon(Icons.add),
-                label: const Text('Crear ingrediente nuevo'),
+                label: Text(tr('Crear ingrediente nuevo')),
               ),
             ],
             const SizedBox(height: 20),
@@ -188,14 +189,14 @@ class _AddInventoryItemScreenState extends State<AddInventoryItemScreen> {
                   child: TextField(
                     controller: _quantityController,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(labelText: 'Cantidad'),
+                    decoration: InputDecoration(labelText: tr('Cantidad')),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     initialValue: _unit,
-                    decoration: const InputDecoration(labelText: 'Unidad'),
+                    decoration: InputDecoration(labelText: tr('Unidad')),
                     items: _units
                         .map((u) => DropdownMenuItem(value: u, child: Text(u)))
                         .toList(),
@@ -207,7 +208,7 @@ class _AddInventoryItemScreenState extends State<AddInventoryItemScreen> {
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               initialValue: _state,
-              decoration: const InputDecoration(labelText: 'Estado'),
+              decoration: InputDecoration(labelText: tr('Estado')),
               items: _states.entries
                   .map((e) => DropdownMenuItem(value: e.key, child: Text(e.value)))
                   .toList(),
@@ -217,8 +218,8 @@ class _AddInventoryItemScreenState extends State<AddInventoryItemScreen> {
             ListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(_expirationDate == null
-                  ? 'Sin fecha de vencimiento'
-                  : 'Vence: ${_expirationDate!.toIso8601String().split('T').first}'),
+                  ? tr('Sin fecha de vencimiento')
+                  : tr('Vence: {_expirationDate}', {'_expirationDate': _expirationDate!.toIso8601String().split('T').first})),
               trailing: const Icon(Icons.calendar_today_outlined),
               onTap: () async {
                 final picked = await showDatePicker(
@@ -240,7 +241,7 @@ class _AddInventoryItemScreenState extends State<AddInventoryItemScreen> {
               child: _isSaving
                   ? const SizedBox(
                       height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Text('Guardar'),
+                  : Text(tr('Guardar')),
             ),
           ],
         ),

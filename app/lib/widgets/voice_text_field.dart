@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart';
+import '../core/i18n.dart';
 
 /// Botón de micrófono reutilizable. Escucha hasta que el usuario para de hablar
 /// y llama [onResult] con el texto transcripto.
@@ -7,11 +8,11 @@ class VoiceInputButton extends StatefulWidget {
   const VoiceInputButton({
     super.key,
     required this.onResult,
-    this.locale = 'es_AR',
+    this.locale,
   });
 
   final void Function(String text) onResult;
-  final String locale;
+  final String? locale; // null = el idioma de la app
 
   @override
   State<VoiceInputButton> createState() => _VoiceInputButtonState();
@@ -43,7 +44,7 @@ class _VoiceInputButtonState extends State<VoiceInputButton>
     if (!_available) return;
     setState(() => _listening = true);
     await _stt.listen(
-      listenOptions: SpeechListenOptions(localeId: widget.locale),
+      listenOptions: SpeechListenOptions(localeId: widget.locale ?? AppLanguage.instance.speechLocale),
       onResult: (result) {
         if (result.finalResult) {
           widget.onResult(result.recognizedWords);
@@ -78,7 +79,7 @@ class _VoiceInputButtonState extends State<VoiceInputButton>
               ? Color.lerp(color.error, color.primary, _pulse.value)
               : color.onSurfaceVariant,
         ),
-        tooltip: _listening ? 'Escuchando…' : 'Dictado por voz',
+        tooltip: _listening ? tr('Escuchando…') : tr('Dictado por voz'),
         onPressed: _listening ? _stopListening : _startListening,
       ),
     );
@@ -95,7 +96,7 @@ class VoiceTextField extends StatelessWidget {
     this.maxLines = 1,
     this.onSubmitted,
     this.onChanged,
-    this.locale = 'es_AR',
+    this.locale,
     this.appendMode = false,
   });
 
@@ -105,7 +106,7 @@ class VoiceTextField extends StatelessWidget {
   final int? maxLines;
   final void Function(String)? onSubmitted;
   final void Function(String)? onChanged;
-  final String locale;
+  final String? locale; // null = el idioma de la app
 
   /// Si true, el texto dictado se agrega al existente; si false lo reemplaza.
   final bool appendMode;

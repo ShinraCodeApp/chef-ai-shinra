@@ -4,6 +4,7 @@ import '../../providers/admin_provider.dart';
 import 'admin_ingredients_screen.dart';
 import 'admin_recipes_screen.dart';
 import 'admin_users_screen.dart';
+import '../../core/i18n.dart';
 
 class AdminStatsScreen extends StatefulWidget {
   const AdminStatsScreen({super.key});
@@ -26,7 +27,7 @@ class _AdminStatsScreenState extends State<AdminStatsScreen> {
     final provider = context.watch<AdminProvider>();
     final stats = provider.stats;
     return Scaffold(
-      appBar: AppBar(title: const Text('Panel de administración')),
+      appBar: AppBar(title: Text(tr('Panel de administración'))),
       body: RefreshIndicator(
         onRefresh: () => provider.loadStats(),
         child: ListView(
@@ -47,19 +48,19 @@ class _AdminStatsScreenState extends State<AdminStatsScreen> {
                 crossAxisSpacing: 12,
                 childAspectRatio: 1.4,
                 children: [
-                  _StatCard(label: 'Usuarios', value: stats.totalUsers, icon: Icons.people_outline),
+                  _StatCard(label: tr('Usuarios'), value: stats.totalUsers, icon: Icons.people_outline),
                   _StatCard(
-                      label: 'Recetas', value: stats.totalRecipes, icon: Icons.menu_book_outlined),
+                      label: tr('Recetas'), value: stats.totalRecipes, icon: Icons.menu_book_outlined),
                   _StatCard(
-                      label: 'Generadas por IA',
+                      label: tr('Generadas por IA'),
                       value: stats.aiGeneratedRecipes,
                       icon: Icons.auto_awesome),
                   _StatCard(
-                      label: 'Ingredientes',
+                      label: tr('Ingredientes'),
                       value: stats.totalIngredients,
                       icon: Icons.egg_outlined),
                   _StatCard(
-                      label: 'Ítems en inventarios',
+                      label: tr('Ítems en inventarios'),
                       value: stats.totalInventoryItems,
                       icon: Icons.kitchen_outlined),
                 ],
@@ -69,8 +70,8 @@ class _AdminStatsScreenState extends State<AdminStatsScreen> {
             Card(
               child: ListTile(
                 leading: const Icon(Icons.manage_accounts_outlined),
-                title: const Text('Gestionar usuarios'),
-                subtitle: const Text('Ver usuarios, cambiar roles o eliminar'),
+                title: Text(tr('Gestionar usuarios')),
+                subtitle: Text(tr('Ver usuarios, cambiar roles o eliminar')),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const AdminUsersScreen()),
@@ -81,8 +82,8 @@ class _AdminStatsScreenState extends State<AdminStatsScreen> {
             Card(
               child: ListTile(
                 leading: const Icon(Icons.menu_book_outlined),
-                title: const Text('Gestionar recetas'),
-                subtitle: const Text('Ver y eliminar cualquier receta'),
+                title: Text(tr('Gestionar recetas')),
+                subtitle: Text(tr('Ver y eliminar cualquier receta')),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const AdminRecipesScreen()),
@@ -93,8 +94,8 @@ class _AdminStatsScreenState extends State<AdminStatsScreen> {
             Card(
               child: ListTile(
                 leading: const Icon(Icons.egg_outlined),
-                title: const Text('Gestionar ingredientes'),
-                subtitle: const Text('Catálogo, info nutricional y precios'),
+                title: Text(tr('Gestionar ingredientes')),
+                subtitle: Text(tr('Catálogo, info nutricional y precios')),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const AdminIngredientsScreen()),

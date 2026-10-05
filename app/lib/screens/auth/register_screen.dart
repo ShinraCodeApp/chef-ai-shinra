@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../core/i18n.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -42,7 +43,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     return Scaffold(
-      appBar: AppBar(title: const Text('Crear cuenta')),
+      appBar: AppBar(title: Text(tr('Crear cuenta'))),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -57,26 +58,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   children: [
                     TextFormField(
                       controller: _nameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Nombre',
+                      decoration: InputDecoration(
+                        labelText: tr('Nombre'),
                         prefixIcon: Icon(Icons.person_outline),
                       ),
                       validator: (value) =>
                           (value == null || value.trim().isEmpty)
-                              ? 'Ingresá tu nombre'
+                              ? tr('Ingresá tu nombre')
                               : null,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
+                      decoration: InputDecoration(
+                        labelText: tr('Email'),
                         prefixIcon: Icon(Icons.email_outlined),
                       ),
                       validator: (value) =>
                           (value == null || !value.contains('@'))
-                              ? 'Ingresá un email válido'
+                              ? tr('Ingresá un email válido')
                               : null,
                     ),
                     const SizedBox(height: 16),
@@ -84,7 +85,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       controller: _passwordController,
                       obscureText: _obscurePassword,
                       decoration: InputDecoration(
-                        labelText: 'Contraseña',
+                        labelText: tr('Contraseña'),
                         prefixIcon: const Icon(Icons.lock_outline),
                         suffixIcon: IconButton(
                           icon: Icon(_obscurePassword
@@ -95,7 +96,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ),
                       validator: (value) => (value == null || value.length < 8)
-                          ? 'Mínimo 8 caracteres'
+                          ? tr('Mínimo 8 caracteres')
                           : null,
                     ),
                     if (auth.errorMessage != null) ...[
@@ -115,7 +116,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               width: 20,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Crear cuenta'),
+                          : Text(tr('Crear cuenta')),
                     ),
                   ],
                 ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/diet_tags.dart';
 import '../core/recipe_images.dart';
 import '../models/recipe.dart';
+import '../core/i18n.dart';
 
 class RecipeCard extends StatelessWidget {
   final Recipe recipe;
@@ -83,8 +84,8 @@ class RecipeCard extends StatelessWidget {
                     Wrap(
                       spacing: 8,
                       children: [
-                        _chip(context, Icons.timer_outlined, '${recipe.prepTimeMinutes} min'),
-                        _chip(context, Icons.people_outline, '${recipe.servings} porciones'),
+                        _chip(context, Icons.timer_outlined, tr('{prepTimeMinutes} min', {'prepTimeMinutes': recipe.prepTimeMinutes})),
+                        _chip(context, Icons.people_outline, tr('{servings} porciones', {'servings': recipe.servings})),
                         if (recipe.estimatedCostTotal != null)
                           _chip(context, Icons.attach_money,
                               recipe.estimatedCostTotal!.toStringAsFixed(0)),

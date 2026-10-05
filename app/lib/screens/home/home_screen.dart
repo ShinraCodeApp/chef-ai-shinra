@@ -17,6 +17,7 @@ import '../profile/profile_screen.dart';
 import '../admin/admin_stats_screen.dart';
 import '../contacts/contacts_screen.dart';
 import '../../widgets/expiring_banner.dart';
+import '../../core/i18n.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -27,60 +28,60 @@ class HomeScreen extends StatelessWidget {
     final name = auth.currentUser?.name.split(' ').first ?? '';
     final hour = DateTime.now().hour;
     final greeting = hour < 12
-        ? 'Buenos días'
+        ? tr('Buenos días')
         : hour < 19
-            ? 'Buenas tardes'
-            : 'Buenas noches';
+            ? tr('Buenas tardes')
+            : tr('Buenas noches');
 
     final actions = <_QuickAction>[
-      _QuickAction('Generar receta', Icons.auto_awesome,
+      _QuickAction(tr('Generar receta'), Icons.auto_awesome,
           (ctx) => const GenerateRecipeScreen()),
-      _QuickAction('Sacar foto', Icons.camera_alt, (ctx) => const ScanInventoryScreen()),
-      _QuickAction('Escanear ticket', Icons.receipt_long,
+      _QuickAction(tr('Sacar foto'), Icons.camera_alt, (ctx) => const ScanInventoryScreen()),
+      _QuickAction(tr('Escanear ticket'), Icons.receipt_long,
           (ctx) => const ScanReceiptScreen()),
-      _QuickAction('Calorías de mi plato', Icons.restaurant_menu,
+      _QuickAction(tr('Calorías de mi plato'), Icons.restaurant_menu,
           (ctx) => const ScanMealScreen()),
-      _QuickAction('Mi inventario', Icons.kitchen, (ctx) => const InventoryScreen()),
-      _QuickAction('Dictar inventario', Icons.mic, (ctx) => const VoiceInventoryScreen()),
-      _QuickAction('Recetas', Icons.menu_book, (ctx) => const RecipesListScreen()),
-      _QuickAction('Comida proteica', Icons.fitness_center,
+      _QuickAction(tr('Mi inventario'), Icons.kitchen, (ctx) => const InventoryScreen()),
+      _QuickAction(tr('Dictar inventario'), Icons.mic, (ctx) => const VoiceInventoryScreen()),
+      _QuickAction(tr('Recetas'), Icons.menu_book, (ctx) => const RecipesListScreen()),
+      _QuickAction(tr('Comida proteica'), Icons.fitness_center,
           (ctx) => const RecipesListScreen(initialDietTag: 'proteico')),
-      _QuickAction('Comida vegana', Icons.eco,
+      _QuickAction(tr('Comida vegana'), Icons.eco,
           (ctx) => const RecipesListScreen(initialDietTag: 'vegano')),
-      _QuickAction('Hipotiroidismo', Icons.medical_information_outlined,
+      _QuickAction(tr('Hipotiroidismo'), Icons.medical_information_outlined,
           (ctx) => const RecipesListScreen(initialDietTag: 'hipotiroidismo')),
-      _QuickAction('Hipertiroidismo', Icons.medical_information_outlined,
+      _QuickAction(tr('Hipertiroidismo'), Icons.medical_information_outlined,
           (ctx) => const RecipesListScreen(initialDietTag: 'hipertiroidismo')),
-      _QuickAction('Bajo en yodo', Icons.health_and_safety_outlined,
+      _QuickAction(tr('Bajo en yodo'), Icons.health_and_safety_outlined,
           (ctx) => const RecipesListScreen(initialDietTag: 'bajo_yodo')),
-      _QuickAction('Platos anime', Icons.ramen_dining,
+      _QuickAction(tr('Platos anime'), Icons.ramen_dining,
           (ctx) => const RecipesListScreen(initialDietTag: 'anime')),
-      _QuickAction('Favoritos', Icons.favorite, (ctx) => const FavoritesScreen()),
-      _QuickAction('Compartir receta', Icons.share, (ctx) => const CreateRecipeScreen()),
-      _QuickAction('Plan semanal', Icons.calendar_month,
+      _QuickAction(tr('Favoritos'), Icons.favorite, (ctx) => const FavoritesScreen()),
+      _QuickAction(tr('Compartir receta'), Icons.share, (ctx) => const CreateRecipeScreen()),
+      _QuickAction(tr('Plan semanal'), Icons.calendar_month,
           (ctx) => const MealPlansScreen()),
-      _QuickAction('Listas de compras', Icons.shopping_cart,
+      _QuickAction(tr('Listas de compras'), Icons.shopping_cart,
           (ctx) => const ShoppingListsScreen()),
-      _QuickAction('Contactos', Icons.people_outline,
+      _QuickAction(tr('Contactos'), Icons.people_outline,
           (ctx) => const ContactsScreen()),
       // único admin (el servidor exige lo mismo)
       if (auth.currentUser?.role == 'admin' &&
           auth.currentUser?.email.toLowerCase() == 'admin@chefai.com')
-        _QuickAction('Panel Admin', Icons.admin_panel_settings,
+        _QuickAction(tr('Panel Admin'), Icons.admin_panel_settings,
             (ctx) => const AdminStatsScreen()),
     ];
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Chef AI by Shinra'),
+        title: Text(tr('Chef AI by Shinra')),
         actions: [
           PopupMenuButton<ThemeMode>(
             icon: const Icon(Icons.brightness_6_outlined),
             onSelected: (mode) => context.read<ThemeModeController>().setMode(mode),
-            itemBuilder: (_) => const [
-              PopupMenuItem(value: ThemeMode.light, child: Text('Claro')),
-              PopupMenuItem(value: ThemeMode.dark, child: Text('Oscuro')),
-              PopupMenuItem(value: ThemeMode.system, child: Text('Automático')),
+            itemBuilder: (_) => [
+              PopupMenuItem(value: ThemeMode.light, child: Text(tr('Claro'))),
+              PopupMenuItem(value: ThemeMode.dark, child: Text(tr('Oscuro'))),
+              PopupMenuItem(value: ThemeMode.system, child: Text(tr('Automático'))),
             ],
           ),
           IconButton(
@@ -99,7 +100,7 @@ class HomeScreen extends StatelessWidget {
               Text('$greeting, $name.',
                   style: Theme.of(context).textTheme.headlineSmall),
               const SizedBox(height: 4),
-              Text('¿Qué cocinaremos hoy?',
+              Text(tr('¿Qué cocinaremos hoy?'),
                   style: Theme.of(context).textTheme.bodyLarge),
               const SizedBox(height: 16),
               const ExpiringBanner(),

@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../core/api_client.dart';
 import '../core/auth_storage.dart';
 import '../models/user.dart';
+import '../core/i18n.dart';
 
 enum AuthStatus { unknown, authenticated, unauthenticated }
 
@@ -131,6 +132,6 @@ class AuthProvider extends ChangeNotifier {
         return message is List ? message.join(', ') : message.toString();
       }
     }
-    return 'Ocurrió un error. Probá de nuevo.';
+    return tr('Ocurrió un error. Probá de nuevo.');
   }
 }

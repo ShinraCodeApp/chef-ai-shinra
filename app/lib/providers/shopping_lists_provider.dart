@@ -3,6 +3,7 @@ import '../core/api_client.dart';
 import '../core/notifications_service.dart';
 import '../models/missing_ingredient.dart';
 import '../models/shopping_list.dart';
+import '../core/i18n.dart';
 
 class ShoppingListsProvider extends ChangeNotifier {
   final _dio = ApiClient.instance.dio;
@@ -23,7 +24,7 @@ class ShoppingListsProvider extends ChangeNotifier {
           .toList();
       await _updateShoppingReminder();
     } catch (_) {
-      errorMessage = 'No se pudieron cargar las listas de compras.';
+      errorMessage = tr('No se pudieron cargar las listas de compras.');
     } finally {
       isLoading = false;
       notifyListeners();
@@ -46,10 +47,10 @@ class ShoppingListsProvider extends ChangeNotifier {
     await NotificationsService.instance.scheduleAt(
       id: _shoppingReminderId,
       when: when,
-      title: 'Lista de compras pendiente',
+      title: tr('Lista de compras pendiente'),
       body: uncheckedCount == 1
-          ? 'Tenés 1 ítem pendiente en tu lista de compras.'
-          : 'Tenés $uncheckedCount ítems pendientes en tu lista de compras.',
+          ? tr('Tenés 1 ítem pendiente en tu lista de compras.')
+          : tr('Tenés {uncheckedCount} ítems pendientes en tu lista de compras.', {'uncheckedCount': uncheckedCount}),
     );
   }
 
@@ -76,7 +77,7 @@ class ShoppingListsProvider extends ChangeNotifier {
       var targetListId = lists.isNotEmpty ? lists.first.id : null;
       if (targetListId == null) {
         final response =
-            await _dio.post('/shopping-lists', data: {'name': 'Para comprar'});
+            await _dio.post('/shopping-lists', data: {'name': tr('Para comprar')});
         final created = ShoppingList.fromJson(response.data as Map<String, dynamic>);
         lists = [created, ...lists];
         targetListId = created.id;

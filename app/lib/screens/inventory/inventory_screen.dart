@@ -6,13 +6,14 @@ import '../../providers/inventory_provider.dart';
 import '../../widgets/empty_state.dart';
 import '../generate_recipe/voice_inventory_screen.dart';
 import 'add_inventory_item_screen.dart';
+import '../../core/i18n.dart';
 
-const _stateLabels = {
-  'fresh': 'Fresco',
-  'frozen': 'Congelado',
-  'opened': 'Abierto',
-  'cooked': 'Cocido',
-  'expired': 'Vencido',
+Map<String, String> get _stateLabels => {
+  'fresh': tr('Fresco'),
+  'frozen': tr('Congelado'),
+  'opened': tr('Abierto'),
+  'cooked': tr('Cocido'),
+  'expired': tr('Vencido'),
 };
 
 class InventoryScreen extends StatefulWidget {
@@ -36,11 +37,11 @@ class _InventoryScreenState extends State<InventoryScreen> {
     final provider = context.watch<InventoryProvider>();
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mi inventario'),
+        title: Text(tr('Mi inventario')),
         actions: [
           IconButton(
             icon: const Icon(Icons.mic_outlined),
-            tooltip: 'Dictar por voz',
+            tooltip: tr('Dictar por voz'),
             onPressed: () async {
               await Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const VoiceInventoryScreen()),
@@ -57,12 +58,12 @@ class _InventoryScreenState extends State<InventoryScreen> {
               child: provider.items.isEmpty
                   ? ListView(
                       physics: const AlwaysScrollableScrollPhysics(),
-                      children: const [
+                      children: [
                         SizedBox(height: 80),
                         EmptyState(
                           icon: Icons.kitchen_outlined,
                           message:
-                              'Tu inventario está vacío. Agregá lo que tenés en casa.',
+                              tr('Tu inventario está vacío. Agregá lo que tenés en casa.'),
                         ),
                       ],
                     )
@@ -92,7 +93,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
           MaterialPageRoute(builder: (_) => const AddInventoryItemScreen()),
         ),
         icon: const Icon(Icons.add),
-        label: const Text('Agregar'),
+        label: Text(tr('Agregar')),
       ),
     );
   }
@@ -122,16 +123,16 @@ class _ItemSubtitle extends StatelessWidget {
             runSpacing: 4,
             children: [
               if (nutrition.calories != null)
-                _macroChip('${nutrition.calories!.toStringAsFixed(0)} kcal'),
+                _macroChip(tr('{v} kcal', {'v': nutrition.calories!.toStringAsFixed(0)})),
               if (nutrition.proteinG != null)
-                _macroChip('Proteína: ${nutrition.proteinG!.toStringAsFixed(1)}g'),
+                _macroChip(tr('Proteína: {v}g', {'v': nutrition.proteinG!.toStringAsFixed(1)})),
               if (nutrition.carbsG != null)
-                _macroChip('Carbs: ${nutrition.carbsG!.toStringAsFixed(1)}g'),
+                _macroChip(tr('Carbs: {v}g', {'v': nutrition.carbsG!.toStringAsFixed(1)})),
               if (macro != null)
                 Chip(
                   label: Text(macro, style: const TextStyle(fontSize: 11)),
                   visualDensity: VisualDensity.compact,
-                  backgroundColor: macro == 'Proteico'
+                  backgroundColor: macro == tr('Proteico')
                       ? scheme.primaryContainer
                       : scheme.tertiaryContainer,
                   padding: EdgeInsets.zero,

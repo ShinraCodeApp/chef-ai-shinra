@@ -16,6 +16,7 @@ import '../../models/recipe.dart';
 import '../../providers/recipes_provider.dart';
 import '../../providers/shopping_lists_provider.dart';
 import '../../widgets/app_loading.dart';
+import '../../core/i18n.dart';
 
 class RecipeDetailScreen extends StatefulWidget {
   final String? recipeId;
@@ -50,7 +51,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
         }
       });
     }
-    _tts.setLanguage('es-AR');
+    _tts.setLanguage(AppLanguage.instance.ttsLanguage);
     _tts.setCompletionHandler(() {
       if (mounted) setState(() => _isSpeaking = false);
     });
@@ -75,7 +76,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     }
     final aiEstimate = recipe.estimatedCostTotal;
     if (aiEstimate != null) return '≈ \$${aiEstimate.toStringAsFixed(0)}';
-    return 'Sin datos de precios';
+    return tr('Sin datos de precios');
   }
 
   @override
@@ -93,13 +94,13 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     final buffer = StringBuffer()
       ..writeln(recipe.title)
       ..writeln(recipe.description)
-      ..writeln('Ingredientes:');
+      ..writeln(tr('Ingredientes:'));
     for (final ri in recipe.recipeIngredients) {
-      buffer.writeln('${formatQuantity(ri.quantity, ri.unit)} de ${ri.ingredient.name}.');
+      buffer.writeln(tr('{unit} de {ri}.', {'unit': formatQuantity(ri.quantity, ri.unit), 'ri': ri.ingredient.name}));
     }
-    buffer.writeln('Preparación:');
+    buffer.writeln(tr('Preparación:'));
     for (final step in recipe.instructions) {
-      buffer.writeln('Paso ${step.order}. ${step.instruction}');
+      buffer.writeln(tr('Paso {order}. {instruction}', {'order': step.order, 'instruction': step.instruction}));
     }
     setState(() => _isSpeaking = true);
     await _tts.speak(buffer.toString());
@@ -111,19 +112,19 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       ..writeln()
       ..writeln(recipe.description)
       ..writeln()
-      ..writeln('⏱ ${recipe.prepTimeMinutes} min · 🍽 ${recipe.servings} porciones')
+      ..writeln(tr('⏱ {prepTimeMinutes} min · 🍽 {servings} porciones', {'prepTimeMinutes': recipe.prepTimeMinutes, 'servings': recipe.servings}))
       ..writeln()
-      ..writeln('Ingredientes:');
+      ..writeln(tr('Ingredientes:'));
     for (final ri in recipe.recipeIngredients) {
       buffer.writeln('• ${formatQuantity(ri.quantity, ri.unit)} — ${ri.ingredient.name}');
     }
     buffer.writeln();
-    buffer.writeln('Preparación:');
+    buffer.writeln(tr('Preparación:'));
     for (final step in recipe.instructions) {
       buffer.writeln('${step.order}. ${step.instruction}');
     }
     buffer.writeln();
-    buffer.writeln('Compartido desde Chef Ai by Shinra');
+    buffer.writeln(tr('Compartido desde Chef Ai by Shinra'));
     await SharePlus.instance.share(ShareParams(text: buffer.toString(), subject: recipe.title));
   }
 
@@ -138,13 +139,13 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       final missing = await context.read<RecipesProvider>().cook(_recipe!.id);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('¡Buen provecho! Se descontó del inventario.'),
+        SnackBar(
+          content: Text(tr('¡Buen provecho! Se descontó del inventario.')),
         ),
       );
       if (missing.isNotEmpty) {
         await NotificationsService.instance.showNow(
-          title: 'Te quedaste sin ingredientes',
+          title: tr('Te quedaste sin ingredientes'),
           body: missing.map((m) => m.name).join(', '),
         );
         await _offerAddMissingToShoppingList(missing);
@@ -152,7 +153,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No se pudo marcar como cocinada.')),
+          SnackBar(content: Text(tr('No se pudo marcar como cocinada.'))),
         );
       }
     } finally {
@@ -168,11 +169,11 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     final deduct = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('¡Buen provecho!'),
-        content: const Text('¿Descontamos los ingredientes de tu inventario?'),
+        title: Text(tr('¡Buen provecho!')),
+        content: Text(tr('¿Descontamos los ingredientes de tu inventario?')),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('No')),
-          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Sí')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('No'))),
+          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(tr('Sí'))),
         ],
       ),
     );
@@ -187,25 +188,25 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     final missing = missingFromInventory(recipe, inventory.items);
     if (missing.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('¡Tenés todo para esta receta!')),
+        SnackBar(content: Text(tr('¡Tenés todo para esta receta!'))),
       );
       return;
     }
-    await _offerAddMissingToShoppingList(missing, title: 'Te falta para esta receta');
+    await _offerAddMissingToShoppingList(missing, title: tr('Te falta para esta receta'));
   }
 
   Future<void> _offerAddMissingToShoppingList(
       List<MissingIngredient> missing,
-      {String title = 'Te faltaron ingredientes'}) async {
+      {String? title}) async {
     final shouldAdd = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(title),
+        title: Text(title ?? tr('Te faltaron ingredientes')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('¿Los agregamos a tu lista de compras?'),
+            Text(tr('¿Los agregamos a tu lista de compras?')),
             const SizedBox(height: 12),
             ...missing.map(
               (item) => Text(
@@ -215,9 +216,9 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.of(ctx).pop(false), child: const Text('No')),
+              onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('No'))),
           FilledButton(
-              onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Sí')),
+              onPressed: () => Navigator.of(ctx).pop(true), child: Text(tr('Sí'))),
         ],
       ),
     );
@@ -228,8 +229,8 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(added
-            ? 'Ingredientes agregados a tu lista de compras.'
-            : 'No se pudieron agregar a la lista de compras.'),
+            ? tr('Ingredientes agregados a tu lista de compras.')
+            : tr('No se pudieron agregar a la lista de compras.')),
       ),
     );
   }
@@ -239,18 +240,18 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     final recipe = _recipe;
     return Scaffold(
       appBar: AppBar(
-        title: Text(recipe?.title ?? 'Receta'),
+        title: Text(recipe?.title ?? tr('Receta')),
         actions: recipe == null
             ? null
             : [
                 IconButton(
                   icon: Icon(_isSpeaking ? Icons.stop_circle_outlined : Icons.volume_up_outlined),
-                  tooltip: _isSpeaking ? 'Detener' : 'Escuchar receta',
+                  tooltip: _isSpeaking ? tr('Detener') : tr('Escuchar receta'),
                   onPressed: () => _toggleSpeak(recipe),
                 ),
                 IconButton(
                   icon: const Icon(Icons.share_outlined),
-                  tooltip: 'Compartir receta',
+                  tooltip: tr('Compartir receta'),
                   onPressed: () => _shareRecipe(recipe),
                 ),
                 IconButton(
@@ -312,8 +313,8 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                     spacing: 8,
                     runSpacing: 8,
                     children: [
-                      _infoChip(Icons.timer_outlined, '${recipe.prepTimeMinutes} min'),
-                      _infoChip(Icons.people_outline, '${recipe.servings} porciones'),
+                      _infoChip(Icons.timer_outlined, tr('{prepTimeMinutes} min', {'prepTimeMinutes': recipe.prepTimeMinutes})),
+                      _infoChip(Icons.people_outline, tr('{servings} porciones', {'servings': recipe.servings})),
                       _infoChip(Icons.bar_chart, difficultyLabel(recipe.difficulty)),
                       if (recipe.estimatedCostTotal != null)
                         _infoChip(Icons.attach_money,
@@ -322,7 +323,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                     ],
                   ),
                   const SizedBox(height: 20),
-                  Text('Ingredientes', style: Theme.of(context).textTheme.titleMedium),
+                  Text(tr('Ingredientes'), style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 8),
                   ...recipe.recipeIngredients.map(
                     (ri) => Padding(
@@ -338,7 +339,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                     )
                   else if (_costData != null) ...[
                     const SizedBox(height: 20),
-                    Text('Costo estimado', style: Theme.of(context).textTheme.titleMedium),
+                    Text(tr('Costo estimado'), style: Theme.of(context).textTheme.titleMedium),
                     const SizedBox(height: 8),
                     ...(_costData!['breakdown'] as List).map((b) {
                       final lineCost = b['lineCost'] as num?;
@@ -358,7 +359,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             Text(
                               lineCost != null
                                   ? '$approx\$${lineCost.toStringAsFixed(0)}'
-                                  : 'sin precio',
+                                  : tr('sin precio'),
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: lineCost == null
                                         ? Theme.of(context).colorScheme.onSurfaceVariant
@@ -381,8 +382,8 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                         children: [
                           Text(
                             _costData!['hasPartialPrices'] == true
-                                ? 'Total estimado (parcial)'
-                                : 'Total estimado',
+                                ? tr('Total estimado (parcial)')
+                                : tr('Total estimado'),
                             style: Theme.of(context).textTheme.titleSmall?.copyWith(
                                   color: Theme.of(context).colorScheme.onPrimaryContainer,
                                 ),
@@ -399,7 +400,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                     ),
                   ],
                   const SizedBox(height: 20),
-                  Text('Preparación', style: Theme.of(context).textTheme.titleMedium),
+                  Text(tr('Preparación'), style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 8),
                   ...recipe.instructions.map(
                     (step) => Padding(
@@ -409,7 +410,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                   ),
                   if (recipe.tips.isNotEmpty) ...[
                     const SizedBox(height: 20),
-                    Text('Consejos', style: Theme.of(context).textTheme.titleMedium),
+                    Text(tr('Consejos'), style: Theme.of(context).textTheme.titleMedium),
                     const SizedBox(height: 8),
                     ...recipe.tips.map(
                       (tip) => Padding(
@@ -420,20 +421,20 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                   ],
                   if (recipe.nutrition != null) ...[
                     const SizedBox(height: 20),
-                    Text('Nutrición (aprox.)',
+                    Text(tr('Nutrición (aprox.)'),
                         style: Theme.of(context).textTheme.titleMedium),
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 12,
                       runSpacing: 8,
                       children: [
-                        _nutritionChip('Calorías', recipe.nutrition!.calories, ''),
-                        _nutritionChip('Proteína', recipe.nutrition!.proteinG, 'g'),
-                        _nutritionChip('Grasas', recipe.nutrition!.fatG, 'g'),
-                        _nutritionChip('Carbs', recipe.nutrition!.carbsG, 'g'),
-                        _nutritionChip('Fibra', recipe.nutrition!.fiberG, 'g'),
-                        _nutritionChip('Azúcares', recipe.nutrition!.sugarG, 'g'),
-                        _nutritionChip('Sodio', recipe.nutrition!.sodiumMg, 'mg'),
+                        _nutritionChip(tr('Calorías'), recipe.nutrition!.calories, ''),
+                        _nutritionChip(tr('Proteína'), recipe.nutrition!.proteinG, 'g'),
+                        _nutritionChip(tr('Grasas'), recipe.nutrition!.fatG, 'g'),
+                        _nutritionChip(tr('Carbs'), recipe.nutrition!.carbsG, 'g'),
+                        _nutritionChip(tr('Fibra'), recipe.nutrition!.fiberG, 'g'),
+                        _nutritionChip(tr('Azúcares'), recipe.nutrition!.sugarG, 'g'),
+                        _nutritionChip(tr('Sodio'), recipe.nutrition!.sodiumMg, 'mg'),
                       ],
                     ),
                   ],
@@ -445,7 +446,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                         child: FilledButton.tonalIcon(
                           onPressed: () => _openCookingMode(recipe),
                           icon: const Icon(Icons.soup_kitchen_outlined),
-                          label: const Text('Modo cocina'),
+                          label: Text(tr('Modo cocina')),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -453,7 +454,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                         child: OutlinedButton.icon(
                           onPressed: () => _checkMissing(recipe),
                           icon: const Icon(Icons.shopping_cart_outlined),
-                          label: const Text('¿Qué me falta?'),
+                          label: Text(tr('¿Qué me falta?')),
                         ),
                       ),
                     ],
@@ -467,7 +468,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             width: 16,
                             child: CircularProgressIndicator(strokeWidth: 2))
                         : const Icon(Icons.restaurant),
-                    label: const Text('Cocinar'),
+                    label: Text(tr('Cocinar')),
                   ),
                 ],
               ),
@@ -484,7 +485,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     final textTheme = Theme.of(context).textTheme;
     return [
       const SizedBox(height: 20),
-      Text('Dietas y salud: puede ayudar en…', style: textTheme.titleMedium),
+      Text(tr('Dietas y salud: puede ayudar en…'), style: textTheme.titleMedium),
       const SizedBox(height: 8),
       ...conditions.map(
         (c) => Padding(
@@ -509,7 +510,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       ),
       const SizedBox(height: 6),
       Text(
-        'Información orientativa: no reemplaza la indicación de tu médico o nutricionista.',
+        tr('Información orientativa: no reemplaza la indicación de tu médico o nutricionista.'),
         style: textTheme.bodySmall,
       ),
     ];

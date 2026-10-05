@@ -1,3 +1,4 @@
+import '../core/i18n.dart';
 /// Formatea una cantidad de ingrediente eligiendo la unidad más legible:
 /// - Sólidos (g/kg): gramos si es menos de 1 kilo, kilos si es 1 kilo o más.
 /// - Líquidos (ml/l): mililitros si es menos de 1 litro, litros si es 1 litro o más.
@@ -9,16 +10,16 @@ String formatQuantity(double quantity, String unit) {
     case 'g':
       final grams = unit == 'kg' ? quantity * 1000 : quantity;
       if (grams >= 1000) {
-        return '${_trim(grams / 1000)} kg';
+        return tr('{v} kg', {'v': _trim(grams / 1000)});
       }
-      return '${_trim(grams)} g';
+      return tr('{grams} g', {'grams': _trim(grams)});
     case 'l':
     case 'ml':
       final milliliters = unit == 'l' ? quantity * 1000 : quantity;
       if (milliliters >= 1000) {
-        return '${_trim(milliliters / 1000)} l';
+        return tr('{v} l', {'v': _trim(milliliters / 1000)});
       }
-      return '${_trim(milliliters)} ml';
+      return tr('{milliliters} ml', {'milliliters': _trim(milliliters)});
     default:
       return '${_trim(quantity)} $unit';
   }

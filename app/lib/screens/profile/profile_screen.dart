@@ -7,21 +7,22 @@ import '../../models/user.dart';
 import '../../models/weight_log.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/voice_text_field.dart';
+import '../../core/i18n.dart';
 
-const _sexOptions = {'male': 'Masculino', 'female': 'Femenino', 'other': 'Otro'};
-const _goalOptions = {
-  'lose_weight': 'Bajar de peso',
-  'gain_muscle': 'Ganar músculo',
-  'maintain': 'Mantenerme',
-  'eat_healthier': 'Comer más sano',
-  'save_money': 'Ahorrar dinero',
+Map<String, String> get _sexOptions => {'male': tr('Masculino'), 'female': tr('Femenino'), 'other': tr('Otro')};
+Map<String, String> get _goalOptions => {
+  'lose_weight': tr('Bajar de peso'),
+  'gain_muscle': tr('Ganar músculo'),
+  'maintain': tr('Mantenerme'),
+  'eat_healthier': tr('Comer más sano'),
+  'save_money': tr('Ahorrar dinero'),
 };
-const _activityOptions = {
-  'sedentary': 'Sedentario',
-  'light': 'Actividad leve',
-  'moderate': 'Actividad moderada',
-  'active': 'Activo',
-  'very_active': 'Muy activo',
+Map<String, String> get _activityOptions => {
+  'sedentary': tr('Sedentario'),
+  'light': tr('Actividad leve'),
+  'moderate': tr('Actividad moderada'),
+  'active': tr('Activo'),
+  'very_active': tr('Muy activo'),
 };
 const _dietOptions = [
   'proteico',
@@ -146,13 +147,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _loadWeightLogs();
         if (mounted) {
           ScaffoldMessenger.of(context)
-              .showSnackBar(const SnackBar(content: Text('Perfil actualizado.')));
+              .showSnackBar(SnackBar(content: Text(tr('Perfil actualizado.'))));
         }
       }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('No se pudo guardar el perfil.')));
+            .showSnackBar(SnackBar(content: Text(tr('No se pudo guardar el perfil.'))));
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -163,17 +164,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (weightProgress is! Map || weightProgress['isGoalProgress'] != true) return;
     final deltaKg = (weightProgress['deltaKg'] as num).toDouble();
     final message = deltaKg < 0
-        ? '¡Bajaste ${deltaKg.abs().toStringAsFixed(1)} kg! Seguí así 💪'
-        : '¡Sumaste ${deltaKg.toStringAsFixed(1)} kg! Vas por buen camino 💪';
-    await NotificationsService.instance.showNow(title: '¡Buen progreso!', body: message);
+        ? tr('¡Bajaste {v} kg! Seguí así 💪', {'v': deltaKg.abs().toStringAsFixed(1)})
+        : tr('¡Sumaste {v} kg! Vas por buen camino 💪', {'v': deltaKg.toStringAsFixed(1)});
+    await NotificationsService.instance.showNow(title: tr('¡Buen progreso!'), body: message);
     if (!mounted) return;
     await showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('🎉 ¡Felicitaciones!'),
+        title: Text(tr('🎉 ¡Felicitaciones!')),
         content: Text(message),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Genial')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: Text(tr('Genial'))),
         ],
       ),
     );
@@ -189,8 +190,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (mounted) setState(() => _advice = tips);
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('No se pudieron generar los consejos. Probá de nuevo.')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(tr('No se pudieron generar los consejos. Probá de nuevo.'))));
       }
     } finally {
       if (mounted) setState(() => _loadingAdvice = false);
@@ -203,11 +204,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final user = auth.currentUser;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mi perfil'),
+        title: Text(tr('Mi perfil')),
         actions: [
           TextButton(
             onPressed: () => setState(() => _isEditing = !_isEditing),
-            child: Text(_isEditing ? 'Ver' : 'Editar'),
+            child: Text(_isEditing ? tr('Ver') : tr('Editar')),
           ),
           IconButton(
             icon: const Icon(Icons.logout),
@@ -243,16 +244,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final delta = logs.last.weightKg - logs.first.weightKg;
     if (delta == 0) return null;
     final sign = delta < 0 ? '-' : '+';
-    return '$sign${delta.abs().toStringAsFixed(1)} kg desde que empezaste a registrarlo';
+    return tr('{sign}{v} kg desde que empezaste a registrarlo', {'sign': sign, 'v': delta.abs().toStringAsFixed(1)});
   }
 
   Widget _buildReadOnlyView(User? user) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _readRow('Edad', user?.age?.toString()),
-        _readRow('Sexo', user?.sex != null ? _sexOptions[user!.sex] : null),
-        _readRow('Peso', user?.weightKg != null ? '${user!.weightKg} kg' : null),
+        _readRow(tr('Edad'), user?.age?.toString()),
+        _readRow(tr('Sexo'), user?.sex != null ? _sexOptions[user!.sex] : null),
+        _readRow(tr('Peso'), user?.weightKg != null ? tr('{weightKg} kg', {'weightKg': user!.weightKg}) : null),
         if (_weightProgressSummary() != null)
           Padding(
             padding: const EdgeInsets.only(left: 160, bottom: 4),
@@ -265,29 +266,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
           ),
-        _readRow('Altura', user?.heightCm != null ? '${user!.heightCm} cm' : null),
-        _readRow('Objetivo', user?.goal != null ? _goalOptions[user!.goal] : null),
-        _readRow('Actividad física',
+        _readRow(tr('Altura'), user?.heightCm != null ? tr('{heightCm} cm', {'heightCm': user!.heightCm}) : null),
+        _readRow(tr('Objetivo'), user?.goal != null ? _goalOptions[user!.goal] : null),
+        _readRow(tr('Actividad física'),
             user?.activityLevel != null ? _activityOptions[user!.activityLevel] : null),
-        _readRow('Presupuesto mensual',
+        _readRow(tr('Presupuesto mensual'),
             user?.monthlyBudget != null ? '\$${user!.monthlyBudget}' : null),
-        _readRow('Integrantes de familia', user?.familyMembers?.toString()),
+        _readRow(tr('Integrantes de familia'), user?.familyMembers?.toString()),
         const SizedBox(height: 16),
-        Text('Condición de salud / dieta especial',
+        Text(tr('Condición de salud / dieta especial'),
             style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 6),
         Text(
           (user?.healthNotes?.trim().isNotEmpty ?? false)
               ? user!.healthNotes!
-              : 'No cargaste ninguna. Tocá "Editar" para agregarla.',
+              : tr('No cargaste ninguna. Tocá "Editar" para agregarla.'),
           style: Theme.of(context).textTheme.bodyMedium,
         ),
         const SizedBox(height: 20),
-        Text('Preferencias dietarias', style: Theme.of(context).textTheme.titleMedium),
+        Text(tr('Preferencias dietarias'), style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         _readChips((user?.dietPreferences ?? []).map(dietTagLabel).toList()),
         const SizedBox(height: 20),
-        Text('Alergias / intolerancias', style: Theme.of(context).textTheme.titleMedium),
+        Text(tr('Alergias / intolerancias'), style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         _readChips(user?.allergies ?? []),
       ],
@@ -317,7 +318,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _readChips(List<String> values) {
     if (values.isEmpty) {
-      return Text('Ninguna', style: TextStyle(color: Colors.grey.shade600));
+      return Text(tr('Ninguna'), style: TextStyle(color: Colors.grey.shade600));
     }
     return Wrap(
       spacing: 8,
@@ -336,14 +337,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: TextField(
                 controller: _ageController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Edad'),
+                decoration: InputDecoration(labelText: tr('Edad')),
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: DropdownButtonFormField<String>(
                 initialValue: _sex,
-                decoration: const InputDecoration(labelText: 'Sexo'),
+                decoration: InputDecoration(labelText: tr('Sexo')),
                 items: _sexOptions.entries
                     .map((e) => DropdownMenuItem(value: e.key, child: Text(e.value)))
                     .toList(),
@@ -359,7 +360,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: TextField(
                 controller: _weightController,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(labelText: 'Peso (kg)'),
+                decoration: InputDecoration(labelText: tr('Peso (kg)')),
               ),
             ),
             const SizedBox(width: 12),
@@ -367,7 +368,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: TextField(
                 controller: _heightController,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(labelText: 'Altura (cm)'),
+                decoration: InputDecoration(labelText: tr('Altura (cm)')),
               ),
             ),
           ],
@@ -375,7 +376,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SizedBox(height: 12),
         DropdownButtonFormField<String>(
           initialValue: _goal,
-          decoration: const InputDecoration(labelText: 'Objetivo'),
+          decoration: InputDecoration(labelText: tr('Objetivo')),
           items: _goalOptions.entries
               .map((e) => DropdownMenuItem(value: e.key, child: Text(e.value)))
               .toList(),
@@ -384,7 +385,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SizedBox(height: 12),
         DropdownButtonFormField<String>(
           initialValue: _activityLevel,
-          decoration: const InputDecoration(labelText: 'Actividad física'),
+          decoration: InputDecoration(labelText: tr('Actividad física')),
           items: _activityOptions.entries
               .map((e) => DropdownMenuItem(value: e.key, child: Text(e.value)))
               .toList(),
@@ -397,7 +398,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: TextField(
                 controller: _budgetController,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(labelText: 'Presupuesto mensual'),
+                decoration: InputDecoration(labelText: tr('Presupuesto mensual')),
               ),
             ),
             const SizedBox(width: 12),
@@ -405,19 +406,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: TextField(
                 controller: _familyController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Integrantes familia'),
+                decoration: InputDecoration(labelText: tr('Integrantes familia')),
               ),
             ),
           ],
         ),
         const SizedBox(height: 20),
-        Text('Condición de salud / dieta especial',
+        Text(tr('Condición de salud / dieta especial'),
             style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 4),
         Text(
-          'Contanos si tenés alguna enfermedad, estás embarazada o necesitás comer '
+          tr('Contanos si tenés alguna enfermedad, estás embarazada o necesitás comer '
           'diferente por algún motivo que no esté en las opciones de abajo. Lo usamos '
-          'para darte consejos y recomendaciones más precisas.',
+          'para darte consejos y recomendaciones más precisas.'),
           style: Theme.of(context)
               .textTheme
               .bodySmall
@@ -428,13 +429,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
           controller: _healthNotesController,
           maxLines: 3,
           appendMode: true,
-          decoration: const InputDecoration(
-            hintText: 'Ej: gastritis, embarazo, resistencia a la insulina...',
+          decoration: InputDecoration(
+            hintText: tr('Ej: gastritis, embarazo, resistencia a la insulina...'),
             border: OutlineInputBorder(),
           ),
         ),
         const SizedBox(height: 12),
-        Text('Preferencias dietarias', style: Theme.of(context).textTheme.titleMedium),
+        Text(tr('Preferencias dietarias'), style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -449,7 +450,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               .toList(),
         ),
         const SizedBox(height: 20),
-        Text('Alergias / intolerancias', style: Theme.of(context).textTheme.titleMedium),
+        Text(tr('Alergias / intolerancias'), style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -469,7 +470,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: _isSaving
               ? const SizedBox(
                   height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2))
-              : const Text('Guardar cambios'),
+              : Text(tr('Guardar cambios')),
         ),
       ],
     );
@@ -491,7 +492,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const Icon(Icons.lightbulb_outline),
               const SizedBox(width: 8),
               Expanded(
-                child: Text('Consejos para tu situación',
+                child: Text(tr('Consejos para tu situación'),
                     style: Theme.of(context).textTheme.titleMedium),
               ),
             ],
@@ -504,7 +505,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ? const SizedBox(
                       height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2))
                   : const Icon(Icons.auto_awesome),
-              label: Text(_loadingAdvice ? 'Generando...' : 'Ver consejos con IA'),
+              label: Text(_loadingAdvice ? tr('Generando...') : tr('Ver consejos con IA')),
             )
           else
             Column(
@@ -524,7 +525,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 TextButton.icon(
                   onPressed: _loadingAdvice ? null : _fetchAdvice,
                   icon: const Icon(Icons.refresh),
-                  label: const Text('Generar de nuevo'),
+                  label: Text(tr('Generar de nuevo')),
                 ),
               ],
             ),

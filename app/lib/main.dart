@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
+import 'core/i18n.dart';
 import 'core/notifications_service.dart';
 import 'core/theme.dart';
 import 'providers/auth_provider.dart';
@@ -16,6 +17,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('es', null);
   await NotificationsService.instance.initialize();
+  await AppLanguage.instance.load();
   runApp(const ChefAiApp());
 }
 
@@ -34,10 +36,13 @@ class ChefAiApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AdminProvider()),
         ChangeNotifierProvider(create: (_) => ContactsProvider()),
         ChangeNotifierProvider(create: (_) => ThemeModeController()..load()),
+        ChangeNotifierProvider.value(value: AppLanguage.instance),
       ],
-      child: Consumer<ThemeModeController>(
-        builder: (context, themeController, _) => MaterialApp(
-          title: 'Chef AI by Shinra',
+      child: Consumer2<ThemeModeController, AppLanguage>(
+        builder: (context, themeController, language, _) => MaterialApp(
+          // al cambiar el idioma se reconstruye toda la app con los textos nuevos
+          key: ValueKey(language.code),
+          title: tr('Chef AI by Shinra'),
           debugShowCheckedModeBanner: false,
           theme: buildChefAiTheme(Brightness.light),
           darkTheme: buildChefAiTheme(Brightness.dark),

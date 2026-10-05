@@ -6,9 +6,10 @@ import '../../core/ingredients_api.dart';
 import '../../models/ingredient.dart';
 import '../../providers/recipes_provider.dart';
 import 'recipe_detail_screen.dart';
+import '../../core/i18n.dart';
 
 const _units = ['g', 'kg', 'ml', 'l', 'unidad'];
-const _difficulties = {'easy': 'Fácil', 'medium': 'Media', 'hard': 'Difícil'};
+Map<String, String> get _difficulties => {'easy': tr('Fácil'), 'medium': tr('Media'), 'hard': tr('Difícil')};
 const _dietTagOptions = [
   'vegetariano',
   'vegano',
@@ -88,13 +89,13 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
 
   Future<void> _save() async {
     if (_titleController.text.trim().isEmpty) {
-      setState(() => _error = 'Ponele un título a la receta.');
+      setState(() => _error = tr('Ponele un título a la receta.'));
       return;
     }
     final servings = int.tryParse(_servingsController.text);
     final prepTime = int.tryParse(_prepTimeController.text);
     if (servings == null || servings <= 0 || prepTime == null || prepTime < 0) {
-      setState(() => _error = 'Revisá las porciones y el tiempo de preparación.');
+      setState(() => _error = tr('Revisá las porciones y el tiempo de preparación.'));
       return;
     }
     final steps = _stepControllers
@@ -102,7 +103,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
         .where((s) => s.isNotEmpty)
         .toList();
     if (steps.isEmpty) {
-      setState(() => _error = 'Agregá al menos un paso de preparación.');
+      setState(() => _error = tr('Agregá al menos un paso de preparación.'));
       return;
     }
     final ingredients = <Map<String, dynamic>>[];
@@ -117,7 +118,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
       });
     }
     if (ingredients.isEmpty) {
-      setState(() => _error = 'Agregá al menos un ingrediente (elegido de la lista).');
+      setState(() => _error = tr('Agregá al menos un ingrediente (elegido de la lista).'));
       return;
     }
 
@@ -144,7 +145,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
         MaterialPageRoute(builder: (_) => RecipeDetailScreen(initialRecipe: recipe)),
       );
     } catch (_) {
-      setState(() => _error = 'No se pudo guardar la receta.');
+      setState(() => _error = tr('No se pudo guardar la receta.'));
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -153,7 +154,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Compartir mi receta')),
+      appBar: AppBar(title: Text(tr('Compartir mi receta'))),
       body: SafeArea(
         child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -162,12 +163,12 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
           children: [
             TextField(
               controller: _titleController,
-              decoration: const InputDecoration(labelText: 'Título de la receta'),
+              decoration: InputDecoration(labelText: tr('Título de la receta')),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _descriptionController,
-              decoration: const InputDecoration(labelText: 'Descripción'),
+              decoration: InputDecoration(labelText: tr('Descripción')),
               maxLines: 2,
             ),
             const SizedBox(height: 12),
@@ -177,7 +178,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                   child: TextField(
                     controller: _servingsController,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: 'Porciones'),
+                    decoration: InputDecoration(labelText: tr('Porciones')),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -185,7 +186,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                   child: TextField(
                     controller: _prepTimeController,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: 'Tiempo (min)'),
+                    decoration: InputDecoration(labelText: tr('Tiempo (min)')),
                   ),
                 ),
               ],
@@ -196,7 +197,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     initialValue: _difficulty,
-                    decoration: const InputDecoration(labelText: 'Dificultad'),
+                    decoration: InputDecoration(labelText: tr('Dificultad')),
                     items: _difficulties.entries
                         .map((e) => DropdownMenuItem(value: e.key, child: Text(e.value)))
                         .toList(),
@@ -208,13 +209,13 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                   child: TextField(
                     controller: _costController,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(labelText: 'Costo estimado (opcional)'),
+                    decoration: InputDecoration(labelText: tr('Costo estimado (opcional)')),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            Text('Categorías / dietas', style: Theme.of(context).textTheme.titleMedium),
+            Text(tr('Categorías / dietas'), style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -229,7 +230,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                   .toList(),
             ),
             const SizedBox(height: 20),
-            Text('Ingredientes', style: Theme.of(context).textTheme.titleMedium),
+            Text(tr('Ingredientes'), style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             ..._ingredientRows.asMap().entries.map((entry) {
               final index = entry.key;
@@ -247,7 +248,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                             controller: row.nameController,
                             onChanged: (value) => _onIngredientNameChanged(row, value),
                             decoration: InputDecoration(
-                              labelText: 'Ingrediente',
+                              labelText: tr('Ingrediente'),
                               suffixIcon: row.selected != null
                                   ? const Icon(Icons.check_circle, color: Colors.green)
                                   : null,
@@ -260,7 +261,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                             controller: row.quantityController,
                             keyboardType:
                                 const TextInputType.numberWithOptions(decimal: true),
-                            decoration: const InputDecoration(labelText: 'Cant.'),
+                            decoration: InputDecoration(labelText: tr('Cant.')),
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -310,10 +311,10 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
             TextButton.icon(
               onPressed: () => setState(() => _ingredientRows.add(_IngredientRow())),
               icon: const Icon(Icons.add),
-              label: const Text('Agregar ingrediente'),
+              label: Text(tr('Agregar ingrediente')),
             ),
             const SizedBox(height: 20),
-            Text('Preparación', style: Theme.of(context).textTheme.titleMedium),
+            Text(tr('Preparación'), style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             ..._stepControllers.asMap().entries.map((entry) {
               final index = entry.key;
@@ -331,7 +332,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                       child: TextField(
                         controller: entry.value,
                         maxLines: 2,
-                        decoration: const InputDecoration(hintText: 'Describí el paso'),
+                        decoration: InputDecoration(hintText: tr('Describí el paso')),
                       ),
                     ),
                     IconButton(
@@ -350,7 +351,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
             TextButton.icon(
               onPressed: () => setState(() => _stepControllers.add(TextEditingController())),
               icon: const Icon(Icons.add),
-              label: const Text('Agregar paso'),
+              label: Text(tr('Agregar paso')),
             ),
             if (_error != null) ...[
               const SizedBox(height: 12),
@@ -363,7 +364,7 @@ class _CreateRecipeScreenState extends State<CreateRecipeScreen> {
                   ? const SizedBox(
                       height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2))
                   : const Icon(Icons.share),
-              label: const Text('Compartir receta'),
+              label: Text(tr('Compartir receta')),
             ),
           ],
         ),

@@ -4,6 +4,7 @@ import '../../core/diet_tags.dart';
 import '../../models/recipe.dart';
 import '../../providers/recipes_provider.dart';
 import '../recipes/recipe_detail_screen.dart';
+import '../../core/i18n.dart';
 
 /// Panel de admin para ver y eliminar cualquier receta de la plataforma
 /// (propias, compartidas por usuarios o generadas por IA).
@@ -38,14 +39,14 @@ class _AdminRecipesScreenState extends State<AdminRecipesScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Eliminar receta'),
-        content: Text('¿Seguro que querés eliminar "${recipe.title}"?'),
+        title: Text(tr('Eliminar receta')),
+        content: Text(tr('¿Seguro que querés eliminar "{title}"?', {'title': recipe.title})),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancelar')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancelar'))),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Theme.of(ctx).colorScheme.error),
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Eliminar'),
+            child: Text(tr('Eliminar')),
           ),
         ],
       ),
@@ -54,7 +55,7 @@ class _AdminRecipesScreenState extends State<AdminRecipesScreen> {
     final ok = await context.read<RecipesProvider>().deleteRecipe(recipe.id);
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(ok ? 'Receta eliminada.' : 'No se pudo eliminar la receta.')),
+      SnackBar(content: Text(ok ? tr('Receta eliminada.') : tr('No se pudo eliminar la receta.'))),
     );
   }
 
@@ -62,15 +63,15 @@ class _AdminRecipesScreenState extends State<AdminRecipesScreen> {
   Widget build(BuildContext context) {
     final provider = context.watch<RecipesProvider>();
     return Scaffold(
-      appBar: AppBar(title: const Text('Recetas')),
+      appBar: AppBar(title: Text(tr('Recetas'))),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(12),
             child: TextField(
               controller: _searchController,
-              decoration: const InputDecoration(
-                hintText: 'Buscar receta…',
+              decoration: InputDecoration(
+                hintText: tr('Buscar receta…'),
                 prefixIcon: Icon(Icons.search),
               ),
               onSubmitted: (value) {
@@ -95,7 +96,7 @@ class _AdminRecipesScreenState extends State<AdminRecipesScreen> {
                               child: Center(
                                 child: TextButton(
                                   onPressed: provider.loadNextPage,
-                                  child: const Text('Cargar más'),
+                                  child: Text(tr('Cargar más')),
                                 ),
                               ),
                             );
@@ -107,8 +108,8 @@ class _AdminRecipesScreenState extends State<AdminRecipesScreen> {
                           title: Text(recipe.title),
                           subtitle: Text(
                             [
-                              if (recipe.isAiGenerated) 'Generada por IA',
-                              '${recipe.servings} porciones',
+                              if (recipe.isAiGenerated) tr('Generada por IA'),
+                              tr('{servings} porciones', {'servings': recipe.servings}),
                               ...recipe.dietTags.map(dietTagLabel),
                             ].join(' · '),
                           ),
@@ -120,7 +121,7 @@ class _AdminRecipesScreenState extends State<AdminRecipesScreen> {
                           trailing: IconButton(
                             icon: Icon(Icons.delete_outline,
                                 color: Theme.of(context).colorScheme.error),
-                            tooltip: 'Eliminar receta',
+                            tooltip: tr('Eliminar receta'),
                             onPressed: () => _delete(recipe),
                           ),
                         );

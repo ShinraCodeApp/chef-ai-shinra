@@ -1,6 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/inventory_item.dart';
 import 'notifications_service.dart';
+import '../core/i18n.dart';
 
 /// Días hasta que vence (0 = hoy, negativo = ya venció). null si no tiene fecha.
 int? daysUntilExpiry(InventoryItem item, DateTime now) {
@@ -29,9 +30,9 @@ List<InventoryItem> expiringSoon(
 }
 
 String expiryLabel(int days) => switch (days) {
-      0 => 'vence hoy',
-      1 => 'vence mañana',
-      _ => 'vence en $days días',
+      0 => tr('vence hoy'),
+      1 => tr('vence mañana'),
+      _ => tr('vence en {days} días', {'days': days}),
     };
 
 /// Una notificación programada: a las 10 hs del día anterior y del mismo día
@@ -55,14 +56,14 @@ List<ExpiryReminder> planExpiryReminders(List<InventoryItem> items, DateTime now
     final days = daysUntilExpiry(item, now)!;
     final expiry = DateTime(now.year, now.month, now.day).add(Duration(days: days));
     final name = item.ingredient.name;
-    for (final (offset, label) in [(1, 'vence mañana'), (0, 'vence hoy')]) {
+    for (final (offset, label) in [(1, tr('vence mañana')), (0, tr('vence hoy'))]) {
       final when = expiry.subtract(Duration(days: offset)).add(const Duration(hours: 10));
       if (!when.isAfter(now) || reminders.length >= _maxReminders) continue;
       reminders.add(ExpiryReminder(
         _firstId + reminders.length,
         when,
         '${name[0].toUpperCase()}${name.substring(1)}: $label',
-        'Abrí Chef AI y cociná algo con lo que está por vencer.',
+        tr('Abrí Chef AI y cociná algo con lo que está por vencer.'),
       ));
     }
   }

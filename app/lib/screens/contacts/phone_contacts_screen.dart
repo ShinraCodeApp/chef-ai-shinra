@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/contact.dart';
 import '../../providers/contacts_provider.dart';
+import '../../core/i18n.dart';
 
 class PhoneContactsScreen extends StatefulWidget {
   const PhoneContactsScreen({super.key});
@@ -31,7 +32,7 @@ class _PhoneContactsScreenState extends State<PhoneContactsScreen> {
       setState(() {
         _results = [];
         _loading = false;
-        _error = 'No se encontraron contactos con la app, o no se otorgó el permiso.';
+        _error = tr('No se encontraron contactos con la app, o no se otorgó el permiso.');
       });
     } else {
       setState(() { _results = results; _loading = false; });
@@ -46,7 +47,7 @@ class _PhoneContactsScreenState extends State<PhoneContactsScreen> {
     if (error == null) {
       setState(() => _invited.add(contact.userId));
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Invitación enviada a ${contact.name}')),
+        SnackBar(content: Text(tr('Invitación enviada a {contact}', {'contact': contact.name}))),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
@@ -57,23 +58,23 @@ class _PhoneContactsScreenState extends State<PhoneContactsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Contactos con Chef AI'),
+        title: Text(tr('Contactos con Chef AI')),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            tooltip: 'Volver a escanear',
+            tooltip: tr('Volver a escanear'),
             onPressed: _loading ? null : _scan,
           ),
         ],
       ),
       body: _loading
-          ? const Center(
+          ? Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   CircularProgressIndicator(),
                   SizedBox(height: 16),
-                  Text('Buscando contactos con la app…'),
+                  Text(tr('Buscando contactos con la app…')),
                 ],
               ),
             )
@@ -107,7 +108,7 @@ class _PhoneContactsScreenState extends State<PhoneContactsScreen> {
                         subtitle: Text(c.email),
                         trailing: alreadyContact
                             ? Chip(
-                                label: const Text('Contacto'),
+                                label: Text(tr('Contacto')),
                                 avatar: Icon(
                                   Icons.check_circle,
                                   size: 16,
@@ -115,7 +116,7 @@ class _PhoneContactsScreenState extends State<PhoneContactsScreen> {
                                 ),
                               )
                             : alreadyInvited
-                                ? const Chip(label: Text('Invitado'))
+                                ? Chip(label: Text(tr('Invitado')))
                                 : isSending
                                     ? const SizedBox(
                                         width: 24,
@@ -124,7 +125,7 @@ class _PhoneContactsScreenState extends State<PhoneContactsScreen> {
                                       )
                                     : FilledButton.tonal(
                                         onPressed: () => _invite(c),
-                                        child: const Text('Invitar'),
+                                        child: Text(tr('Invitar')),
                                       ),
                       ),
                     );

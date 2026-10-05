@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../models/ingredient.dart';
 import '../../providers/admin_provider.dart';
 import 'admin_ingredient_edit_screen.dart';
+import '../../core/i18n.dart';
 
 /// Panel de admin para ver, crear, editar y eliminar ingredientes del catálogo.
 class AdminIngredientsScreen extends StatefulWidget {
@@ -33,15 +34,15 @@ class _AdminIngredientsScreenState extends State<AdminIngredientsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Eliminar ingrediente'),
+        title: Text(tr('Eliminar ingrediente')),
         content: Text(
-            '¿Seguro que querés eliminar "${ingredient.name}"? Puede fallar si está en uso en recetas o inventarios.'),
+            tr('¿Seguro que querés eliminar "{ingredient}"? Puede fallar si está en uso en recetas o inventarios.', {'ingredient': ingredient.name})),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancelar')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancelar'))),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Theme.of(ctx).colorScheme.error),
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Eliminar'),
+            child: Text(tr('Eliminar')),
           ),
         ],
       ),
@@ -50,7 +51,7 @@ class _AdminIngredientsScreenState extends State<AdminIngredientsScreen> {
     final ok = await context.read<AdminProvider>().deleteIngredient(ingredient.id);
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(ok ? 'Ingrediente eliminado.' : 'No se pudo eliminar (¿está en uso?).')),
+      SnackBar(content: Text(ok ? tr('Ingrediente eliminado.') : tr('No se pudo eliminar (¿está en uso?).'))),
     );
   }
 
@@ -59,11 +60,11 @@ class _AdminIngredientsScreenState extends State<AdminIngredientsScreen> {
     final provider = context.watch<AdminProvider>();
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ingredientes'),
+        title: Text(tr('Ingredientes')),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            tooltip: 'Nuevo ingrediente',
+            tooltip: tr('Nuevo ingrediente'),
             onPressed: () async {
               await Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const AdminIngredientEditScreen()),
@@ -79,8 +80,8 @@ class _AdminIngredientsScreenState extends State<AdminIngredientsScreen> {
             padding: const EdgeInsets.all(12),
             child: TextField(
               controller: _searchController,
-              decoration: const InputDecoration(
-                hintText: 'Buscar ingrediente…',
+              decoration: InputDecoration(
+                hintText: tr('Buscar ingrediente…'),
                 prefixIcon: Icon(Icons.search),
               ),
               onSubmitted: (value) {
@@ -105,7 +106,7 @@ class _AdminIngredientsScreenState extends State<AdminIngredientsScreen> {
                               child: Center(
                                 child: TextButton(
                                   onPressed: provider.loadNextIngredientsPage,
-                                  child: const Text('Cargar más'),
+                                  child: Text(tr('Cargar más')),
                                 ),
                               ),
                             );
@@ -127,7 +128,7 @@ class _AdminIngredientsScreenState extends State<AdminIngredientsScreen> {
                           trailing: IconButton(
                             icon: Icon(Icons.delete_outline,
                                 color: Theme.of(context).colorScheme.error),
-                            tooltip: 'Eliminar ingrediente',
+                            tooltip: tr('Eliminar ingrediente'),
                             onPressed: () => _delete(ingredient),
                           ),
                         );

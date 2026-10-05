@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../models/contact.dart';
 import '../../models/inventory_item.dart';
 import '../../providers/contacts_provider.dart';
+import '../../core/i18n.dart';
 
 class ContactInventoryScreen extends StatefulWidget {
   final Contact contact;
@@ -31,7 +32,7 @@ class _ContactInventoryScreenState extends State<ContactInventoryScreen> {
     setState(() {
       _items = items;
       _loading = false;
-      if (items == null) _error = 'No se pudo cargar el inventario';
+      if (items == null) _error = tr('No se pudo cargar el inventario');
     });
   }
 
@@ -39,7 +40,7 @@ class _ContactInventoryScreenState extends State<ContactInventoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Inventario de ${widget.contact.name}'),
+        title: Text(tr('Inventario de {contact}', {'contact': widget.contact.name})),
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
@@ -50,9 +51,9 @@ class _ContactInventoryScreenState extends State<ContactInventoryScreen> {
                   child: _items!.isEmpty
                       ? ListView(
                           physics: const AlwaysScrollableScrollPhysics(),
-                          children: const [
+                          children: [
                             SizedBox(height: 80),
-                            Center(child: Text('El inventario de este contacto está vacío')),
+                            Center(child: Text(tr('El inventario de este contacto está vacío'))),
                           ],
                         )
                       : ListView.builder(

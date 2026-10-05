@@ -3,13 +3,14 @@ import 'package:provider/provider.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../../core/api_client.dart';
 import '../../providers/inventory_provider.dart';
+import '../../core/i18n.dart';
 
-const _stateLabels = {
-  'fresh': 'Fresco',
-  'frozen': 'Congelado',
-  'opened': 'Abierto',
-  'expired': 'Vencido',
-  'unknown': 'Sin determinar',
+Map<String, String> get _stateLabels => {
+  'fresh': tr('Fresco'),
+  'frozen': tr('Congelado'),
+  'opened': tr('Abierto'),
+  'expired': tr('Vencido'),
+  'unknown': tr('Sin determinar'),
 };
 
 class _DetectedItem {
@@ -59,7 +60,7 @@ class _VoiceInventoryScreenState extends State<VoiceInventoryScreen> {
 
   Future<void> _initSpeech() async {
     final available = await _speech.initialize(
-      onError: (error) => setState(() => _error = 'Error de reconocimiento de voz: ${error.errorMsg}'),
+      onError: (error) => setState(() => _error = tr('Error de reconocimiento de voz: {errorMsg}', {'errorMsg': error.errorMsg})),
     );
     if (mounted) setState(() => _speechAvailable = available);
   }
@@ -71,7 +72,7 @@ class _VoiceInventoryScreenState extends State<VoiceInventoryScreen> {
       return;
     }
     if (!_speechAvailable) {
-      setState(() => _error = 'El reconocimiento de voz no está disponible en este dispositivo.');
+      setState(() => _error = tr('El reconocimiento de voz no está disponible en este dispositivo.'));
       return;
     }
     setState(() {
@@ -82,14 +83,14 @@ class _VoiceInventoryScreenState extends State<VoiceInventoryScreen> {
       onResult: (result) {
         setState(() => _textController.text = result.recognizedWords);
       },
-      listenOptions: stt.SpeechListenOptions(localeId: 'es_AR'),
+      listenOptions: stt.SpeechListenOptions(localeId: AppLanguage.instance.speechLocale),
     );
   }
 
   Future<void> _analyze() async {
     final text = _textController.text.trim();
     if (text.isEmpty) {
-      setState(() => _error = 'Dictá o escribí qué alimentos tenés primero.');
+      setState(() => _error = tr('Dictá o escribí qué alimentos tenés primero.'));
       return;
     }
     setState(() {
@@ -113,7 +114,7 @@ class _VoiceInventoryScreenState extends State<VoiceInventoryScreen> {
       setState(() => _results = items);
     } catch (_) {
       setState(() => _error =
-          'No se pudo interpretar el dictado. Revisá que el backend tenga GEMINI_API_KEY configurada.');
+          tr('No se pudo interpretar el dictado. Revisá que el backend tenga GEMINI_API_KEY configurada.'));
     } finally {
       if (mounted) setState(() => _isAnalyzing = false);
     }
@@ -139,7 +140,7 @@ class _VoiceInventoryScreenState extends State<VoiceInventoryScreen> {
     if (!mounted) return;
     setState(() => _isSaving = false);
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$successCount ítems agregados al inventario.')),
+      SnackBar(content: Text(tr('{successCount} ítems agregados al inventario.', {'successCount': successCount}))),
     );
     Navigator.of(context).pop();
   }
@@ -154,7 +155,7 @@ class _VoiceInventoryScreenState extends State<VoiceInventoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Dictar inventario')),
+      appBar: AppBar(title: Text(tr('Dictar inventario'))),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -162,15 +163,15 @@ class _VoiceInventoryScreenState extends State<VoiceInventoryScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Decí qué alimentos tenés, por ejemplo: "tengo dos kilos de papa, una docena de huevos y medio litro de leche"',
+                tr('Decí qué alimentos tenés, por ejemplo: "tengo dos kilos de papa, una docena de huevos y medio litro de leche"'),
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: _textController,
                 maxLines: 4,
-                decoration: const InputDecoration(
-                  hintText: 'Lo que dictes aparece acá (también podés escribirlo)',
+                decoration: InputDecoration(
+                  hintText: tr('Lo que dictes aparece acá (también podés escribirlo)'),
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -178,7 +179,7 @@ class _VoiceInventoryScreenState extends State<VoiceInventoryScreen> {
               FilledButton.icon(
                 onPressed: _toggleListening,
                 icon: Icon(_isListening ? Icons.stop : Icons.mic),
-                label: Text(_isListening ? 'Detener' : 'Empezar a dictar'),
+                label: Text(_isListening ? tr('Detener') : tr('Empezar a dictar')),
                 style: _isListening
                     ? FilledButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.error)
@@ -191,7 +192,7 @@ class _VoiceInventoryScreenState extends State<VoiceInventoryScreen> {
                     ? const SizedBox(
                         height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2))
                     : const Icon(Icons.auto_awesome),
-                label: const Text('Interpretar con IA'),
+                label: Text(tr('Interpretar con IA')),
               ),
               if (_error != null) ...[
                 const SizedBox(height: 12),
@@ -199,10 +200,10 @@ class _VoiceInventoryScreenState extends State<VoiceInventoryScreen> {
               ],
               if (_results != null) ...[
                 const SizedBox(height: 24),
-                Text('Ingredientes detectados', style: Theme.of(context).textTheme.titleMedium),
+                Text(tr('Ingredientes detectados'), style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 8),
                 if (_results!.isEmpty)
-                  const Text('No se detectó ningún ingrediente en el dictado.')
+                  Text(tr('No se detectó ningún ingrediente en el dictado.'))
                 else
                   ..._results!.map((item) => Card(
                         child: CheckboxListTile(
@@ -239,7 +240,7 @@ class _VoiceInventoryScreenState extends State<VoiceInventoryScreen> {
                             width: 16,
                             child: CircularProgressIndicator(strokeWidth: 2))
                         : const Icon(Icons.add_shopping_cart),
-                    label: const Text('Agregar seleccionados al inventario'),
+                    label: Text(tr('Agregar seleccionados al inventario')),
                   ),
                 ],
               ],

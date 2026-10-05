@@ -4,6 +4,7 @@ import '../../models/contact.dart';
 import '../../providers/contacts_provider.dart';
 import 'contact_inventory_screen.dart';
 import 'phone_contacts_screen.dart';
+import '../../core/i18n.dart';
 
 class ContactsScreen extends StatefulWidget {
   const ContactsScreen({super.key});
@@ -37,7 +38,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
     if (error == null) {
       _emailController.clear();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Invitación enviada')),
+        SnackBar(content: Text(tr('Invitación enviada'))),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
@@ -48,11 +49,11 @@ class _ContactsScreenState extends State<ContactsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Eliminar contacto'),
-        content: Text('¿Eliminar a ${contact.name} de tus contactos?'),
+        title: Text(tr('Eliminar contacto')),
+        content: Text(tr('¿Eliminar a {contact} de tus contactos?', {'contact': contact.name})),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancelar')),
-          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Eliminar')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancelar'))),
+          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(tr('Eliminar'))),
         ],
       ),
     );
@@ -69,11 +70,11 @@ class _ContactsScreenState extends State<ContactsScreen> {
     final provider = context.watch<ContactsProvider>();
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Contactos'),
+        title: Text(tr('Contactos')),
         actions: [
           IconButton(
             icon: const Icon(Icons.contacts_outlined),
-            tooltip: 'Buscar contactos con la app',
+            tooltip: tr('Buscar contactos con la app'),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const PhoneContactsScreen()),
             ),
@@ -89,10 +90,10 @@ class _ContactsScreenState extends State<ContactsScreen> {
                 padding: const EdgeInsets.all(16),
                 children: [
                   // Invitar por email
-                  Text('Invitar por email', style: Theme.of(context).textTheme.titleMedium),
+                  Text(tr('Invitar por email'), style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 4),
                   Text(
-                    'O usá el ícono de contactos arriba para ver quiénes ya tienen la app.',
+                    tr('O usá el ícono de contactos arriba para ver quiénes ya tienen la app.'),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
@@ -104,7 +105,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                         child: TextField(
                           controller: _emailController,
                           keyboardType: TextInputType.emailAddress,
-                          decoration: const InputDecoration(hintText: 'Email del usuario…'),
+                          decoration: InputDecoration(hintText: tr('Email del usuario…')),
                           onSubmitted: (_) => _sendInvite(),
                         ),
                       ),
@@ -119,7 +120,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
 
                   // Invitaciones pendientes recibidas
                   if (provider.pendingInvites.isNotEmpty) ...[
-                    Text('Invitaciones pendientes',
+                    Text(tr('Invitaciones pendientes'),
                         style: Theme.of(context).textTheme.titleMedium),
                     const SizedBox(height: 8),
                     ...provider.pendingInvites.map((inv) => Card(
@@ -132,12 +133,12 @@ class _ContactsScreenState extends State<ContactsScreen> {
                               children: [
                                 IconButton(
                                   icon: const Icon(Icons.check, color: Colors.green),
-                                  tooltip: 'Aceptar',
+                                  tooltip: tr('Aceptar'),
                                   onPressed: () => provider.respondInvite(inv.contactId, true),
                                 ),
                                 IconButton(
                                   icon: const Icon(Icons.close, color: Colors.red),
-                                  tooltip: 'Rechazar',
+                                  tooltip: tr('Rechazar'),
                                   onPressed: () => provider.respondInvite(inv.contactId, false),
                                 ),
                               ],
@@ -148,14 +149,14 @@ class _ContactsScreenState extends State<ContactsScreen> {
                   ],
 
                   // Contactos aceptados
-                  Text('Mis contactos', style: Theme.of(context).textTheme.titleMedium),
+                  Text(tr('Mis contactos'), style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 8),
                   if (provider.contacts.isEmpty)
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 24),
                       child: Center(
                         child: Text(
-                          'Todavía no tenés contactos.\nInvitá a alguien por email o buscá tus contactos del celular.',
+                          tr('Todavía no tenés contactos.\nInvitá a alguien por email o buscá tus contactos del celular.'),
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -194,12 +195,12 @@ class _ContactsScreenState extends State<ContactsScreen> {
                                         ? Theme.of(context).colorScheme.error
                                         : null,
                                   ),
-                                  tooltip: c.isFavorite ? 'Quitar favorito' : 'Agregar a favoritos',
+                                  tooltip: c.isFavorite ? tr('Quitar favorito') : tr('Agregar a favoritos'),
                                   onPressed: () => provider.toggleFavorite(c.contactId),
                                 ),
                                 IconButton(
                                   icon: const Icon(Icons.delete_outline),
-                                  tooltip: 'Eliminar contacto',
+                                  tooltip: tr('Eliminar contacto'),
                                   onPressed: () => _removeContact(c),
                                 ),
                               ],

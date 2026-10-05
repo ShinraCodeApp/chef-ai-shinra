@@ -12,24 +12,25 @@ import '../../widgets/empty_state.dart';
 import '../profile/profile_screen.dart';
 import '../recipes/recipe_detail_screen.dart';
 import '../shopping_lists/shopping_lists_screen.dart';
+import '../../core/i18n.dart';
 
-const _mealTypeLabels = {
-  'breakfast': 'Desayuno',
-  'mid_morning': 'Colación mañana',
-  'lunch': 'Almuerzo',
-  'post_workout': 'Post-entreno',
-  'snack': 'Merienda',
-  'dinner': 'Cena',
+Map<String, String> get _mealTypeLabels => {
+  'breakfast': tr('Desayuno'),
+  'mid_morning': tr('Colación mañana'),
+  'lunch': tr('Almuerzo'),
+  'post_workout': tr('Post-entreno'),
+  'snack': tr('Merienda'),
+  'dinner': tr('Cena'),
 };
 
 const _defaultMealTypes = ['breakfast', 'lunch', 'snack', 'dinner'];
 
-const _goalLabels = {
-  'lose_weight': 'Bajar de peso',
-  'gain_muscle': 'Ganar músculo',
-  'maintain': 'Mantenerme',
-  'eat_healthier': 'Comer más sano',
-  'save_money': 'Ahorrar dinero',
+Map<String, String> get _goalLabels => {
+  'lose_weight': tr('Bajar de peso'),
+  'gain_muscle': tr('Ganar músculo'),
+  'maintain': tr('Mantenerme'),
+  'eat_healthier': tr('Comer más sano'),
+  'save_money': tr('Ahorrar dinero'),
 };
 
 class MealPlansScreen extends StatefulWidget {
@@ -64,7 +65,7 @@ class _MealPlansScreenState extends State<MealPlansScreen> {
       setState(() => _isGenerating = false);
       if (plan == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No se pudo generar el plan.')),
+          SnackBar(content: Text(tr('No se pudo generar el plan.'))),
         );
       }
     }
@@ -78,8 +79,8 @@ class _MealPlansScreenState extends State<MealPlansScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(streak > 1
-              ? '¡Completaste el día! 🔥 Racha: $streak días seguidos'
-              : '¡Completaste el día! 🎉'),
+              ? tr('¡Completaste el día! 🔥 Racha: {streak} días seguidos', {'streak': streak})
+              : tr('¡Completaste el día! 🎉')),
         ),
       );
     }
@@ -94,7 +95,7 @@ class _MealPlansScreenState extends State<MealPlansScreen> {
           .push(MaterialPageRoute(builder: (_) => const ShoppingListsScreen()));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No se pudo generar la lista de compras.')),
+        SnackBar(content: Text(tr('No se pudo generar la lista de compras.'))),
       );
     }
   }
@@ -104,7 +105,7 @@ class _MealPlansScreenState extends State<MealPlansScreen> {
     final provider = context.watch<MealPlansProvider>();
     final user = context.watch<AuthProvider>().currentUser;
     return Scaffold(
-      appBar: AppBar(title: const Text('Plan semanal')),
+      appBar: AppBar(title: Text(tr('Plan semanal'))),
       body: Column(
         children: [
           if (user != null) _DietSummaryCard(user: user),
@@ -116,11 +117,11 @@ class _MealPlansScreenState extends State<MealPlansScreen> {
               child: provider.mealPlans.isEmpty
               ? ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  children: const [
+                  children: [
                     SizedBox(height: 80),
                     EmptyState(
                       icon: Icons.calendar_month_outlined,
-                      message: 'Todavía no generaste ningún plan de comidas.',
+                      message: tr('Todavía no generaste ningún plan de comidas.'),
                     ),
                   ],
                 )
@@ -148,8 +149,8 @@ class _MealPlansScreenState extends State<MealPlansScreen> {
                       child: ExpansionTile(
                         title: Text('${plan.startDate} → ${plan.endDate}'),
                         subtitle: Text(streak > 0
-                            ? '${plan.entries.length} comidas planificadas · 🔥 $streak días seguidos'
-                            : '${plan.entries.length} comidas planificadas'),
+                            ? tr('{plan} comidas planificadas · 🔥 {streak} días seguidos', {'plan': plan.entries.length, 'streak': streak})
+                            : tr('{plan} comidas planificadas', {'plan': plan.entries.length})),
                         children: [
                           ...sortedDates.map((dateKey) => Padding(
                                 padding: const EdgeInsets.symmetric(
@@ -191,7 +192,7 @@ class _MealPlansScreenState extends State<MealPlansScreen> {
                             child: OutlinedButton.icon(
                               onPressed: () => _generateShoppingList(plan.id),
                               icon: const Icon(Icons.shopping_cart_outlined),
-                              label: const Text('Generar lista de compras'),
+                              label: Text(tr('Generar lista de compras')),
                             ),
                           ),
                         ],
@@ -209,7 +210,7 @@ class _MealPlansScreenState extends State<MealPlansScreen> {
             ? const SizedBox(
                 height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2))
             : const Icon(Icons.auto_awesome),
-        label: const Text('Generar plan'),
+        label: Text(tr('Generar plan')),
       ),
     );
   }
@@ -217,7 +218,7 @@ class _MealPlansScreenState extends State<MealPlansScreen> {
   String _formatDayHeader(String dateKey) {
     final date = DateTime.tryParse(dateKey);
     if (date == null) return dateKey;
-    final formatted = DateFormat('EEEE d/MM', 'es').format(date);
+    final formatted = DateFormat(tr('EEEE d/MM'), 'es').format(date);
     return formatted[0].toUpperCase() + formatted.substring(1);
   }
 }
@@ -242,28 +243,28 @@ class _GeneratePlanDialogState extends State<_GeneratePlanDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Generar plan semanal'),
+      title: Text(tr('Generar plan semanal')),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('¿Para cuántos días?'),
+            Text(tr('¿Para cuántos días?')),
             const SizedBox(height: 8),
             SegmentedButton<int>(
-              segments: const [
-                ButtonSegment(value: 7, label: Text('7 días')),
-                ButtonSegment(value: 15, label: Text('15 días')),
-                ButtonSegment(value: 30, label: Text('30 días')),
+              segments: [
+                ButtonSegment(value: 7, label: Text(tr('7 días'))),
+                ButtonSegment(value: 15, label: Text(tr('15 días'))),
+                ButtonSegment(value: 30, label: Text(tr('30 días'))),
               ],
               selected: {_days},
               onSelectionChanged: (s) => setState(() => _days = s.first),
             ),
             const SizedBox(height: 20),
-            const Text('¿Qué comidas incluye el día?'),
-            const Text(
-              'Sumá colación de media mañana o post-entreno para planes con más comidas, '
-              'como los de fisicoculturismo.',
+            Text(tr('¿Qué comidas incluye el día?')),
+            Text(
+              tr('Sumá colación de media mañana o post-entreno para planes con más comidas, '
+              'como los de fisicoculturismo.'),
               style: TextStyle(fontSize: 12, color: Colors.grey),
             ),
             ..._mealTypeLabels.entries.map((entry) => CheckboxListTile(
@@ -285,14 +286,14 @@ class _GeneratePlanDialogState extends State<_GeneratePlanDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancelar'),
+          child: Text(tr('Cancelar')),
         ),
         FilledButton(
           onPressed: _selectedMealTypes.isEmpty
               ? null
               : () => Navigator.of(context)
                   .pop(_GenerateChoice(_days, _selectedMealTypes.toList())),
-          child: const Text('Generar'),
+          child: Text(tr('Generar')),
         ),
       ],
     );
@@ -317,7 +318,7 @@ class _DietSummaryCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Mi objetivo: ${goalLabel ?? 'sin definir'}',
+                  Text(tr('Mi objetivo: {definir}', {'definir': goalLabel ?? tr('sin definir')}),
                       style: Theme.of(context).textTheme.titleSmall),
                   if (user.dietPreferences.isNotEmpty) ...[
                     const SizedBox(height: 6),
@@ -338,7 +339,7 @@ class _DietSummaryCard extends StatelessWidget {
             TextButton(
               onPressed: () => Navigator.of(context)
                   .push(MaterialPageRoute(builder: (_) => const ProfileScreen())),
-              child: const Text('Editar'),
+              child: Text(tr('Editar')),
             ),
           ],
         ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import 'register_screen.dart';
+import '../../core/i18n.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -53,13 +54,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         size: 64, color: Theme.of(context).colorScheme.primary),
                     const SizedBox(height: 12),
                     Text(
-                      'Chef AI by Shinra',
+                      tr('Chef AI by Shinra'),
                       style: Theme.of(context).textTheme.headlineMedium,
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Convierte tus ingredientes en platos increíbles.',
+                      tr('Convierte tus ingredientes en platos increíbles.'),
                       style: Theme.of(context).textTheme.bodyMedium,
                       textAlign: TextAlign.center,
                     ),
@@ -67,13 +68,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     TextFormField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
+                      decoration: InputDecoration(
+                        labelText: tr('Email'),
                         prefixIcon: Icon(Icons.email_outlined),
                       ),
                       validator: (value) =>
                           (value == null || !value.contains('@'))
-                              ? 'Ingresá un email válido'
+                              ? tr('Ingresá un email válido')
                               : null,
                     ),
                     const SizedBox(height: 16),
@@ -81,7 +82,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       controller: _passwordController,
                       obscureText: _obscurePassword,
                       decoration: InputDecoration(
-                        labelText: 'Contraseña',
+                        labelText: tr('Contraseña'),
                         prefixIcon: const Icon(Icons.lock_outline),
                         suffixIcon: IconButton(
                           icon: Icon(_obscurePassword
@@ -92,7 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       validator: (value) => (value == null || value.length < 8)
-                          ? 'Mínimo 8 caracteres'
+                          ? tr('Mínimo 8 caracteres')
                           : null,
                     ),
                     CheckboxListTile(
@@ -100,7 +101,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       onChanged: (value) => setState(() => _rememberMe = value ?? true),
                       controlAffinity: ListTileControlAffinity.leading,
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('Mantener sesión iniciada'),
+                      title: Text(tr('Mantener sesión iniciada')),
                     ),
                     if (auth.errorMessage != null) ...[
                       const SizedBox(height: 12),
@@ -119,7 +120,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               width: 20,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Ingresar'),
+                          : Text(tr('Ingresar')),
                     ),
                     const SizedBox(height: 12),
                     TextButton(
@@ -128,7 +129,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           MaterialPageRoute(builder: (_) => const RegisterScreen()),
                         );
                       },
-                      child: const Text('¿No tenés cuenta? Registrate'),
+                      child: Text(tr('¿No tenés cuenta? Registrate')),
                     ),
                   ],
                 ),

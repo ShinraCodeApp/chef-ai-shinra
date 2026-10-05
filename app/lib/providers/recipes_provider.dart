@@ -4,6 +4,7 @@ import '../core/offline_recipes.dart';
 import '../models/missing_ingredient.dart';
 import '../models/paginated.dart';
 import '../models/recipe.dart';
+import '../core/i18n.dart';
 
 class RecipesProvider extends ChangeNotifier {
   final _dio = ApiClient.instance.dio;
@@ -44,7 +45,7 @@ class RecipesProvider extends ChangeNotifier {
       recipes = reset ? paginated.items : [...recipes, ...paginated.items];
       totalPages = paginated.totalPages;
     } catch (_) {
-      errorMessage = 'No se pudieron cargar las recetas.';
+      errorMessage = tr('No se pudieron cargar las recetas.');
     } finally {
       isLoading = false;
       notifyListeners();
@@ -119,7 +120,7 @@ class RecipesProvider extends ChangeNotifier {
     });
     final data = response.data;
     if (data == null || data is! Map<String, dynamic>) {
-      throw Exception('El servidor no pudo generar la receta. Verificá la conexión e intentá de nuevo.');
+      throw Exception(tr('El servidor no pudo generar la receta. Verificá la conexión e intentá de nuevo.'));
     }
     return Recipe.fromJson(data);
   }

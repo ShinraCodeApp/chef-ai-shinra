@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../core/expiry.dart';
 import '../providers/inventory_provider.dart';
 import '../screens/generate_recipe/generate_recipe_screen.dart';
+import '../core/i18n.dart';
 
 /// Cartel del inicio con lo que vence en los próximos 3 días y un atajo para
 /// cocinar con eso antes de tirarlo.
@@ -50,8 +51,8 @@ class _ExpiringBannerState extends State<ExpiringBanner> {
                 Expanded(
                   child: Text(
                     soon.length == 1
-                        ? '1 producto por vencer'
-                        : '${soon.length} productos por vencer',
+                        ? tr('1 producto por vencer')
+                        : tr('{soon} productos por vencer', {'soon': soon.length}),
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           color: scheme.onTertiaryContainer,
                           fontWeight: FontWeight.bold,
@@ -69,11 +70,11 @@ class _ExpiringBannerState extends State<ExpiringBanner> {
               alignment: Alignment.centerRight,
               child: TextButton.icon(
                 icon: const Icon(Icons.auto_awesome),
-                label: const Text('Cocinar con esto'),
+                label: Text(tr('Cocinar con esto')),
                 onPressed: () => Navigator.of(context).push(MaterialPageRoute(
                   builder: (_) => GenerateRecipeScreen(
                     initialIngredients: names,
-                    initialRequest: 'Usá primero lo que está por vencer',
+                    initialRequest: tr('Usá primero lo que está por vencer'),
                   ),
                 )),
               ),

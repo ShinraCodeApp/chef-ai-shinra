@@ -8,6 +8,7 @@ import '../../widgets/empty_state.dart';
 import '../../widgets/voice_text_field.dart';
 import 'recipe_detail_screen.dart';
 import 'create_recipe_screen.dart';
+import '../../core/i18n.dart';
 
 const _dietTagOptions = [
   'proteico',
@@ -83,19 +84,19 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
   String _titleFor(String? dietTag) {
     switch (dietTag) {
       case 'proteico':
-        return 'Comida proteica';
+        return tr('Comida proteica');
       case 'vegano':
-        return 'Comida vegana';
+        return tr('Comida vegana');
       case 'hipotiroidismo':
-        return 'Recetas para hipotiroidismo';
+        return tr('Recetas para hipotiroidismo');
       case 'hipertiroidismo':
-        return 'Recetas para hipertiroidismo';
+        return tr('Recetas para hipertiroidismo');
       case 'bajo_yodo':
-        return 'Recetas bajas en yodo';
+        return tr('Recetas bajas en yodo');
       case 'anime':
-        return 'Platos anime';
+        return tr('Platos anime');
       default:
-        return 'Recetas';
+        return tr('Recetas');
     }
   }
 
@@ -114,9 +115,9 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
         .where((r) => r.isMainIngredientMatch != true)
         .toList();
     return [
-      if (mainMatches.isNotEmpty) 'Ingrediente principal',
+      if (mainMatches.isNotEmpty) tr('Ingrediente principal'),
       ...mainMatches,
-      if (otherMatches.isNotEmpty) 'También lo contienen',
+      if (otherMatches.isNotEmpty) tr('También lo contienen'),
       ...otherMatches,
     ];
   }
@@ -143,7 +144,7 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            tooltip: 'Compartir mi receta',
+            tooltip: tr('Compartir mi receta'),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const CreateRecipeScreen()),
             ),
@@ -162,7 +163,7 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
                         ? TextField(
                             controller: _multiIngredientController,
                             decoration: InputDecoration(
-                              hintText: 'Agregar ingrediente…',
+                              hintText: tr('Agregar ingrediente…'),
                               prefixIcon: const Icon(Icons.add),
                               suffixIcon: Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -186,8 +187,8 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
                             controller: _searchController,
                             decoration: InputDecoration(
                               hintText: _searchByIngredient
-                                  ? 'Buscar por ingrediente…'
-                                  : 'Buscar receta…',
+                                  ? tr('Buscar por ingrediente…')
+                                  : tr('Buscar receta…'),
                               prefixIcon: const Icon(Icons.search),
                               suffixIcon: VoiceInputButton(
                                 onResult: (text) {
@@ -226,7 +227,7 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
                           ? Theme.of(context).colorScheme.primary
                           : null,
                     ),
-                    tooltip: '¿Qué puedo cocinar?',
+                    tooltip: tr('¿Qué puedo cocinar?'),
                     onPressed: () {
                       setState(() {
                         _multiIngredientMode = !_multiIngredientMode;
@@ -251,8 +252,8 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
                             : Icons.egg_alt_outlined,
                       ),
                       tooltip: _searchByIngredient
-                          ? 'Buscando por ingrediente'
-                          : 'Buscar por ingrediente',
+                          ? tr('Buscando por ingrediente')
+                          : tr('Buscar por ingrediente'),
                       onPressed: () {
                         setState(
                           () => _searchByIngredient = !_searchByIngredient,
@@ -277,7 +278,7 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
                       provider.loadRecipes();
                     },
                     itemBuilder: (_) => [
-                      const PopupMenuItem(value: null, child: Text('Todas')),
+                      PopupMenuItem(value: null, child: Text(tr('Todas'))),
                       ..._dietTagOptions.map(
                         (tag) => PopupMenuItem(
                           value: tag,
@@ -300,7 +301,7 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
                       Padding(
                         padding: const EdgeInsets.only(bottom: 6),
                         child: Text(
-                          'Agregá los ingredientes que tenés y encontrá recetas',
+                          tr('Agregá los ingredientes que tenés y encontrá recetas'),
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                       )
@@ -316,7 +317,7 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
                             ),
                           ),
                           ActionChip(
-                            label: const Text('Limpiar todo'),
+                            label: Text(tr('Limpiar todo')),
                             onPressed: () => _clearMultiMode(provider),
                           ),
                         ],
@@ -331,7 +332,7 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Chip(
-                    label: Text('Filtro: ${dietTagLabel(provider.dietTag!)}'),
+                    label: Text(tr('Filtro: {dietTag}', {'dietTag': dietTagLabel(provider.dietTag!)})),
                     onDeleted: () {
                       provider.dietTag = null;
                       provider.loadRecipes();
@@ -345,7 +346,7 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Chip(
-                    label: Text('Ingrediente: ${provider.ingredient}'),
+                    label: Text(tr('Ingrediente: {ingredient}', {'ingredient': provider.ingredient})),
                     onDeleted: () {
                       provider.ingredient = '';
                       _searchController.clear();
@@ -362,12 +363,12 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
                       child: provider.recipes.isEmpty
                           ? ListView(
                               physics: const AlwaysScrollableScrollPhysics(),
-                              children: const [
+                              children: [
                                 SizedBox(height: 80),
                                 EmptyState(
                                   icon: Icons.menu_book_outlined,
                                   message:
-                                      'Todavía no hay recetas. ¡Generá una con IA!',
+                                      tr('Todavía no hay recetas. ¡Generá una con IA!'),
                                 ),
                               ],
                             )
@@ -389,7 +390,7 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
                                         child: Center(
                                           child: TextButton(
                                             onPressed: provider.loadNextPage,
-                                            child: const Text('Cargar más'),
+                                            child: Text(tr('Cargar más')),
                                           ),
                                         ),
                                       );

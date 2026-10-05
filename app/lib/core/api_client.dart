@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'auth_storage.dart';
 import 'constants.dart';
+import 'i18n.dart';
 
 /// Cliente HTTP compartido por toda la app. Agrega el JWT automáticamente y,
 /// ante un 401, intenta un refresh silencioso una sola vez antes de reintentar
@@ -12,6 +13,8 @@ class ApiClient {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
+          // el servidor responde (y la IA escribe) en el idioma elegido
+          options.headers['Accept-Language'] = AppLanguage.instance.code;
           final token = await AuthStorage.instance.accessToken;
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token';

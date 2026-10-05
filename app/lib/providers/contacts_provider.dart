@@ -3,6 +3,7 @@ import 'package:flutter_contacts/flutter_contacts.dart' as fc;
 import '../core/api_client.dart';
 import '../models/contact.dart';
 import '../models/inventory_item.dart';
+import '../core/i18n.dart';
 
 class ContactsProvider extends ChangeNotifier {
   final _dio = ApiClient.instance.dio;
@@ -28,7 +29,7 @@ class ContactsProvider extends ChangeNotifier {
           .map((e) => PendingInvite.fromJson(e as Map<String, dynamic>))
           .toList();
     } catch (e) {
-      error = 'No se pudo cargar los contactos';
+      error = tr('No se pudo cargar los contactos');
     } finally {
       isLoading = false;
       notifyListeners();
@@ -42,7 +43,7 @@ class ContactsProvider extends ChangeNotifier {
     } catch (e) {
       final data = (e as dynamic).response?.data;
       if (data is Map && data['message'] != null) return data['message'].toString();
-      return 'No se pudo enviar la invitación';
+      return tr('No se pudo enviar la invitación');
     }
   }
 
@@ -52,7 +53,7 @@ class ContactsProvider extends ChangeNotifier {
       await loadAll();
       return null;
     } catch (_) {
-      return 'Error al responder la invitación';
+      return tr('Error al responder la invitación');
     }
   }
 
@@ -63,7 +64,7 @@ class ContactsProvider extends ChangeNotifier {
       notifyListeners();
       return null;
     } catch (_) {
-      return 'No se pudo eliminar el contacto';
+      return tr('No se pudo eliminar el contacto');
     }
   }
 
@@ -82,7 +83,7 @@ class ContactsProvider extends ChangeNotifier {
       }
       return null;
     } catch (_) {
-      return 'No se pudo actualizar favorito';
+      return tr('No se pudo actualizar favorito');
     }
   }
 

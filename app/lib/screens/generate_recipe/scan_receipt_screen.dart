@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../core/api_client.dart';
 import '../../providers/inventory_provider.dart';
+import '../../core/i18n.dart';
 
 class _DetectedReceiptItem {
   final String name;
@@ -116,16 +117,16 @@ class _ScanReceiptScreenState extends State<ScanReceiptScreen> {
 
       setState(() => _results = merged.values.toList());
     } catch (e) {
-      String msg = 'No se pudo analizar el ticket.';
+      String msg = tr('No se pudo analizar el ticket.');
       if (e is DioException) {
         final data = e.response?.data;
         if (data is Map && data['message'] != null) {
           msg = data['message'].toString();
         } else {
-          msg = 'Error ${e.response?.statusCode ?? ''}: ${e.message}';
+          msg = tr('Error {statusCode}: {message}', {'statusCode': e.response?.statusCode ?? '', 'message': e.message});
         }
       } else {
-        msg = 'Error: ${e.toString()}';
+        msg = tr('Error: {e}', {'e': e.toString()});
       }
       setState(() => _error = msg);
     } finally {
@@ -169,7 +170,7 @@ class _ScanReceiptScreenState extends State<ScanReceiptScreen> {
     if (!mounted) return;
     setState(() => _isSaving = false);
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$successCount ítems agregados al inventario.')),
+      SnackBar(content: Text(tr('{successCount} ítems agregados al inventario.', {'successCount': successCount}))),
     );
     Navigator.of(context).pop();
   }
@@ -179,7 +180,7 @@ class _ScanReceiptScreenState extends State<ScanReceiptScreen> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Escanear ticket de compra')),
+      appBar: AppBar(title: Text(tr('Escanear ticket de compra'))),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -241,7 +242,7 @@ class _ScanReceiptScreenState extends State<ScanReceiptScreen> {
                     child: OutlinedButton.icon(
                       onPressed: () => _pickImage(ImageSource.camera),
                       icon: const Icon(Icons.camera_alt_outlined),
-                      label: Text(_images.isEmpty ? 'Sacar foto' : 'Agregar foto'),
+                      label: Text(_images.isEmpty ? tr('Sacar foto') : tr('Agregar foto')),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -249,7 +250,7 @@ class _ScanReceiptScreenState extends State<ScanReceiptScreen> {
                     child: OutlinedButton.icon(
                       onPressed: () => _pickImage(ImageSource.gallery),
                       icon: const Icon(Icons.photo_library_outlined),
-                      label: const Text('Galería'),
+                      label: Text(tr('Galería')),
                     ),
                   ),
                 ],
@@ -258,7 +259,7 @@ class _ScanReceiptScreenState extends State<ScanReceiptScreen> {
               if (_images.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Text(
-                  '${_images.length} foto${_images.length > 1 ? 's' : ''} — tocá × para quitar',
+                  tr('{_images} foto{s} — tocá × para quitar', {'_images': _images.length, 's': _images.length > 1 ? 's' : ''}),
                   style: Theme.of(context).textTheme.bodySmall,
                   textAlign: TextAlign.center,
                 ),
@@ -272,8 +273,8 @@ class _ScanReceiptScreenState extends State<ScanReceiptScreen> {
                           child: CircularProgressIndicator(strokeWidth: 2))
                       : const Icon(Icons.auto_awesome),
                   label: Text(_images.length > 1
-                      ? 'Analizar ${_images.length} fotos con IA'
-                      : 'Analizar con IA'),
+                      ? tr('Analizar {_images} fotos con IA', {'_images': _images.length})
+                      : tr('Analizar con IA')),
                 ),
               ],
 
@@ -284,11 +285,11 @@ class _ScanReceiptScreenState extends State<ScanReceiptScreen> {
 
               if (_results != null) ...[
                 const SizedBox(height: 24),
-                Text('Productos detectados',
+                Text(tr('Productos detectados'),
                     style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 8),
                 if (_results!.isEmpty)
-                  const Text('No se detectó ningún producto en el ticket.')
+                  Text(tr('No se detectó ningún producto en el ticket.'))
                 else ...[
                   ..._results!.map((item) => Card(
                         child: CheckboxListTile(
@@ -304,7 +305,7 @@ class _ScanReceiptScreenState extends State<ScanReceiptScreen> {
                                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                   decoration: InputDecoration(
                                     isDense: true,
-                                    labelText: 'Cantidad',
+                                    labelText: tr('Cantidad'),
                                     suffixText: item.unit,
                                   ),
                                   onChanged: (_) => setState(() {}),
@@ -315,9 +316,9 @@ class _ScanReceiptScreenState extends State<ScanReceiptScreen> {
                                 child: TextField(
                                   controller: item.priceController,
                                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                  decoration: const InputDecoration(
+                                  decoration: InputDecoration(
                                     isDense: true,
-                                    labelText: 'Total pagado',
+                                    labelText: tr('Total pagado'),
                                     prefixText: '\$',
                                   ),
                                   onChanged: (_) => setState(() {}),
@@ -339,7 +340,7 @@ class _ScanReceiptScreenState extends State<ScanReceiptScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Total seleccionado',
+                        Text(tr('Total seleccionado'),
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                   color: colorScheme.onPrimaryContainer,
                                 )),
@@ -362,7 +363,7 @@ class _ScanReceiptScreenState extends State<ScanReceiptScreen> {
                             width: 16,
                             child: CircularProgressIndicator(strokeWidth: 2))
                         : const Icon(Icons.add_shopping_cart),
-                    label: const Text('Agregar seleccionados al inventario'),
+                    label: Text(tr('Agregar seleccionados al inventario')),
                   ),
                 ],
               ],

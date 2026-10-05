@@ -3,6 +3,7 @@ import '../core/api_client.dart';
 import '../core/meal_type_schedule.dart';
 import '../core/notifications_service.dart';
 import '../models/meal_plan.dart';
+import '../core/i18n.dart';
 
 class MealPlansProvider extends ChangeNotifier {
   final _dio = ApiClient.instance.dio;
@@ -24,7 +25,7 @@ class MealPlansProvider extends ChangeNotifier {
         await _scheduleRemindersForPlan(plan);
       }
     } catch (_) {
-      errorMessage = 'No se pudieron cargar los planes.';
+      errorMessage = tr('No se pudieron cargar los planes.');
     } finally {
       isLoading = false;
       notifyListeners();
@@ -63,10 +64,10 @@ class MealPlansProvider extends ChangeNotifier {
         if (_isDayFullyCompleted(plan, entry.date)) {
           final streak = streakForPlan(plan);
           await NotificationsService.instance.showNow(
-            title: '¡Día completado! 🎉',
+            title: tr('¡Día completado! 🎉'),
             body: streak > 1
-                ? 'Cumpliste todas las comidas de hoy. ¡Racha de $streak días seguidos!'
-                : 'Cumpliste todas las comidas de hoy. ¡Seguí así!',
+                ? tr('Cumpliste todas las comidas de hoy. ¡Racha de {streak} días seguidos!', {'streak': streak})
+                : tr('Cumpliste todas las comidas de hoy. ¡Seguí así!'),
           );
           return true;
         }
@@ -113,7 +114,7 @@ class MealPlansProvider extends ChangeNotifier {
       await NotificationsService.instance.scheduleAt(
         id: _notificationId(entry.id),
         when: when,
-        title: 'Es hora de comer',
+        title: tr('Es hora de comer'),
         body: entry.recipe.title,
       );
     }

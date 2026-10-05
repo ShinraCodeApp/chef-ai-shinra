@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/shopping_lists_provider.dart';
 import '../../widgets/empty_state.dart';
+import '../../core/i18n.dart';
 
 class ShoppingListsScreen extends StatefulWidget {
   const ShoppingListsScreen({super.key});
@@ -26,18 +27,18 @@ class _ShoppingListsScreenState extends State<ShoppingListsScreen> {
     final name = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Nueva lista de compras'),
+        title: Text(tr('Nueva lista de compras')),
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: const InputDecoration(labelText: 'Nombre de la lista'),
+          decoration: InputDecoration(labelText: tr('Nombre de la lista')),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Cancelar')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: Text(tr('Cancelar'))),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(
-                controller.text.trim().isEmpty ? 'Lista de compras' : controller.text.trim()),
-            child: const Text('Crear'),
+                controller.text.trim().isEmpty ? tr('Lista de compras') : controller.text.trim()),
+            child: Text(tr('Crear')),
           ),
         ],
       ),
@@ -47,7 +48,7 @@ class _ShoppingListsScreenState extends State<ShoppingListsScreen> {
     if (!mounted) return;
     if (!ok) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('No se pudo crear la lista.')));
+          .showSnackBar(SnackBar(content: Text(tr('No se pudo crear la lista.'))));
     }
   }
 
@@ -59,14 +60,14 @@ class _ShoppingListsScreenState extends State<ShoppingListsScreen> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          title: const Text('Agregar ítem'),
+          title: Text(tr('Agregar ítem')),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: nameController,
                 autofocus: true,
-                decoration: const InputDecoration(labelText: 'Ítem'),
+                decoration: InputDecoration(labelText: tr('Ítem')),
               ),
               const SizedBox(height: 12),
               Row(
@@ -75,14 +76,14 @@ class _ShoppingListsScreenState extends State<ShoppingListsScreen> {
                     child: TextField(
                       controller: quantityController,
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      decoration: const InputDecoration(labelText: 'Cantidad'),
+                      decoration: InputDecoration(labelText: tr('Cantidad')),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       initialValue: unit,
-                      decoration: const InputDecoration(labelText: 'Unidad'),
+                      decoration: InputDecoration(labelText: tr('Unidad')),
                       items: _units.map((u) => DropdownMenuItem(value: u, child: Text(u))).toList(),
                       onChanged: (value) => setDialogState(() => unit = value ?? 'unidad'),
                     ),
@@ -92,8 +93,8 @@ class _ShoppingListsScreenState extends State<ShoppingListsScreen> {
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancelar')),
-            FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Agregar')),
+            TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancelar'))),
+            FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(tr('Agregar'))),
           ],
         ),
       ),
@@ -108,7 +109,7 @@ class _ShoppingListsScreenState extends State<ShoppingListsScreen> {
     if (!mounted) return;
     if (!ok) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('No se pudo agregar el ítem.')));
+          .showSnackBar(SnackBar(content: Text(tr('No se pudo agregar el ítem.'))));
     }
   }
 
@@ -116,7 +117,7 @@ class _ShoppingListsScreenState extends State<ShoppingListsScreen> {
   Widget build(BuildContext context) {
     final provider = context.watch<ShoppingListsProvider>();
     return Scaffold(
-      appBar: AppBar(title: const Text('Listas de compras')),
+      appBar: AppBar(title: Text(tr('Listas de compras'))),
       body: provider.isLoading && provider.lists.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
@@ -124,12 +125,12 @@ class _ShoppingListsScreenState extends State<ShoppingListsScreen> {
               child: provider.lists.isEmpty
               ? ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  children: const [
+                  children: [
                     SizedBox(height: 80),
                     EmptyState(
                       icon: Icons.shopping_cart_outlined,
                       message:
-                          'No tenés listas todavía. Generá una desde un plan semanal.',
+                          tr('No tenés listas todavía. Generá una desde un plan semanal.'),
                     ),
                   ],
                 )
@@ -147,7 +148,7 @@ class _ShoppingListsScreenState extends State<ShoppingListsScreen> {
                       margin: const EdgeInsets.symmetric(vertical: 6),
                       child: ExpansionTile(
                         title: Text(list.name),
-                        subtitle: Text('${list.items.length} ítems'),
+                        subtitle: Text(tr('{list} ítems', {'list': list.items.length})),
                         children: byCategory.entries.expand((entry) {
                           return [
                             Padding(
@@ -185,7 +186,7 @@ class _ShoppingListsScreenState extends State<ShoppingListsScreen> {
                               child: OutlinedButton.icon(
                                 onPressed: () => _addItem(list.id),
                                 icon: const Icon(Icons.add),
-                                label: const Text('Agregar ítem'),
+                                label: Text(tr('Agregar ítem')),
                               ),
                             ),
                           ),
@@ -196,7 +197,7 @@ class _ShoppingListsScreenState extends State<ShoppingListsScreen> {
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: _createList,
-        tooltip: 'Nueva lista',
+        tooltip: tr('Nueva lista'),
         child: const Icon(Icons.add),
       ),
     );

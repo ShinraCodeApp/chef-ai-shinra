@@ -2,20 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/diet_tags.dart';
 import '../../providers/auth_provider.dart';
+import '../../core/i18n.dart';
 
-const _goalOptions = {
-  'lose_weight': 'Bajar de peso',
-  'gain_muscle': 'Ganar músculo',
-  'maintain': 'Mantenerme',
-  'eat_healthier': 'Comer más sano',
-  'save_money': 'Ahorrar dinero',
+Map<String, String> get _goalOptions => {
+  'lose_weight': tr('Bajar de peso'),
+  'gain_muscle': tr('Ganar músculo'),
+  'maintain': tr('Mantenerme'),
+  'eat_healthier': tr('Comer más sano'),
+  'save_money': tr('Ahorrar dinero'),
 };
-const _activityOptions = {
-  'sedentary': 'Sedentario',
-  'light': 'Actividad leve',
-  'moderate': 'Actividad moderada',
-  'active': 'Activo',
-  'very_active': 'Muy activo',
+Map<String, String> get _activityOptions => {
+  'sedentary': tr('Sedentario'),
+  'light': tr('Actividad leve'),
+  'moderate': tr('Actividad moderada'),
+  'active': tr('Activo'),
+  'very_active': tr('Muy activo'),
 };
 const _dietOptions = [
   'proteico',
@@ -71,7 +72,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No se pudo guardar. Probá de nuevo.')),
+          SnackBar(content: Text(tr('No se pudo guardar. Probá de nuevo.'))),
         );
       }
     } finally {
@@ -88,11 +89,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('¡Bienvenido a Chef AI by Shinra!',
+              Text(tr('¡Bienvenido a Chef AI by Shinra!'),
                   style: Theme.of(context).textTheme.headlineSmall),
               const SizedBox(height: 8),
               Text(
-                'Contanos un poco sobre vos para armarte recetas y planes a tu medida.',
+                tr('Contanos un poco sobre vos para armarte recetas y planes a tu medida.'),
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
               const SizedBox(height: 24),
@@ -102,7 +103,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     child: TextField(
                       controller: _weightController,
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      decoration: const InputDecoration(labelText: 'Peso (kg)'),
+                      decoration: InputDecoration(labelText: tr('Peso (kg)')),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -110,7 +111,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     child: TextField(
                       controller: _heightController,
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      decoration: const InputDecoration(labelText: 'Altura (cm)'),
+                      decoration: InputDecoration(labelText: tr('Altura (cm)')),
                     ),
                   ),
                 ],
@@ -118,7 +119,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 initialValue: _goal,
-                decoration: const InputDecoration(labelText: '¿Qué querés lograr?'),
+                decoration: InputDecoration(labelText: tr('¿Qué querés lograr?')),
                 items: _goalOptions.entries
                     .map((e) => DropdownMenuItem(value: e.key, child: Text(e.value)))
                     .toList(),
@@ -127,14 +128,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 initialValue: _activityLevel,
-                decoration: const InputDecoration(labelText: 'Actividad física'),
+                decoration: InputDecoration(labelText: tr('Actividad física')),
                 items: _activityOptions.entries
                     .map((e) => DropdownMenuItem(value: e.key, child: Text(e.value)))
                     .toList(),
                 onChanged: (value) => setState(() => _activityLevel = value),
               ),
               const SizedBox(height: 20),
-              Text('¿Qué dieta seguís?', style: Theme.of(context).textTheme.titleMedium),
+              Text(tr('¿Qué dieta seguís?'), style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
@@ -157,13 +158,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 child: _isSaving
                     ? const SizedBox(
                         height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Text('Empezar'),
+                    : Text(tr('Empezar')),
               ),
               const SizedBox(height: 8),
               Center(
                 child: TextButton(
                   onPressed: _isSaving ? null : () => _finish(onboardingCompleted: true),
-                  child: const Text('Completar más tarde'),
+                  child: Text(tr('Completar más tarde')),
                 ),
               ),
             ],

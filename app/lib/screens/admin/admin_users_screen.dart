@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../models/user.dart';
 import '../../providers/admin_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../core/i18n.dart';
 
 class AdminUsersScreen extends StatefulWidget {
   const AdminUsersScreen({super.key});
@@ -27,15 +28,15 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Eliminar usuario'),
+        title: Text(tr('Eliminar usuario')),
         content: Text(
-            '¿Seguro que querés eliminar a ${user.name} (${user.email})? Se borran también su inventario, recetas propias, favoritos y listas.'),
+            tr('¿Seguro que querés eliminar a {user} ({email})? Se borran también su inventario, recetas propias, favoritos y listas.', {'user': user.name, 'email': user.email})),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancelar')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Cancelar'))),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Theme.of(ctx).colorScheme.error),
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Eliminar'),
+            child: Text(tr('Eliminar')),
           ),
         ],
       ),
@@ -44,7 +45,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
     final ok = await context.read<AdminProvider>().deleteUser(user.id);
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(ok ? 'Usuario eliminado.' : 'No se pudo eliminar el usuario.')),
+      SnackBar(content: Text(ok ? tr('Usuario eliminado.') : tr('No se pudo eliminar el usuario.'))),
     );
   }
 
@@ -53,7 +54,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
     final provider = context.watch<AdminProvider>();
     final currentUserId = context.watch<AuthProvider>().currentUser?.id;
     return Scaffold(
-      appBar: AppBar(title: const Text('Usuarios')),
+      appBar: AppBar(title: Text(tr('Usuarios'))),
       body: provider.isLoadingUsers && provider.users.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
@@ -69,7 +70,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                         child: Center(
                           child: TextButton(
                             onPressed: provider.loadNextUsersPage,
-                            child: const Text('Cargar más'),
+                            child: Text(tr('Cargar más')),
                           ),
                         ),
                       );
@@ -91,7 +92,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                               : null,
                         ),
                         Tooltip(
-                          message: user.aiUnlimited ? 'IA ilimitada activa' : 'IA limitada',
+                          message: user.aiUnlimited ? tr('IA ilimitada activa') : tr('IA limitada'),
                           child: IconButton(
                             icon: Icon(
                               user.aiUnlimited ? Icons.all_inclusive : Icons.auto_awesome_outlined,
@@ -108,9 +109,9 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                               messenger.showSnackBar(SnackBar(
                                 content: Text(ok
                                     ? (!user.aiUnlimited
-                                        ? 'IA ilimitada activada para ${user.name}'
-                                        : 'IA ilimitada desactivada para ${user.name}')
-                                    : 'No se pudo actualizar'),
+                                        ? tr('IA ilimitada activada para {user}', {'user': user.name})
+                                        : tr('IA ilimitada desactivada para {user}', {'user': user.name}))
+                                    : tr('No se pudo actualizar')),
                               ));
                             },
                           ),
@@ -119,7 +120,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                           IconButton(
                             icon: Icon(Icons.delete_outline,
                                 color: Theme.of(context).colorScheme.error),
-                            tooltip: 'Eliminar usuario',
+                            tooltip: tr('Eliminar usuario'),
                             onPressed: () => _deleteUser(user),
                           ),
                       ],

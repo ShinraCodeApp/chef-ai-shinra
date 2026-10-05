@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../core/api_client.dart';
+import '../../core/i18n.dart';
 
 class _MealAnalysisItem {
   final String name;
@@ -111,7 +112,7 @@ class _ScanMealScreenState extends State<ScanMealScreen> {
           _result = _MealAnalysis.fromJson(response.data as Map<String, dynamic>));
     } catch (_) {
       setState(() => _error =
-          'No se pudo analizar el plato. Revisá que el backend tenga GEMINI_API_KEY configurada.');
+          tr('No se pudo analizar el plato. Revisá que el backend tenga GEMINI_API_KEY configurada.'));
     } finally {
       if (mounted) setState(() => _isAnalyzing = false);
     }
@@ -121,7 +122,7 @@ class _ScanMealScreenState extends State<ScanMealScreen> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(title: const Text('Calorías de mi plato')),
+      appBar: AppBar(title: Text(tr('Calorías de mi plato'))),
       body: SafeArea(
         child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -151,7 +152,7 @@ class _ScanMealScreenState extends State<ScanMealScreen> {
                   child: OutlinedButton.icon(
                     onPressed: () => _pickImage(ImageSource.camera),
                     icon: const Icon(Icons.camera_alt_outlined),
-                    label: const Text('Sacar foto'),
+                    label: Text(tr('Sacar foto')),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -159,7 +160,7 @@ class _ScanMealScreenState extends State<ScanMealScreen> {
                   child: OutlinedButton.icon(
                     onPressed: () => _pickImage(ImageSource.gallery),
                     icon: const Icon(Icons.photo_library_outlined),
-                    label: const Text('Galería'),
+                    label: Text(tr('Galería')),
                   ),
                 ),
               ],
@@ -172,7 +173,7 @@ class _ScanMealScreenState extends State<ScanMealScreen> {
                     ? const SizedBox(
                         height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2))
                     : const Icon(Icons.auto_awesome),
-                label: const Text('Analizar con IA'),
+                label: Text(tr('Analizar con IA')),
               ),
             if (_error != null) ...[
               const SizedBox(height: 12),
@@ -190,12 +191,12 @@ class _ScanMealScreenState extends State<ScanMealScreen> {
                 children: [
                   Chip(
                     avatar: const Icon(Icons.scale, size: 16),
-                    label: Text('${_result!.estimatedServingGrams.toStringAsFixed(0)} g aprox.'),
+                    label: Text(tr('{v} g aprox.', {'v': _result!.estimatedServingGrams.toStringAsFixed(0)})),
                   ),
                   Chip(
                     avatar: const Icon(Icons.percent, size: 16),
                     label: Text(
-                        'Confianza: ${(_result!.confidence * 100).toStringAsFixed(0)}%'),
+                        tr('Confianza: {v}%', {'v': (_result!.confidence * 100).toStringAsFixed(0)})),
                   ),
                 ],
               ),
@@ -207,10 +208,10 @@ class _ScanMealScreenState extends State<ScanMealScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Calorías estimadas',
+                      Text(tr('Calorías estimadas'),
                           style: TextStyle(color: scheme.onPrimaryContainer)),
                       Text(
-                        '${_result!.calories.toStringAsFixed(0)} kcal',
+                        tr('{v} kcal', {'v': _result!.calories.toStringAsFixed(0)}),
                         style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                               color: scheme.onPrimaryContainer,
                               fontWeight: FontWeight.bold,
@@ -221,36 +222,36 @@ class _ScanMealScreenState extends State<ScanMealScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              Text('Macronutrientes (aprox.)',
+              Text(tr('Macronutrientes (aprox.)'),
                   style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 12,
                 runSpacing: 8,
                 children: [
-                  _nutritionChip('Proteína', _result!.proteinG, 'g'),
-                  _nutritionChip('Grasas', _result!.fatG, 'g'),
-                  _nutritionChip('Carbs', _result!.carbsG, 'g'),
-                  _nutritionChip('Fibra', _result!.fiberG, 'g'),
-                  _nutritionChip('Azúcares', _result!.sugarG, 'g'),
-                  _nutritionChip('Sodio', _result!.sodiumMg, 'mg'),
+                  _nutritionChip(tr('Proteína'), _result!.proteinG, 'g'),
+                  _nutritionChip(tr('Grasas'), _result!.fatG, 'g'),
+                  _nutritionChip(tr('Carbs'), _result!.carbsG, 'g'),
+                  _nutritionChip(tr('Fibra'), _result!.fiberG, 'g'),
+                  _nutritionChip(tr('Azúcares'), _result!.sugarG, 'g'),
+                  _nutritionChip(tr('Sodio'), _result!.sodiumMg, 'mg'),
                 ],
               ),
               if (_result!.items.isNotEmpty) ...[
                 const SizedBox(height: 20),
-                Text('Detectado en el plato',
+                Text(tr('Detectado en el plato'),
                     style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 8),
                 ..._result!.items.map(
                   (item) => Padding(
                     padding: const EdgeInsets.symmetric(vertical: 2),
-                    child: Text('• ${item.name} — ${item.approxGrams.toStringAsFixed(0)} g'),
+                    child: Text(tr('• {item} — {v} g', {'item': item.name, 'v': item.approxGrams.toStringAsFixed(0)})),
                   ),
                 ),
               ],
               const SizedBox(height: 12),
               Text(
-                'Estimación aproximada generada por IA a partir de la foto; puede variar del valor real.',
+                tr('Estimación aproximada generada por IA a partir de la foto; puede variar del valor real.'),
                 style: Theme.of(context)
                     .textTheme
                     .bodySmall

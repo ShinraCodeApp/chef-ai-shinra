@@ -1,6 +1,7 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
+import '../core/i18n.dart';
 
 /// Envuelve las notificaciones locales (recordatorios de horario de comida, avisos
 /// de lista de compras e ingredientes agotados). No hay push real desde el backend:
@@ -12,9 +13,9 @@ class NotificationsService {
 
   final _plugin = FlutterLocalNotificationsPlugin();
   static const _channelId = 'chef_ai_reminders';
-  static const _channelName = 'Recordatorios';
-  static const _channelDescription =
-      'Horarios de comida, lista de compras e ingredientes agotados';
+  static String get _channelName => tr('Recordatorios');
+  static String get _channelDescription =>
+      tr('Horarios de comida, lista de compras e ingredientes agotados');
 
   Future<void> initialize() async {
     tz_data.initializeTimeZones();
@@ -32,7 +33,7 @@ class NotificationsService {
         ?.requestNotificationsPermission();
   }
 
-  NotificationDetails get _details => const NotificationDetails(
+  NotificationDetails get _details => NotificationDetails(
         android: AndroidNotificationDetails(
           _channelId,
           _channelName,

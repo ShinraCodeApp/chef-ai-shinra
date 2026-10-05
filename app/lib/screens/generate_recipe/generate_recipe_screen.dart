@@ -6,6 +6,7 @@ import '../../providers/inventory_provider.dart';
 import '../../providers/recipes_provider.dart';
 import '../../widgets/voice_text_field.dart';
 import '../recipes/recipe_detail_screen.dart';
+import '../../core/i18n.dart';
 
 class GenerateRecipeScreen extends StatefulWidget {
   /// Ingredientes ya cargados al abrir (ej. "Cocinar con esto" desde lo que vence).
@@ -56,7 +57,7 @@ class _GenerateRecipeScreenState extends State<GenerateRecipeScreen> {
           .toSet()
           .toList();
       if (names.isEmpty) {
-        setState(() => _error = 'Tu inventario está vacío.');
+        setState(() => _error = tr('Tu inventario está vacío.'));
         return;
       }
       setState(() {
@@ -64,7 +65,7 @@ class _GenerateRecipeScreenState extends State<GenerateRecipeScreen> {
         _ingredients.addAll(names);
       });
     } catch (_) {
-      if (mounted) setState(() => _error = 'No se pudo cargar el inventario.');
+      if (mounted) setState(() => _error = tr('No se pudo cargar el inventario.'));
     } finally {
       if (mounted) setState(() => _loadingInventory = false);
     }
@@ -93,7 +94,7 @@ class _GenerateRecipeScreenState extends State<GenerateRecipeScreen> {
 
   Future<void> _generate() async {
     if (_ingredients.isEmpty) {
-      setState(() => _error = 'Agregá al menos un ingrediente.');
+      setState(() => _error = tr('Agregá al menos un ingrediente.'));
       return;
     }
     setState(() {
@@ -116,16 +117,16 @@ class _GenerateRecipeScreenState extends State<GenerateRecipeScreen> {
       );
     } on DioException catch (e) {
       final data = e.response?.data;
-      String msg = 'No se pudo generar la receta. Intentá de nuevo.';
+      String msg = tr('No se pudo generar la receta. Intentá de nuevo.');
       if (data is Map && data['message'] != null) {
         msg = data['message'].toString();
       } else if (e.type == DioExceptionType.connectionError ||
           e.type == DioExceptionType.connectionTimeout) {
-        msg = 'Sin conexión. Verificá tu internet e intentá de nuevo.';
+        msg = tr('Sin conexión. Verificá tu internet e intentá de nuevo.');
       }
       setState(() => _error = msg);
     } catch (e) {
-      setState(() => _error = 'Error inesperado: ${e.toString()}');
+      setState(() => _error = tr('Error inesperado: {e}', {'e': e.toString()}));
     } finally {
       if (mounted) setState(() => _isGenerating = false);
     }
@@ -141,7 +142,7 @@ class _GenerateRecipeScreenState extends State<GenerateRecipeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Generar receta con IA')),
+      appBar: AppBar(title: Text(tr('Generar receta con IA'))),
       body: SafeArea(
         child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -155,7 +156,7 @@ class _GenerateRecipeScreenState extends State<GenerateRecipeScreen> {
                       size: 16,
                       color: Theme.of(context).colorScheme.primary),
                   const SizedBox(width: 6),
-                  Text('IA ilimitada activada',
+                  Text(tr('IA ilimitada activada'),
                       style: TextStyle(
                           color: Theme.of(context).colorScheme.primary)),
                 ])
@@ -176,7 +177,7 @@ class _GenerateRecipeScreenState extends State<GenerateRecipeScreen> {
             Row(
               children: [
                 Expanded(
-                  child: Text('¿Qué ingredientes tenés?',
+                  child: Text(tr('¿Qué ingredientes tenés?'),
                       style: Theme.of(context).textTheme.titleMedium),
                 ),
                 TextButton.icon(
@@ -187,7 +188,7 @@ class _GenerateRecipeScreenState extends State<GenerateRecipeScreen> {
                           width: 14,
                           child: CircularProgressIndicator(strokeWidth: 2))
                       : const Icon(Icons.inventory_2_outlined, size: 18),
-                  label: const Text('Usar mi inventario'),
+                  label: Text(tr('Usar mi inventario')),
                 ),
               ],
             ),
@@ -197,8 +198,8 @@ class _GenerateRecipeScreenState extends State<GenerateRecipeScreen> {
                 Expanded(
                   child: VoiceTextField(
                     controller: _ingredientController,
-                    decoration: const InputDecoration(
-                      hintText: 'Ej: arroz, pollo, cebolla…',
+                    decoration: InputDecoration(
+                      hintText: tr('Ej: arroz, pollo, cebolla…'),
                     ),
                     onSubmitted: (_) => _addIngredient(),
                   ),
@@ -222,23 +223,23 @@ class _GenerateRecipeScreenState extends State<GenerateRecipeScreen> {
                   .toList(),
             ),
             const SizedBox(height: 24),
-            Text('Preferencias (opcional)',
+            Text(tr('Preferencias (opcional)'),
                 style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
               initialValue: _budget,
-              decoration: const InputDecoration(labelText: 'Presupuesto'),
-              items: const [
-                DropdownMenuItem(value: 'low', child: Text('Económico')),
-                DropdownMenuItem(value: 'medium', child: Text('Medio')),
-                DropdownMenuItem(value: 'high', child: Text('Sin restricción')),
+              decoration: InputDecoration(labelText: tr('Presupuesto')),
+              items: [
+                DropdownMenuItem(value: 'low', child: Text(tr('Económico'))),
+                DropdownMenuItem(value: 'medium', child: Text(tr('Medio'))),
+                DropdownMenuItem(value: 'high', child: Text(tr('Sin restricción'))),
               ],
               onChanged: (value) => setState(() => _budget = value),
             ),
             const SizedBox(height: 12),
             TextField(
-              decoration: const InputDecoration(
-                labelText: 'Tiempo máximo de preparación (minutos)',
+              decoration: InputDecoration(
+                labelText: tr('Tiempo máximo de preparación (minutos)'),
               ),
               keyboardType: TextInputType.number,
               onChanged: (value) =>
@@ -247,8 +248,8 @@ class _GenerateRecipeScreenState extends State<GenerateRecipeScreen> {
             const SizedBox(height: 12),
             VoiceTextField(
               controller: _freeTextController,
-              decoration: const InputDecoration(
-                labelText: 'Pedido libre (ej: "quiero algo dulce")',
+              decoration: InputDecoration(
+                labelText: tr('Pedido libre (ej: "quiero algo dulce")'),
               ),
               maxLines: 2,
               appendMode: true,
@@ -267,7 +268,7 @@ class _GenerateRecipeScreenState extends State<GenerateRecipeScreen> {
                       width: 16,
                       child: CircularProgressIndicator(strokeWidth: 2))
                   : const Icon(Icons.auto_awesome),
-              label: const Text('Generar receta'),
+              label: Text(tr('Generar receta')),
             ),
           ],
         ),

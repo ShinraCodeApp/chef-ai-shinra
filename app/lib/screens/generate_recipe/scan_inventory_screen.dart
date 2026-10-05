@@ -5,13 +5,14 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../core/api_client.dart';
 import '../../providers/inventory_provider.dart';
+import '../../core/i18n.dart';
 
-const _stateLabels = {
-  'fresh': 'Fresco',
-  'frozen': 'Congelado',
-  'opened': 'Abierto',
-  'expired': 'Vencido',
-  'unknown': 'Sin determinar',
+Map<String, String> get _stateLabels => {
+  'fresh': tr('Fresco'),
+  'frozen': tr('Congelado'),
+  'opened': tr('Abierto'),
+  'expired': tr('Vencido'),
+  'unknown': tr('Sin determinar'),
 };
 
 class _DetectedItem {
@@ -88,7 +89,7 @@ class _ScanInventoryScreenState extends State<ScanInventoryScreen> {
       setState(() => _results = items);
     } catch (_) {
       setState(() => _error =
-          'No se pudo analizar la imagen. Revisá que el backend tenga GEMINI_API_KEY configurada.');
+          tr('No se pudo analizar la imagen. Revisá que el backend tenga GEMINI_API_KEY configurada.'));
     } finally {
       if (mounted) setState(() => _isAnalyzing = false);
     }
@@ -114,7 +115,7 @@ class _ScanInventoryScreenState extends State<ScanInventoryScreen> {
     if (!mounted) return;
     setState(() => _isSaving = false);
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$successCount ítems agregados al inventario.')),
+      SnackBar(content: Text(tr('{successCount} ítems agregados al inventario.', {'successCount': successCount}))),
     );
     Navigator.of(context).pop();
   }
@@ -122,7 +123,7 @@ class _ScanInventoryScreenState extends State<ScanInventoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Escanear heladera/alacena')),
+      appBar: AppBar(title: Text(tr('Escanear heladera/alacena'))),
       body: SafeArea(
         child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -152,7 +153,7 @@ class _ScanInventoryScreenState extends State<ScanInventoryScreen> {
                   child: OutlinedButton.icon(
                     onPressed: () => _pickImage(ImageSource.camera),
                     icon: const Icon(Icons.camera_alt_outlined),
-                    label: const Text('Sacar foto'),
+                    label: Text(tr('Sacar foto')),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -160,7 +161,7 @@ class _ScanInventoryScreenState extends State<ScanInventoryScreen> {
                   child: OutlinedButton.icon(
                     onPressed: () => _pickImage(ImageSource.gallery),
                     icon: const Icon(Icons.photo_library_outlined),
-                    label: const Text('Galería'),
+                    label: Text(tr('Galería')),
                   ),
                 ),
               ],
@@ -173,7 +174,7 @@ class _ScanInventoryScreenState extends State<ScanInventoryScreen> {
                     ? const SizedBox(
                         height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2))
                     : const Icon(Icons.auto_awesome),
-                label: const Text('Analizar con IA'),
+                label: Text(tr('Analizar con IA')),
               ),
             if (_error != null) ...[
               const SizedBox(height: 12),
@@ -181,10 +182,10 @@ class _ScanInventoryScreenState extends State<ScanInventoryScreen> {
             ],
             if (_results != null) ...[
               const SizedBox(height: 24),
-              Text('Ingredientes detectados', style: Theme.of(context).textTheme.titleMedium),
+              Text(tr('Ingredientes detectados'), style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
               if (_results!.isEmpty)
-                const Text('No se detectó ningún ingrediente en la imagen.')
+                Text(tr('No se detectó ningún ingrediente en la imagen.'))
               else
                 ..._results!.map((item) => Card(
                       child: CheckboxListTile(
@@ -221,7 +222,7 @@ class _ScanInventoryScreenState extends State<ScanInventoryScreen> {
                           width: 16,
                           child: CircularProgressIndicator(strokeWidth: 2))
                       : const Icon(Icons.add_shopping_cart),
-                  label: const Text('Agregar seleccionados al inventario'),
+                  label: Text(tr('Agregar seleccionados al inventario')),
                 ),
               ],
             ],

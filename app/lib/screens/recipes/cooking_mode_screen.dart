@@ -6,6 +6,7 @@ import '../../core/cooking.dart';
 import '../../core/notifications_service.dart';
 import '../../core/quantity_format.dart';
 import '../../models/recipe.dart';
+import '../../core/i18n.dart';
 
 /// Modo cocina: un paso por pantalla con letra grande, la pantalla no se
 /// apaga, la voz lee cada paso y los pasos con tiempo ofrecen temporizador.
@@ -37,7 +38,7 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
   void initState() {
     super.initState();
     WakelockPlus.enable().catchError((_) {});
-    _tts.setLanguage('es-AR');
+    _tts.setLanguage(AppLanguage.instance.ttsLanguage);
   }
 
   @override
@@ -53,7 +54,7 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
     setState(() => _page = page);
     _tts.stop();
     if (_voiceOn && page > 0) {
-      _tts.speak('Paso $page. ${_steps[page - 1].instruction}');
+      _tts.speak(tr('Paso {page}. {instruction}', {'page': page, 'instruction': _steps[page - 1].instruction}));
     }
   }
 
@@ -71,8 +72,8 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
         .scheduleAt(
           id: _timerNotificationId,
           when: end,
-          title: '⏰ ¡Tiempo!',
-          body: 'Paso ${stepIndex + 1}: ${_steps[stepIndex].instruction}',
+          title: tr('⏰ ¡Tiempo!'),
+          body: tr('Paso {v}: {instruction}', {'v': stepIndex + 1, 'instruction': _steps[stepIndex].instruction}),
         )
         .catchError((_) {});
     setState(() {
@@ -84,7 +85,7 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
       if (left.isNegative || left.inSeconds == 0) {
         t.cancel();
         setState(() => _remaining = Duration.zero);
-        if (_voiceOn) _tts.speak('¡Tiempo! Terminó el paso ${stepIndex + 1}.');
+        if (_voiceOn) _tts.speak(tr('¡Tiempo! Terminó el paso {v}.', {'v': stepIndex + 1}));
       } else {
         setState(() => _remaining = left);
       }
@@ -108,7 +109,7 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
         title: Text(widget.recipe.title, overflow: TextOverflow.ellipsis),
         actions: [
           IconButton(
-            tooltip: _voiceOn ? 'Silenciar voz' : 'Leer los pasos en voz alta',
+            tooltip: _voiceOn ? tr('Silenciar voz') : tr('Leer los pasos en voz alta'),
             icon: Icon(_voiceOn ? Icons.volume_up : Icons.volume_off),
             onPressed: () {
               setState(() => _voiceOn = !_voiceOn);
@@ -138,7 +139,7 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
                     child: OutlinedButton.icon(
                       onPressed: _page == 0 ? null : () => _go(-1),
                       icon: const Icon(Icons.arrow_back),
-                      label: const Text('Anterior'),
+                      label: Text(tr('Anterior')),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -147,12 +148,12 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
                         ? FilledButton.icon(
                             onPressed: () => Navigator.of(context).pop(true),
                             icon: const Icon(Icons.check),
-                            label: const Text('¡Terminé!'),
+                            label: Text(tr('¡Terminé!')),
                           )
                         : FilledButton.icon(
                             onPressed: () => _go(1),
                             icon: const Icon(Icons.arrow_forward),
-                            label: Text(_page == 0 ? 'Empezar' : 'Siguiente'),
+                            label: Text(_page == 0 ? tr('Empezar') : tr('Siguiente')),
                           ),
                   ),
                 ],
@@ -177,12 +178,12 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
           Expanded(
             child: Text(
               done
-                  ? '¡Tiempo! (paso ${_timerStep! + 1})'
-                  : 'Paso ${_timerStep! + 1}: ${formatTimer(_remaining!)}',
+                  ? tr('¡Tiempo! (paso {v})', {'v': _timerStep! + 1})
+                  : tr('Paso {v}: {_remaining}', {'v': _timerStep! + 1, '_remaining': formatTimer(_remaining!)}),
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ),
-          TextButton(onPressed: _stopTimer, child: Text(done ? 'Listo' : 'Cancelar')),
+          TextButton(onPressed: _stopTimer, child: Text(done ? tr('Listo') : tr('Cancelar'))),
         ],
       ),
     );
@@ -193,9 +194,9 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        Text('Preparate', style: Theme.of(context).textTheme.headlineMedium),
+        Text(tr('Preparate'), style: Theme.of(context).textTheme.headlineMedium),
         const SizedBox(height: 4),
-        Text('Tildá lo que ya tenés a mano.',
+        Text(tr('Tildá lo que ya tenés a mano.'),
             style: Theme.of(context).textTheme.bodyLarge),
         const SizedBox(height: 12),
         for (var i = 0; i < items.length; i++)
@@ -220,7 +221,7 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Paso ${index + 1} de ${_steps.length}',
+          Text(tr('Paso {v} de {_steps}', {'v': index + 1, '_steps': _steps.length}),
               style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 16),
           Text(step.instruction,
@@ -234,12 +235,12 @@ class _CookingModeScreenState extends State<CookingModeScreen> {
                 FilledButton.tonalIcon(
                   onPressed: () => _startTimer(index, minutes),
                   icon: const Icon(Icons.timer_outlined),
-                  label: Text('Temporizador $minutes min'),
+                  label: Text(tr('Temporizador {minutes} min', {'minutes': minutes})),
                 ),
               OutlinedButton.icon(
                 onPressed: () => _tts.speak(step.instruction),
                 icon: const Icon(Icons.replay),
-                label: const Text('Repetir'),
+                label: Text(tr('Repetir')),
               ),
             ],
           ),

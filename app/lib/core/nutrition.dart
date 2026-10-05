@@ -1,4 +1,5 @@
 import '../models/ingredient.dart';
+import '../core/i18n.dart';
 
 /// Convierte una cantidad de un ítem a gramos para poder aplicar los valores
 /// nutricionales del ingrediente (que están expresados "por cada 100g").
@@ -51,7 +52,7 @@ String? macroLabel(Ingredient ingredient) {
   final carbs = ingredient.carbsPer100g;
   if (protein == null || carbs == null) return null;
   if (protein < 1 && carbs < 1) return null;
-  if (protein > carbs) return 'Proteico';
-  if (carbs > protein) return 'Carbohidratos';
+  if (protein > carbs) return tr('Proteico');
+  if (carbs > protein) return tr('Carbohidratos');
   return null;
 }

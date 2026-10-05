@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import '../core/api_client.dart';
 import '../core/expiry.dart';
 import '../models/inventory_item.dart';
+import '../core/i18n.dart';
 
 class InventoryProvider extends ChangeNotifier {
   final _dio = ApiClient.instance.dio;
@@ -21,7 +22,7 @@ class InventoryProvider extends ChangeNotifier {
           .toList();
       ExpiryReminders.instance.sync(items);
     } catch (_) {
-      errorMessage = 'No se pudo cargar el inventario.';
+      errorMessage = tr('No se pudo cargar el inventario.');
     } finally {
       isLoading = false;
       notifyListeners();
