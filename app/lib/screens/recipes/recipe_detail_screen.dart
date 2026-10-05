@@ -7,6 +7,9 @@ import '../../core/health_conditions.dart';
 import '../../core/notifications_service.dart';
 import '../../core/quantity_format.dart';
 import '../../core/api_client.dart';
+import '../../core/cooking.dart';
+import '../../providers/inventory_provider.dart';
+import 'cooking_mode_screen.dart';
 import '../../core/recipe_images.dart';
 import '../../models/missing_ingredient.dart';
 import '../../models/recipe.dart';
@@ -157,12 +160,47 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     }
   }
 
+  Future<void> _openCookingMode(Recipe recipe) async {
+    final finished = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (_) => CookingModeScreen(recipe: recipe)),
+    );
+    if (finished != true || !mounted) return;
+    final deduct = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('¡Buen provecho!'),
+        content: const Text('¿Descontamos los ingredientes de tu inventario?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('No')),
+          FilledButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Sí')),
+        ],
+      ),
+    );
+    if (deduct == true && mounted) await _cook();
+  }
+
+  /// Antes de ir a comprar: compara la receta con el inventario.
+  Future<void> _checkMissing(Recipe recipe) async {
+    final inventory = context.read<InventoryProvider>();
+    await inventory.load();
+    if (!mounted) return;
+    final missing = missingFromInventory(recipe, inventory.items);
+    if (missing.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('¡Tenés todo para esta receta!')),
+      );
+      return;
+    }
+    await _offerAddMissingToShoppingList(missing, title: 'Te falta para esta receta');
+  }
+
   Future<void> _offerAddMissingToShoppingList(
-      List<MissingIngredient> missing) async {
+      List<MissingIngredient> missing,
+      {String title = 'Te faltaron ingredientes'}) async {
     final shouldAdd = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Te faltaron ingredientes'),
+        title: Text(title),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -401,6 +439,26 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                   ],
                   ..._healthSection(recipe),
                   const SizedBox(height: 28),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: FilledButton.tonalIcon(
+                          onPressed: () => _openCookingMode(recipe),
+                          icon: const Icon(Icons.soup_kitchen_outlined),
+                          label: const Text('Modo cocina'),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => _checkMissing(recipe),
+                          icon: const Icon(Icons.shopping_cart_outlined),
+                          label: const Text('¿Qué me falta?'),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
                   FilledButton.icon(
                     onPressed: _isCooking ? null : _cook,
                     icon: _isCooking
