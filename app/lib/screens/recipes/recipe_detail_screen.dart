@@ -62,6 +62,19 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     if (mounted) setState(() => _loadingCost = false);
   }
 
+  /// Total del costo: con "≈" si algún precio se aproximó; si no hay ningún
+  /// precio cargado, el costo que estimó la IA al generar la receta.
+  String _totalCostLabel(Recipe recipe) {
+    final total = _costData?['totalCost'] as num?;
+    if (total != null) {
+      final approx = _costData!['approximate'] == true ? '≈ ' : '';
+      return '$approx\$${total.toStringAsFixed(0)}';
+    }
+    final aiEstimate = recipe.estimatedCostTotal;
+    if (aiEstimate != null) return '≈ \$${aiEstimate.toStringAsFixed(0)}';
+    return 'Sin datos de precios';
+  }
+
   @override
   void dispose() {
     _tts.stop();
@@ -291,6 +304,9 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                     const SizedBox(height: 8),
                     ...(_costData!['breakdown'] as List).map((b) {
                       final lineCost = b['lineCost'] as num?;
+                      // ≈: las unidades del precio y de la receta no coincidían
+                      // (ej. precio por lata y receta en gramos)
+                      final approx = b['approximate'] == true ? '≈ ' : '';
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 2),
                         child: Row(
@@ -303,7 +319,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             ),
                             Text(
                               lineCost != null
-                                  ? '\$${lineCost.toStringAsFixed(2)}'
+                                  ? '$approx\$${lineCost.toStringAsFixed(0)}'
                                   : 'sin precio',
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: lineCost == null
@@ -334,9 +350,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                 ),
                           ),
                           Text(
-                            _costData!['totalCost'] != null
-                                ? '\$${(_costData!['totalCost'] as num).toStringAsFixed(2)}'
-                                : 'Sin datos de precios',
+                            _totalCostLabel(recipe),
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                   color: Theme.of(context).colorScheme.onPrimaryContainer,
                                   fontWeight: FontWeight.bold,

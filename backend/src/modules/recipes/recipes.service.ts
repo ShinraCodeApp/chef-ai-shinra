@@ -63,6 +63,45 @@ export function convertQuantity(
   return null;
 }
 
+// Supuestos para aproximar cuando las unidades no se pueden convertir:
+const TYPICAL_PACKAGE = 500; // g o ml de un paquete/lata típico (fideos, tomate, arvejas...)
+const TYPICAL_UNIT_WEIGHT = 100; // g o ml de "1 unidad" (un huevo, una papa...)
+
+/**
+ * Como convertQuantity, pero si las magnitudes no coinciden aproxima en vez de
+ * devolver null: g≈ml, un paquete ≈ 500 g/ml y una unidad ≈ 100 g/ml.
+ * El costo resultante se marca como aproximado.
+ */
+export function approximateQuantity(
+  quantity: number,
+  from: IngredientUnit,
+  to: IngredientUnit,
+): { quantity: number; approximate: boolean } {
+  const exact = convertQuantity(quantity, from, to);
+  if (exact !== null) return { quantity: exact, approximate: false };
+
+  // a gramos/ml "base" (g y ml se toman como equivalentes)
+  const base = (u: IngredientUnit) => MASS[u] ?? VOLUME[u];
+  const fromBase = base(from);
+  const toBase = base(to);
+  if (fromBase !== undefined && toBase !== undefined) {
+    return { quantity: (quantity * fromBase) / toBase, approximate: true };
+  }
+  if (fromBase !== undefined && to === IngredientUnit.UNIT) {
+    return {
+      quantity: (quantity * fromBase) / TYPICAL_PACKAGE,
+      approximate: true,
+    };
+  }
+  if (from === IngredientUnit.UNIT && toBase !== undefined) {
+    return {
+      quantity: (quantity * TYPICAL_UNIT_WEIGHT) / toBase,
+      approximate: true,
+    };
+  }
+  return { quantity, approximate: true };
+}
+
 export interface MissingIngredient {
   ingredientId: string;
   name: string;
@@ -425,8 +464,10 @@ export class RecipesService {
       unit: string;
       unitPrice: number | null;
       lineCost: number | null;
+      approximate: boolean;
     }[];
     hasPartialPrices: boolean;
+    approximate: boolean;
   }> {
     const recipe = await this.recipesRepository.findOne({
       where: { id: recipeId },
@@ -440,9 +481,11 @@ export class RecipesService {
       unit: string;
       unitPrice: number | null;
       lineCost: number | null;
+      approximate: boolean;
     }[] = [];
     let totalCost = 0;
     let missingPrices = 0;
+    let anyApproximate = false;
 
     for (const ri of recipe.recipeIngredients) {
       const latestPrice = await this.pricesRepository.findOne({
@@ -450,20 +493,21 @@ export class RecipesService {
         order: { updatedAt: 'DESC' },
       });
 
-      const unitPrice = latestPrice?.price ?? null;
       // El precio es por 1 kg / 1 l / 1 unidad (latestPrice.unit) y la receta
-      // puede venir en g o ml: antes se multiplicaba sin convertir y 200 ml de
-      // tomate a $1.606 el litro daban $321.250.
-      const qtyInPriceUnit =
-        latestPrice !== null
-          ? convertQuantity(ri.quantity, ri.unit, latestPrice.unit)
-          : null;
-      const lineCost =
-        unitPrice !== null && qtyInPriceUnit !== null
-          ? Math.round(unitPrice * qtyInPriceUnit * 100) / 100
-          : null;
+      // puede venir en g o ml: antes se multiplicaba sin convertir y 300 g de
+      // tomate a $1.606 la lata daban $481.875. Si las unidades no se pueden
+      // convertir exacto, se aproxima (ver approximateQuantity).
+      const unitPrice = latestPrice?.price ?? null;
+      let lineCost: number | null = null;
+      let approximate = false;
+      if (latestPrice) {
+        const qty = approximateQuantity(ri.quantity, ri.unit, latestPrice.unit);
+        lineCost = Math.round(latestPrice.price * qty.quantity * 100) / 100;
+        approximate = qty.approximate;
+      }
       if (lineCost !== null) totalCost += lineCost;
       else missingPrices++;
+      anyApproximate ||= approximate;
 
       breakdown.push({
         ingredientName: ri.ingredient?.name ?? ri.ingredientId,
@@ -471,13 +515,18 @@ export class RecipesService {
         unit: ri.unit,
         unitPrice,
         lineCost,
+        approximate,
       });
     }
 
     return {
-      totalCost: missingPrices === breakdown.length ? null : totalCost,
+      totalCost:
+        missingPrices === breakdown.length
+          ? null
+          : Math.round(totalCost * 100) / 100,
       breakdown,
       hasPartialPrices: missingPrices > 0 && missingPrices < breakdown.length,
+      approximate: anyApproximate,
     };
   }
 

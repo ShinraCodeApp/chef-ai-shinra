@@ -1,5 +1,9 @@
 import { NotFoundException } from '@nestjs/common';
-import { convertQuantity, RecipesService } from './recipes.service';
+import {
+  approximateQuantity,
+  convertQuantity,
+  RecipesService,
+} from './recipes.service';
 import { InventoryService } from '../inventory/inventory.service';
 import { IngredientUnit, RecipeDifficulty } from '../../common/enums';
 
@@ -202,15 +206,16 @@ describe('RecipesService', () => {
       expect(result.hasPartialPrices).toBe(false);
     });
 
-    it('si las unidades no se pueden comparar, no inventa un precio', async () => {
+    it('precio por paquete y receta en gramos: aproxima con un paquete de 500 g', async () => {
+      // el caso real del celular: 300 g de tomate con el precio de la lata
       recipesRepository.findOne.mockResolvedValue({
         id: 'r',
         recipeIngredients: [
           {
-            ingredientId: 'queso',
-            quantity: 30,
+            ingredientId: 'tomate',
+            quantity: 300,
             unit: IngredientUnit.GRAMS,
-            ingredient: { name: 'Queso' },
+            ingredient: { name: 'Tomate triturado' },
           },
           {
             ingredientId: 'aceite',
@@ -218,19 +223,56 @@ describe('RecipesService', () => {
             unit: IngredientUnit.UNIT,
             ingredient: { name: 'Aceite' },
           },
+          {
+            ingredientId: 'sal',
+            quantity: 10,
+            unit: IngredientUnit.GRAMS,
+            ingredient: { name: 'Sal' },
+          },
         ],
       });
       const service = serviceWithPrices({
-        queso: { price: 900, unit: IngredientUnit.UNIT },
+        tomate: { price: 1606.25, unit: IngredientUnit.UNIT },
         aceite: { price: 3612.27, unit: IngredientUnit.UNIT },
       });
 
       const result = await service.getEstimatedCost('r');
 
-      expect(result.breakdown[0].lineCost).toBeNull();
-      expect(result.totalCost).toBe(3612.27);
+      expect(result.breakdown[0].lineCost).toBe(963.75); // 300/500 de la lata
+      expect(result.breakdown[0].approximate).toBe(true);
+      expect(result.breakdown[1].approximate).toBe(false);
+      expect(result.breakdown[2].lineCost).toBeNull(); // la sal no tiene precio cargado
+      expect(result.totalCost).toBe(4576.02);
+      expect(result.approximate).toBe(true);
       expect(result.hasPartialPrices).toBe(true);
     });
+  });
+});
+
+describe('approximateQuantity', () => {
+  it('exacto cuando se puede convertir', () => {
+    expect(
+      approximateQuantity(
+        200,
+        IngredientUnit.MILLILITERS,
+        IngredientUnit.LITERS,
+      ),
+    ).toEqual({ quantity: 0.2, approximate: false });
+  });
+  it('g ≈ ml', () => {
+    expect(
+      approximateQuantity(300, IngredientUnit.GRAMS, IngredientUnit.LITERS),
+    ).toEqual({ quantity: 0.3, approximate: true });
+  });
+  it('gramos contra precio por paquete: fracción de un paquete de 500 g', () => {
+    expect(
+      approximateQuantity(150, IngredientUnit.GRAMS, IngredientUnit.UNIT),
+    ).toEqual({ quantity: 0.3, approximate: true });
+  });
+  it('unidades contra precio por kilo: 1 unidad ≈ 100 g', () => {
+    expect(
+      approximateQuantity(2, IngredientUnit.UNIT, IngredientUnit.KILOGRAMS),
+    ).toEqual({ quantity: 0.2, approximate: true });
   });
 });
 
