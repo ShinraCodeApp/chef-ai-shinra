@@ -1,3 +1,5 @@
+import 'i18n.dart';
+
 /// Etiqueta legible para cada dietTag/preferencia (los valores crudos usan
 /// snake_case porque así los espera el backend, pero no deben mostrarse así).
 const Map<String, String> kDietTagLabels = {
@@ -34,7 +36,8 @@ const Map<String, String> _englishDietTags = {
 String dietTagLabel(String tag) {
   final key = tag.trim().toLowerCase().replaceAll(' ', '_');
   final normalized = _englishDietTags[key] ?? key;
-  return kDietTagLabels[normalized] ?? tag;
+  final label = kDietTagLabels[normalized];
+  return label == null ? tag : tr(label);
 }
 
 const Map<String, String> kDifficultyLabels = {
@@ -43,5 +46,7 @@ const Map<String, String> kDifficultyLabels = {
   'hard': 'Difícil',
 };
 
-String difficultyLabel(String difficulty) =>
-    kDifficultyLabels[difficulty.toLowerCase()] ?? difficulty;
+String difficultyLabel(String difficulty) {
+  final label = kDifficultyLabels[difficulty.toLowerCase()];
+  return label == null ? difficulty : tr(label);
+}

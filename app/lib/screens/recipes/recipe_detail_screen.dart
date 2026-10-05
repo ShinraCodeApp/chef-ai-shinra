@@ -499,9 +499,9 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
               Expanded(
                 child: Text.rich(TextSpan(children: [
                   TextSpan(
-                      text: '${c.name}: ',
+                      text: '${tr(c.name)}: ',
                       style: const TextStyle(fontWeight: FontWeight.bold)),
-                  TextSpan(text: c.reason),
+                  TextSpan(text: tr(c.reason)),
                 ])),
               ),
             ],
