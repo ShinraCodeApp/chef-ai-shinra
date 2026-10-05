@@ -488,8 +488,17 @@ export class RecipesService {
     let anyApproximate = false;
 
     for (const ri of recipe.recipeIngredients) {
+      // Los precios por g/ml son de antes de normalizar (escaneo de tickets
+      // guardaba el total del renglón como precio por gramo): no son confiables.
       const latestPrice = await this.pricesRepository.findOne({
-        where: { ingredientId: ri.ingredientId },
+        where: {
+          ingredientId: ri.ingredientId,
+          unit: In([
+            IngredientUnit.KILOGRAMS,
+            IngredientUnit.LITERS,
+            IngredientUnit.UNIT,
+          ]),
+        },
         order: { updatedAt: 'DESC' },
       });
 

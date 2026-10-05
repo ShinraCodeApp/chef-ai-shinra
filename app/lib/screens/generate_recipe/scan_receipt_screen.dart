@@ -92,7 +92,8 @@ class _ScanReceiptScreenState extends State<ScanReceiptScreen> {
               name: e['name'] as String,
               quantity: (e['quantity'] as num).toDouble(),
               unit: e['unit'] as String,
-              unitPrice: (e['unitPrice'] as num).toDouble(),
+              // lo pagado por todo el renglón (el campo "Precio" de la pantalla)
+              unitPrice: ((e['totalPrice'] ?? e['unitPrice']) as num).toDouble(),
               ingredientId: e['ingredientId'] as String,
             ));
         allItems.addAll(items);
@@ -154,9 +155,12 @@ class _ScanReceiptScreenState extends State<ScanReceiptScreen> {
       );
       if (ok && item.currentPrice > 0) {
         try {
+          // total pagado + cantidad comprada: el servidor lo guarda como
+          // precio por kg / litro / unidad
           await dio.post('/ingredients/${item.ingredientId}/prices', data: {
             'price': item.currentPrice,
             'unit': item.unit,
+            if (item.currentQuantity > 0) 'quantity': item.currentQuantity,
           });
         } catch (_) {}
       }
@@ -313,7 +317,7 @@ class _ScanReceiptScreenState extends State<ScanReceiptScreen> {
                                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                   decoration: const InputDecoration(
                                     isDense: true,
-                                    labelText: 'Precio',
+                                    labelText: 'Total pagado',
                                     prefixText: '\$',
                                   ),
                                   onChanged: (_) => setState(() {}),
