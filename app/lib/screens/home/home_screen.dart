@@ -16,6 +16,7 @@ import '../shopping_lists/shopping_lists_screen.dart';
 import '../profile/profile_screen.dart';
 import '../admin/admin_stats_screen.dart';
 import '../contacts/contacts_screen.dart';
+import '../../widgets/expiring_banner.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -98,7 +99,8 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 4),
               Text('¿Qué cocinaremos hoy?',
                   style: Theme.of(context).textTheme.bodyLarge),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
+              const ExpiringBanner(),
               Expanded(
                 child: GridView.count(
                   crossAxisCount: 2,

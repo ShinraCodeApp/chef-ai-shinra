@@ -8,7 +8,17 @@ import '../../widgets/voice_text_field.dart';
 import '../recipes/recipe_detail_screen.dart';
 
 class GenerateRecipeScreen extends StatefulWidget {
-  const GenerateRecipeScreen({super.key});
+  /// Ingredientes ya cargados al abrir (ej. "Cocinar con esto" desde lo que vence).
+  final List<String> initialIngredients;
+
+  /// Pedido libre ya escrito al abrir.
+  final String? initialRequest;
+
+  const GenerateRecipeScreen({
+    super.key,
+    this.initialIngredients = const [],
+    this.initialRequest,
+  });
 
   @override
   State<GenerateRecipeScreen> createState() => _GenerateRecipeScreenState();
@@ -30,6 +40,8 @@ class _GenerateRecipeScreenState extends State<GenerateRecipeScreen> {
   @override
   void initState() {
     super.initState();
+    _ingredients.addAll(widget.initialIngredients);
+    if (widget.initialRequest != null) _freeTextController.text = widget.initialRequest!;
     _loadAiInfo();
   }
 
