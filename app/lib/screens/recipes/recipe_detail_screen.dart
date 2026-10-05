@@ -263,7 +263,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                     children: [
                       _infoChip(Icons.timer_outlined, '${recipe.prepTimeMinutes} min'),
                       _infoChip(Icons.people_outline, '${recipe.servings} porciones'),
-                      _infoChip(Icons.bar_chart, recipe.difficulty),
+                      _infoChip(Icons.bar_chart, difficultyLabel(recipe.difficulty)),
                       if (recipe.estimatedCostTotal != null)
                         _infoChip(Icons.attach_money,
                             recipe.estimatedCostTotal!.toStringAsFixed(0)),

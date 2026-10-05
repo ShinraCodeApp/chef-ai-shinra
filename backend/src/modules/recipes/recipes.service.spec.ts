@@ -1,5 +1,5 @@
 import { NotFoundException } from '@nestjs/common';
-import { RecipesService } from './recipes.service';
+import { convertQuantity, RecipesService } from './recipes.service';
 import { InventoryService } from '../inventory/inventory.service';
 import { IngredientUnit, RecipeDifficulty } from '../../common/enums';
 
@@ -142,5 +142,116 @@ describe('RecipesService', () => {
         },
       ]);
     });
+  });
+
+  describe('getEstimatedCost', () => {
+    // Los mismos números que salían en el celular: 200 ml de tomate a $1.606,25
+    // el litro daban $321.250 en vez de $321,25.
+    function serviceWithPrices(
+      prices: Record<string, { price: number; unit: IngredientUnit }>,
+    ) {
+      const pricesRepository = {
+        findOne: jest.fn(
+          async ({ where }: any) => prices[where.ingredientId] ?? null,
+        ),
+      };
+      return new RecipesService(
+        recipesRepository as any,
+        favoritesRepository as any,
+        pricesRepository as any,
+        inventoryService as any,
+      );
+    }
+
+    it('convierte ml a litros y g a kilos antes de multiplicar', async () => {
+      recipesRepository.findOne.mockResolvedValue({
+        id: 'r',
+        recipeIngredients: [
+          {
+            ingredientId: 'tomate',
+            quantity: 200,
+            unit: IngredientUnit.MILLILITERS,
+            ingredient: { name: 'Tomate triturado' },
+          },
+          {
+            ingredientId: 'arvejas',
+            quantity: 100,
+            unit: IngredientUnit.GRAMS,
+            ingredient: { name: 'Arvejas' },
+          },
+          {
+            ingredientId: 'ravioles',
+            quantity: 1,
+            unit: IngredientUnit.UNIT,
+            ingredient: { name: 'Ravioles' },
+          },
+        ],
+      });
+      const service = serviceWithPrices({
+        tomate: { price: 1606.25, unit: IngredientUnit.LITERS },
+        arvejas: { price: 571.19, unit: IngredientUnit.KILOGRAMS },
+        ravioles: { price: 4180.71, unit: IngredientUnit.UNIT },
+      });
+
+      const result = await service.getEstimatedCost('r');
+
+      expect(result.breakdown.map((b) => b.lineCost)).toEqual([
+        321.25, 57.12, 4180.71,
+      ]);
+      expect(result.totalCost).toBeCloseTo(4559.08, 2);
+      expect(result.hasPartialPrices).toBe(false);
+    });
+
+    it('si las unidades no se pueden comparar, no inventa un precio', async () => {
+      recipesRepository.findOne.mockResolvedValue({
+        id: 'r',
+        recipeIngredients: [
+          {
+            ingredientId: 'queso',
+            quantity: 30,
+            unit: IngredientUnit.GRAMS,
+            ingredient: { name: 'Queso' },
+          },
+          {
+            ingredientId: 'aceite',
+            quantity: 1,
+            unit: IngredientUnit.UNIT,
+            ingredient: { name: 'Aceite' },
+          },
+        ],
+      });
+      const service = serviceWithPrices({
+        queso: { price: 900, unit: IngredientUnit.UNIT },
+        aceite: { price: 3612.27, unit: IngredientUnit.UNIT },
+      });
+
+      const result = await service.getEstimatedCost('r');
+
+      expect(result.breakdown[0].lineCost).toBeNull();
+      expect(result.totalCost).toBe(3612.27);
+      expect(result.hasPartialPrices).toBe(true);
+    });
+  });
+});
+
+describe('convertQuantity', () => {
+  it('convierte dentro de la misma magnitud', () => {
+    expect(
+      convertQuantity(200, IngredientUnit.MILLILITERS, IngredientUnit.LITERS),
+    ).toBe(0.2);
+    expect(
+      convertQuantity(1.5, IngredientUnit.KILOGRAMS, IngredientUnit.GRAMS),
+    ).toBe(1500);
+    expect(convertQuantity(3, IngredientUnit.UNIT, IngredientUnit.UNIT)).toBe(
+      3,
+    );
+  });
+  it('devuelve null entre magnitudes distintas', () => {
+    expect(
+      convertQuantity(100, IngredientUnit.GRAMS, IngredientUnit.LITERS),
+    ).toBeNull();
+    expect(
+      convertQuantity(1, IngredientUnit.UNIT, IngredientUnit.KILOGRAMS),
+    ).toBeNull();
   });
 });

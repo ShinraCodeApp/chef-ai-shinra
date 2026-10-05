@@ -35,6 +35,34 @@ const CONDITION_PARAMS = {
   calciumRich: CALCIUM_RICH,
 };
 
+// Cuántas unidades base (g o ml) hay en cada unidad
+const MASS: Partial<Record<IngredientUnit, number>> = {
+  [IngredientUnit.GRAMS]: 1,
+  [IngredientUnit.KILOGRAMS]: 1000,
+};
+const VOLUME: Partial<Record<IngredientUnit, number>> = {
+  [IngredientUnit.MILLILITERS]: 1,
+  [IngredientUnit.LITERS]: 1000,
+};
+
+/**
+ * Pasa una cantidad a otra unidad de la misma magnitud (g↔kg, ml↔l).
+ * Devuelve null si no se pueden comparar (ej. "unidad" contra gramos).
+ */
+export function convertQuantity(
+  quantity: number,
+  from: IngredientUnit,
+  to: IngredientUnit,
+): number | null {
+  if (from === to) return quantity;
+  for (const scale of [MASS, VOLUME]) {
+    const f = scale[from];
+    const t = scale[to];
+    if (f !== undefined && t !== undefined) return (quantity * f) / t;
+  }
+  return null;
+}
+
 export interface MissingIngredient {
   ingredientId: string;
   name: string;
@@ -391,7 +419,13 @@ export class RecipesService {
 
   async getEstimatedCost(recipeId: string): Promise<{
     totalCost: number | null;
-    breakdown: { ingredientName: string; quantity: number; unit: string; unitPrice: number | null; lineCost: number | null }[];
+    breakdown: {
+      ingredientName: string;
+      quantity: number;
+      unit: string;
+      unitPrice: number | null;
+      lineCost: number | null;
+    }[];
     hasPartialPrices: boolean;
   }> {
     const recipe = await this.recipesRepository.findOne({
@@ -400,7 +434,13 @@ export class RecipesService {
     });
     if (!recipe) throw new NotFoundException('Receta no encontrada');
 
-    const breakdown: { ingredientName: string; quantity: number; unit: string; unitPrice: number | null; lineCost: number | null }[] = [];
+    const breakdown: {
+      ingredientName: string;
+      quantity: number;
+      unit: string;
+      unitPrice: number | null;
+      lineCost: number | null;
+    }[] = [];
     let totalCost = 0;
     let missingPrices = 0;
 
@@ -411,7 +451,17 @@ export class RecipesService {
       });
 
       const unitPrice = latestPrice?.price ?? null;
-      const lineCost = unitPrice !== null ? unitPrice * ri.quantity : null;
+      // El precio es por 1 kg / 1 l / 1 unidad (latestPrice.unit) y la receta
+      // puede venir en g o ml: antes se multiplicaba sin convertir y 200 ml de
+      // tomate a $1.606 el litro daban $321.250.
+      const qtyInPriceUnit =
+        latestPrice !== null
+          ? convertQuantity(ri.quantity, ri.unit, latestPrice.unit)
+          : null;
+      const lineCost =
+        unitPrice !== null && qtyInPriceUnit !== null
+          ? Math.round(unitPrice * qtyInPriceUnit * 100) / 100
+          : null;
       if (lineCost !== null) totalCost += lineCost;
       else missingPrices++;
 

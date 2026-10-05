@@ -45,6 +45,14 @@ export function isBusyError(msg: string): boolean {
   );
 }
 
+// Las mismas claves que muestra la app (app/lib/core/diet_tags.dart). Sin esta
+// regla la IA inventaba etiquetas en inglés ("Vegetarian").
+const DIET_TAGS_RULE =
+  '"dietTags" solo puede usar estos valores exactos (en minúscula, los que apliquen, o un array vacío): ' +
+  'proteico, vegetariano, vegano, sin_tacc, keto, fitness, economico, comida_cruda, ' +
+  'hipotiroidismo, hipertiroidismo, bajo_yodo. ' +
+  'Los textos (título, descripción, pasos, ingredientes) van en castellano rioplatense.';
+
 const BUSY_MESSAGE =
   'La IA está con mucha demanda en este momento. Probá de nuevo en un minuto.';
 
@@ -442,6 +450,7 @@ export class GeminiProvider implements AiProvider {
   ]
 }`,
       `El array "meals" debe tener exactamente ${mealTypes.length} elementos, uno por cada comida pedida arriba, cada uno con el "mealType" correspondiente.`,
+      DIET_TAGS_RULE,
     );
     return lines.join('\n');
   }
@@ -500,6 +509,7 @@ export class GeminiProvider implements AiProvider {
   "ingredients": [{ "name": string, "quantity": number, "unit": string, "notes": string | null }],
   "nutrition": { "calories": number, "proteinG": number, "fatG": number, "carbsG": number, "fiberG": number, "sugarG": number, "sodiumMg": number }
 }`,
+      DIET_TAGS_RULE,
     );
     return lines.join('\n');
   }
