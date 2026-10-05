@@ -63,7 +63,9 @@ class HomeScreen extends StatelessWidget {
           (ctx) => const ShoppingListsScreen()),
       _QuickAction('Contactos', Icons.people_outline,
           (ctx) => const ContactsScreen()),
-      if (auth.currentUser?.role == 'admin')
+      // único admin (el servidor exige lo mismo)
+      if (auth.currentUser?.role == 'admin' &&
+          auth.currentUser?.email.toLowerCase() == 'admin@chefai.com')
         _QuickAction('Panel Admin', Icons.admin_panel_settings,
             (ctx) => const AdminStatsScreen()),
     ];

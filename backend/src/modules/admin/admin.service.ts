@@ -10,7 +10,11 @@ import { Recipe } from '../recipes/entities/recipe.entity';
 import { Ingredient } from '../ingredients/entities/ingredient.entity';
 import { InventoryItem } from '../inventory/entities/inventory-item.entity';
 import { UserRole } from '../../common/enums';
-import { paginate, PaginatedResult } from '../../common/dto/pagination-query.dto';
+import { isSuperAdminEmail, SUPER_ADMIN_EMAIL } from '../../common/super-admin';
+import {
+  paginate,
+  PaginatedResult,
+} from '../../common/dto/pagination-query.dto';
 import { AiService } from '../ai/ai.service';
 import { IngredientsService } from '../ingredients/ingredients.service';
 
@@ -51,17 +55,36 @@ export class AdminService {
     if (!user) {
       throw new NotFoundException('Usuario no encontrado');
     }
+    // Un único admin: admin@chefai.com. Nadie más puede pasar a admin y a él
+    // no se le puede quitar el rol (antes el panel dejaba hacer admin a cualquiera).
+    if (isSuperAdminEmail(user.email)) {
+      throw new BadRequestException(
+        'No se puede cambiar el rol del administrador principal',
+      );
+    }
+    if (role === UserRole.ADMIN) {
+      throw new BadRequestException(
+        `Solo ${SUPER_ADMIN_EMAIL} puede ser administrador`,
+      );
+    }
     user.role = role;
     return this.usersRepository.save(user);
   }
 
   async deleteUser(userId: string, requesterId: string): Promise<void> {
     if (userId === requesterId) {
-      throw new BadRequestException('No podés eliminar tu propia cuenta de administrador');
+      throw new BadRequestException(
+        'No podés eliminar tu propia cuenta de administrador',
+      );
     }
     const user = await this.usersRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException('Usuario no encontrado');
+    }
+    if (isSuperAdminEmail(user.email)) {
+      throw new BadRequestException(
+        'No se puede eliminar al administrador principal',
+      );
     }
     await this.usersRepository.remove(user);
   }
@@ -73,7 +96,9 @@ export class AdminService {
     return this.usersRepository.save(user);
   }
 
-  async enrichIngredientsNutrition(batchSize = 20): Promise<{ enriched: number; failed: number; total: number }> {
+  async enrichIngredientsNutrition(
+    batchSize = 20,
+  ): Promise<{ enriched: number; failed: number; total: number }> {
     const ingredients = await this.ingredientsService.findMissingNutrition();
     let enriched = 0;
     let failed = 0;
@@ -87,14 +112,19 @@ export class AdminService {
   }
 
   async getStats(): Promise<AdminStats> {
-    const [totalUsers, totalRecipes, aiGeneratedRecipes, totalIngredients, totalInventoryItems] =
-      await Promise.all([
-        this.usersRepository.count(),
-        this.recipesRepository.count(),
-        this.recipesRepository.count({ where: { isAiGenerated: true } }),
-        this.ingredientsRepository.count(),
-        this.inventoryRepository.count(),
-      ]);
+    const [
+      totalUsers,
+      totalRecipes,
+      aiGeneratedRecipes,
+      totalIngredients,
+      totalInventoryItems,
+    ] = await Promise.all([
+      this.usersRepository.count(),
+      this.recipesRepository.count(),
+      this.recipesRepository.count({ where: { isAiGenerated: true } }),
+      this.ingredientsRepository.count(),
+      this.inventoryRepository.count(),
+    ]);
     return {
       totalUsers,
       totalRecipes,

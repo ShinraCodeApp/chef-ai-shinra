@@ -4,8 +4,6 @@ import '../../models/user.dart';
 import '../../providers/admin_provider.dart';
 import '../../providers/auth_provider.dart';
 
-const _roles = ['user', 'admin'];
-
 class AdminUsersScreen extends StatefulWidget {
   const AdminUsersScreen({super.key});
 
@@ -22,33 +20,8 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
     });
   }
 
-  Future<void> _changeRole(User user) async {
-    final newRole = await showDialog<String>(
-      context: context,
-      builder: (ctx) => SimpleDialog(
-        title: Text('Rol de ${user.name}'),
-        children: _roles
-            .map((role) => SimpleDialogOption(
-                  onPressed: () => Navigator.of(ctx).pop(role),
-                  child: Row(
-                    children: [
-                      if (role == user.role) const Icon(Icons.check, size: 18),
-                      if (role == user.role) const SizedBox(width: 8),
-                      Text(role),
-                    ],
-                  ),
-                ))
-            .toList(),
-      ),
-    );
-    if (newRole == null || newRole == user.role) return;
-    if (!mounted) return;
-    final ok = await context.read<AdminProvider>().updateUserRole(user.id, newRole);
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(ok ? 'Rol actualizado.' : 'No se pudo actualizar el rol.')),
-    );
-  }
+  // Ya no se cambian roles desde acá: el único admin es admin@chefai.com
+  // (el servidor rechaza hacer admin a otra cuenta).
 
   Future<void> _deleteUser(User user) async {
     final confirmed = await showDialog<bool>(
@@ -108,7 +81,6 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                   return ListTile(
                     title: Text(user.name),
                     subtitle: Text(user.email),
-                    onTap: () => _changeRole(user),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [

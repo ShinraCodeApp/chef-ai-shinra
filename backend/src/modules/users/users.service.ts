@@ -1,12 +1,25 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { WeightLog } from './entities/weight-log.entity';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { Goal, UserRole } from '../../common/enums';
+import { isSuperAdminEmail } from '../../common/super-admin';
 
 export const AI_MONTHLY_LIMIT = 5;
+
+/** IA sin límite: la cuenta admin principal o usuarios habilitados desde el panel. */
+function isUnlimited(user: User): boolean {
+  return (
+    user.aiUnlimited ||
+    (user.role === UserRole.ADMIN && isSuperAdminEmail(user.email))
+  );
+}
 
 export interface WeightProgress {
   previousWeightKg: number;
@@ -90,7 +103,7 @@ export class UsersService {
     const user = await this.usersRepository.findOne({ where: { id: userId } });
     if (!user) throw new NotFoundException('Usuario no encontrado');
 
-    if (user.role === UserRole.ADMIN || user.aiUnlimited) return;
+    if (isUnlimited(user)) return;
 
     const now = new Date();
     const resetAt = user.aiGenerationsResetAt;
@@ -117,12 +130,14 @@ export class UsersService {
     await this.usersRepository.save(user);
   }
 
-  async getAiGenerationsInfo(userId: string): Promise<{ used: number; limit: number; unlimited: boolean }> {
+  async getAiGenerationsInfo(
+    userId: string,
+  ): Promise<{ used: number; limit: number; unlimited: boolean }> {
     const user = await this.findById(userId);
     return {
-      used: user.aiUnlimited || user.role === UserRole.ADMIN ? 0 : user.aiGenerationsUsed,
+      used: isUnlimited(user) ? 0 : user.aiGenerationsUsed,
       limit: AI_MONTHLY_LIMIT,
-      unlimited: user.aiUnlimited || user.role === UserRole.ADMIN,
+      unlimited: isUnlimited(user),
     };
   }
 
