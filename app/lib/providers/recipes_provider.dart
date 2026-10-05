@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../core/api_client.dart';
+import '../core/offline_recipes.dart';
 import '../models/missing_ingredient.dart';
 import '../models/paginated.dart';
 import '../models/recipe.dart';
@@ -84,9 +85,19 @@ class RecipesProvider extends ChangeNotifier {
     return Recipe.fromJson(response.data as Map<String, dynamic>);
   }
 
+  /// Sin internet, si la receta es favorita se devuelve la copia guardada.
   Future<Recipe> fetchOne(String id) async {
-    final response = await _dio.get('/recipes/$id');
-    return Recipe.fromJson(response.data as Map<String, dynamic>);
+    try {
+      final response = await _dio.get('/recipes/$id');
+      final raw = response.data as Map<String, dynamic>;
+      final recipe = Recipe.fromJson(raw);
+      if (recipe.isFavorite) await OfflineRecipes.instance.saveRecipe(id, raw);
+      return recipe;
+    } catch (_) {
+      final cached = await OfflineRecipes.instance.recipe(id);
+      if (cached != null) return Recipe.fromJson(cached);
+      rethrow;
+    }
   }
 
   Future<Recipe> generateFromIngredients({
@@ -138,6 +149,12 @@ class RecipesProvider extends ChangeNotifier {
   Future<bool> toggleFavorite(String recipeId) async {
     final response = await _dio.post('/recipes/$recipeId/favorite');
     final favorited = response.data['favorited'] as bool;
+    if (favorited) {
+      // guardar la receta completa para verla sin internet
+      fetchOne(recipeId).ignore();
+    } else {
+      OfflineRecipes.instance.removeRecipe(recipeId).ignore();
+    }
     final index = recipes.indexWhere((r) => r.id == recipeId);
     if (index != -1) {
       recipes[index].isFavorite = favorited;
@@ -146,16 +163,33 @@ class RecipesProvider extends ChangeNotifier {
     return favorited;
   }
 
+  /// true cuando la lista de favoritas viene de la copia del celular.
+  bool favoritesOffline = false;
+
   Future<void> loadFavorites() async {
     isLoadingFavorites = true;
     notifyListeners();
     try {
       final response = await _dio.get('/recipes/favorites');
-      favorites = (response.data as List)
+      final rawList = response.data as List;
+      favorites = rawList
           .map((e) => Recipe.fromJson(e as Map<String, dynamic>))
           .toList();
+      favoritesOffline = false;
+      await OfflineRecipes.instance.saveFavoritesList(rawList);
+      // completar en segundo plano las que todavía no están guardadas completas
+      for (final r in favorites) {
+        OfflineRecipes.instance.hasRecipe(r.id).then((has) {
+          if (!has) fetchOne(r.id).ignore();
+        });
+      }
     } catch (_) {
-      // fallo silencioso — favoritos quedan como estaban
+      // sin internet: la copia guardada en el celular
+      final cached = await OfflineRecipes.instance.favoritesList();
+      if (cached != null) {
+        favorites = cached.map(Recipe.fromJson).toList();
+        favoritesOffline = true;
+      }
     } finally {
       isLoadingFavorites = false;
       notifyListeners();

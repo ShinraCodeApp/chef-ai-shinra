@@ -45,8 +45,20 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   : ListView.builder(
                       padding: const EdgeInsets.all(12),
                       physics: const AlwaysScrollableScrollPhysics(),
-                      itemCount: provider.favorites.length,
+                      itemCount: provider.favorites.length + (provider.favoritesOffline ? 1 : 0),
                       itemBuilder: (context, index) {
+                        if (provider.favoritesOffline) {
+                          if (index == 0) {
+                            return const Card(
+                              child: ListTile(
+                                leading: Icon(Icons.cloud_off),
+                                title: Text('Sin conexión'),
+                                subtitle: Text('Mostrando tus favoritas guardadas en el celular.'),
+                              ),
+                            );
+                          }
+                          index--;
+                        }
                         final recipe = provider.favorites[index];
                         return RecipeCard(
                           recipe: recipe,
