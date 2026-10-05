@@ -20,6 +20,8 @@ export const envValidationSchema = Joi.object({
   // La IA y el storage son opcionales al boot: sin ellas, el resto de la API
   // sigue funcionando y solo esos endpoints puntuales fallan con un error claro.
   GEMINI_API_KEY: Joi.string().allow('').optional(),
+  // Respaldo gratuito para las funciones de texto cuando Gemini está saturado.
+  GROQ_API_KEY: Joi.string().allow('').optional(),
 
   R2_ACCOUNT_ID: Joi.string().allow('').optional(),
   R2_ACCESS_KEY_ID: Joi.string().allow('').optional(),

@@ -21,12 +21,32 @@ import {
 import { MealType } from '../../../common/enums';
 import { extractJson } from '../utils/extract-json';
 
-// Esta API key solo tiene acceso a gemini-3.8-flash.
-// Si da 503 (alta demanda), se reintenta hasta MAX_RETRIES veces.
-const TEXT_MODELS = ['gemini-3.8-flash'];
-const VISION_MODELS = ['gemini-3.8-flash'];
-const MAX_RETRIES = 6;
-const RETRY_DELAY_MS = 5000;
+// Modelos gratuitos en orden de preferencia (todos aceptan imágenes). Si uno
+// está saturado (503) o sin cuota (429) se reintenta poco y se pasa al
+// siguiente; si la key no tiene acceso a uno (404) se saltea. Con un solo
+// modelo, cuando gemini-3.8-flash estaba saturado la receta fallaba siempre.
+const TEXT_MODELS = [
+  'gemini-3.8-flash',
+  'gemini-flash-latest',
+  'gemini-3.5-flash-lite',
+  'gemini-flash-lite-latest',
+];
+const VISION_MODELS = TEXT_MODELS;
+const MAX_RETRIES = 2;
+const RETRY_DELAY_MS = 3000;
+
+// Último respaldo para las funciones de texto (gratis): Groq, si hay GROQ_API_KEY.
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_MODEL = 'llama-3.3-70b-versatile';
+
+export function isBusyError(msg: string): boolean {
+  return /\b(503|429)\b|UNAVAILABLE|RESOURCE_EXHAUSTED|overloaded|high demand/i.test(
+    msg,
+  );
+}
+
+const BUSY_MESSAGE =
+  'La IA está con mucha demanda en este momento. Probá de nuevo en un minuto.';
 
 @Injectable()
 export class GeminiProvider implements AiProvider {
@@ -57,12 +77,22 @@ export class GeminiProvider implements AiProvider {
   private handleGeminiError(error: unknown, context: string): never {
     const msg = error instanceof Error ? error.message : String(error);
     this.logger.error(`Gemini error [${context}]: ${msg}`);
-    throw new InternalServerErrorException(`IA no disponible: ${msg}`);
+    // Al usuario nunca le llega el JSON técnico de Google en inglés.
+    throw new InternalServerErrorException(
+      isBusyError(msg)
+        ? BUSY_MESSAGE
+        : 'La IA no pudo responder. Probá de nuevo.',
+    );
   }
 
   private async generateWithFallback(
     models: string[],
-    buildContents: () => string | Array<{ text?: string; inlineData?: { data: string; mimeType: string } }>,
+    buildContents: () =>
+      | string
+      | Array<{
+          text?: string;
+          inlineData?: { data: string; mimeType: string };
+        }>,
     context: string,
   ): Promise<string> {
     let lastError: unknown;
@@ -73,32 +103,86 @@ export class GeminiProvider implements AiProvider {
             model: modelName,
             contents: buildContents() as any,
           });
-          this.logger.log(`Gemini [${context}] OK with ${modelName} (attempt ${attempt})`);
+          this.logger.log(
+            `Gemini [${context}] OK with ${modelName} (attempt ${attempt})`,
+          );
           return result.text ?? '';
         } catch (error) {
           const msg = error instanceof Error ? error.message : String(error);
           lastError = error;
-          const is503 = msg.includes('503');
-          const is404 = msg.includes('404');
-          if (is503 && attempt < MAX_RETRIES) {
-            this.logger.warn(`Gemini [${context}] ${modelName} sobrecargado, reintento ${attempt}/${MAX_RETRIES} en ${RETRY_DELAY_MS}ms...`);
+          if (isBusyError(msg) && attempt < MAX_RETRIES) {
+            this.logger.warn(
+              `Gemini [${context}] ${modelName} saturado, reintento ${attempt}/${MAX_RETRIES} en ${RETRY_DELAY_MS}ms...`,
+            );
             await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
-          } else if (is404 || is503) {
-            this.logger.warn(`Gemini [${context}] ${modelName} no disponible, probando siguiente modelo...`);
-            break;
           } else {
-            this.logger.warn(`Gemini [${context}] ${modelName} error: ${msg}`);
+            // 404 (la key no tiene ese modelo), saturado tras reintentar u otro error
+            this.logger.warn(
+              `Gemini [${context}] ${modelName} no disponible (${msg.slice(0, 120)}), probando siguiente...`,
+            );
             break;
           }
         }
       }
     }
+
+    // Último recurso para texto: Groq (gratis). Las imágenes no pasan por acá.
+    const contents = buildContents();
+    const onlyText =
+      typeof contents === 'string' || contents.every((p) => !p.inlineData);
+    const groqKey = this.configService.get<string>('GROQ_API_KEY');
+    if (onlyText && groqKey) {
+      const prompt =
+        typeof contents === 'string'
+          ? contents
+          : contents.map((p) => p.text ?? '').join('\n');
+      try {
+        const text = await this.generateWithGroq(prompt, groqKey);
+        this.logger.log(`Groq [${context}] OK (respaldo de Gemini)`);
+        return text;
+      } catch (error) {
+        lastError = error;
+        this.logger.warn(
+          `Groq [${context}] falló: ${error instanceof Error ? error.message : error}`,
+        );
+      }
+    }
     this.handleGeminiError(lastError, context);
+  }
+
+  private async generateWithGroq(
+    prompt: string,
+    apiKey: string,
+  ): Promise<string> {
+    const res = await fetch(GROQ_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: GROQ_MODEL,
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.7,
+      }),
+      signal: AbortSignal.timeout(30000),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = (await res.json()) as {
+      choices?: { message?: { content?: string } }[];
+    };
+    const text = data.choices?.[0]?.message?.content;
+    if (!text) throw new Error('respuesta vacía');
+    return text;
   }
 
   async generateRecipe(input: GenerateRecipeInput): Promise<GeneratedRecipe> {
     const prompt = this.buildRecipePrompt(input);
-    const text = await this.generateWithFallback(TEXT_MODELS, () => [{ text: prompt }], 'generateRecipe');
+    const text = await this.generateWithFallback(
+      TEXT_MODELS,
+      () => [{ text: prompt }],
+      'generateRecipe',
+    );
 
     try {
       return extractJson<GeneratedRecipe>(text!);
@@ -114,7 +198,11 @@ export class GeminiProvider implements AiProvider {
     input: GenerateDailyMealPlanInput,
   ): Promise<GeneratedDailyMealPlan> {
     const prompt = this.buildDailyMealPlanPrompt(input);
-    const text = await this.generateWithFallback(TEXT_MODELS, () => [{ text: prompt }], 'generateDailyMealPlan');
+    const text = await this.generateWithFallback(
+      TEXT_MODELS,
+      () => [{ text: prompt }],
+      'generateDailyMealPlan',
+    );
 
     try {
       return extractJson<GeneratedDailyMealPlan>(text!);
@@ -135,7 +223,11 @@ export class GeminiProvider implements AiProvider {
       { text: prompt },
       { inlineData: { data: imageBuffer.toString('base64'), mimeType } },
     ];
-    const text = await this.generateWithFallback(VISION_MODELS, () => parts, 'detectIngredients');
+    const text = await this.generateWithFallback(
+      VISION_MODELS,
+      () => parts,
+      'detectIngredients',
+    );
 
     try {
       return extractJson<DetectedIngredient[]>(text!);
@@ -158,7 +250,11 @@ export class GeminiProvider implements AiProvider {
       { text: prompt },
       { inlineData: { data: imageBuffer.toString('base64'), mimeType } },
     ];
-    const text = await this.generateWithFallback(VISION_MODELS, () => parts, 'detectReceiptItems');
+    const text = await this.generateWithFallback(
+      VISION_MODELS,
+      () => parts,
+      'detectReceiptItems',
+    );
 
     try {
       return extractJson<DetectedReceiptItem[]>(text!);
@@ -179,7 +275,11 @@ export class GeminiProvider implements AiProvider {
       { text: prompt },
       { inlineData: { data: imageBuffer.toString('base64'), mimeType } },
     ];
-    const text = await this.generateWithFallback(VISION_MODELS, () => parts, 'analyzeMealPhoto');
+    const text = await this.generateWithFallback(
+      VISION_MODELS,
+      () => parts,
+      'analyzeMealPhoto',
+    );
 
     try {
       return extractJson<MealAnalysis>(text!);
@@ -193,7 +293,11 @@ export class GeminiProvider implements AiProvider {
 
   async parseIngredientsFromText(text: string): Promise<DetectedIngredient[]> {
     const prompt = this.buildVoiceInventoryPrompt(text);
-    const responseText = await this.generateWithFallback(TEXT_MODELS, () => [{ text: prompt }], 'parseIngredientsFromText');
+    const responseText = await this.generateWithFallback(
+      TEXT_MODELS,
+      () => [{ text: prompt }],
+      'parseIngredientsFromText',
+    );
 
     try {
       return extractJson<DetectedIngredient[]>(responseText!);
@@ -209,7 +313,11 @@ export class GeminiProvider implements AiProvider {
 
   async getHealthAdvice(input: HealthAdviceInput): Promise<HealthAdvice> {
     const prompt = this.buildHealthAdvicePrompt(input);
-    const text = await this.generateWithFallback(TEXT_MODELS, () => [{ text: prompt }], 'getHealthAdvice');
+    const text = await this.generateWithFallback(
+      TEXT_MODELS,
+      () => [{ text: prompt }],
+      'getHealthAdvice',
+    );
 
     try {
       return extractJson<HealthAdvice>(text!);
@@ -231,7 +339,9 @@ export class GeminiProvider implements AiProvider {
       '',
     ];
     if (healthNotes) {
-      lines.push(`Condición o necesidad especial indicada por el usuario: "${healthNotes}".`);
+      lines.push(
+        `Condición o necesidad especial indicada por el usuario: "${healthNotes}".`,
+      );
     }
     if (dietTags.length) {
       lines.push(`Preferencias/etiquetas dietarias: ${dietTags.join(', ')}.`);
@@ -292,10 +402,14 @@ export class GeminiProvider implements AiProvider {
       );
     }
     if (dietTags.length) {
-      lines.push(`Debe cumplir con estas dietas/etiquetas: ${dietTags.join(', ')}.`);
+      lines.push(
+        `Debe cumplir con estas dietas/etiquetas: ${dietTags.join(', ')}.`,
+      );
     }
     if (healthNotes) {
-      lines.push(`Condición de salud / necesidad especial del usuario: "${healthNotes}".`);
+      lines.push(
+        `Condición de salud / necesidad especial del usuario: "${healthNotes}".`,
+      );
     }
     if (goal) {
       lines.push(`Objetivo general del usuario: ${goal}.`);
@@ -474,7 +588,9 @@ Formato:
         () => [{ text: prompt }],
         'fetchIngredientsNutrition',
       );
-      return JSON.parse(text.match(/\[[\s\S]*\]/)?.[0] ?? '[]') as IngredientNutritionData[];
+      return JSON.parse(
+        text.match(/\[[\s\S]*\]/)?.[0] ?? '[]',
+      ) as IngredientNutritionData[];
     } catch {
       return [];
     }
