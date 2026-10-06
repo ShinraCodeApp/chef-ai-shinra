@@ -2,6 +2,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { requestLanguageMiddleware } from './common/request-language';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -15,6 +16,8 @@ async function bootstrap() {
     }),
   );
   app.enableCors();
+  // idioma de la request (Accept-Language) para que la IA responda en él
+  app.use(requestLanguageMiddleware);
 
   const port = configService.get<number>('PORT') ?? 3000;
   await app.listen(port);

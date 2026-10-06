@@ -20,6 +20,7 @@ import {
 } from '../ai-provider.interface';
 import { MealType } from '../../../common/enums';
 import { extractJson } from '../utils/extract-json';
+import { currentLanguage } from '../../../common/request-language';
 
 // Modelos gratuitos en orden de preferencia (todos aceptan imágenes). Si uno
 // está saturado (503) o sin cuota (429) se reintenta poco y se pasa al
@@ -47,14 +48,37 @@ export function isBusyError(msg: string): boolean {
 
 // Las mismas claves que muestra la app (app/lib/core/diet_tags.dart). Sin esta
 // regla la IA inventaba etiquetas en inglés ("Vegetarian").
-const DIET_TAGS_RULE =
-  '"dietTags" solo puede usar estos valores exactos (en minúscula, los que apliquen, o un array vacío): ' +
-  'proteico, vegetariano, vegano, sin_tacc, keto, fitness, economico, comida_cruda, ' +
-  'hipotiroidismo, hipertiroidismo, bajo_yodo. ' +
-  'Los textos (título, descripción, pasos, ingredientes) van en castellano rioplatense.';
+function dietTagsRule(): string {
+  return (
+    '"dietTags" solo puede usar estos valores exactos (en minúscula, los que apliquen, o un array vacío): ' +
+    'proteico, vegetariano, vegano, sin_tacc, keto, fitness, economico, comida_cruda, ' +
+    'hipotiroidismo, hipertiroidismo, bajo_yodo. ' +
+    (currentLanguage() === 'en'
+      ? languageNote()
+      : 'Los textos (título, descripción, pasos, ingredientes) van en castellano rioplatense.')
+  );
+}
 
-const BUSY_MESSAGE =
-  'La IA está con mucha demanda en este momento. Probá de nuevo en un minuto.';
+/**
+ * Si el usuario usa la app en inglés (Accept-Language), la IA escribe en
+ * inglés. Los nombres de ingredientes siguen en castellano: son los del
+ * catálogo compartido y se usan para comparar con el inventario.
+ */
+export function languageNote(): string {
+  if (currentLanguage() !== 'en') return '';
+  return (
+    '\nIMPORTANT: the user reads the app in English. Write every user-facing text ' +
+    '(title, description, instructions, tips, notes, dish names) in English. ' +
+    'Keep each ingredient "name" in Spanish exactly as a grocery catalog name (e.g. "Tomate triturado"), ' +
+    'and keep JSON keys and enum values exactly as specified.'
+  );
+}
+
+function busyMessage(): string {
+  return currentLanguage() === 'en'
+    ? 'The AI is in high demand right now. Please try again in a minute.'
+    : 'La IA está con mucha demanda en este momento. Probá de nuevo en un minuto.';
+}
 
 @Injectable()
 export class GeminiProvider implements AiProvider {
@@ -88,8 +112,10 @@ export class GeminiProvider implements AiProvider {
     // Al usuario nunca le llega el JSON técnico de Google en inglés.
     throw new InternalServerErrorException(
       isBusyError(msg)
-        ? BUSY_MESSAGE
-        : 'La IA no pudo responder. Probá de nuevo.',
+        ? busyMessage()
+        : currentLanguage() === 'en'
+          ? 'The AI could not respond. Please try again.'
+          : 'La IA no pudo responder. Probá de nuevo.',
     );
   }
 
@@ -373,7 +399,7 @@ export class GeminiProvider implements AiProvider {
       'Respondé ÚNICAMENTE con un JSON con esta forma exacta, sin texto adicional ni markdown:',
       '{"tips": ["consejo 1", "consejo 2", "..."]}',
     );
-    return lines.join('\n');
+    return lines.join('\n') + languageNote();
   }
 
   private buildDailyMealPlanPrompt(input: GenerateDailyMealPlanInput): string {
@@ -450,7 +476,7 @@ export class GeminiProvider implements AiProvider {
   ]
 }`,
       `El array "meals" debe tener exactamente ${mealTypes.length} elementos, uno por cada comida pedida arriba, cada uno con el "mealType" correspondiente.`,
-      DIET_TAGS_RULE,
+      dietTagsRule(),
     );
     return lines.join('\n');
   }
@@ -509,7 +535,7 @@ export class GeminiProvider implements AiProvider {
   "ingredients": [{ "name": string, "quantity": number, "unit": string, "notes": string | null }],
   "nutrition": { "calories": number, "proteinG": number, "fatG": number, "carbsG": number, "fiberG": number, "sugarG": number, "sodiumMg": number }
 }`,
-      DIET_TAGS_RULE,
+      dietTagsRule(),
     );
     return lines.join('\n');
   }
@@ -562,13 +588,14 @@ export class GeminiProvider implements AiProvider {
   }
 
   private buildMealAnalysisPrompt(): string {
-    return [
-      'Sos un nutricionista experto en estimar valores nutricionales a partir de fotos de platos de comida ya preparados/cocinados.',
-      'Analizá la imagen (un plato, un bowl, una porción sobre la mesa, etc.), identificá el plato en su conjunto y cada',
-      'componente visible, y estimá el tamaño de la porción observando referencias visuales típicas (tamaño del plato, cubiertos, etc.).',
-      '',
-      'Respondé ÚNICAMENTE con un JSON válido (sin texto adicional, sin markdown) con esta forma exacta:',
-      `{
+    return (
+      [
+        'Sos un nutricionista experto en estimar valores nutricionales a partir de fotos de platos de comida ya preparados/cocinados.',
+        'Analizá la imagen (un plato, un bowl, una porción sobre la mesa, etc.), identificá el plato en su conjunto y cada',
+        'componente visible, y estimá el tamaño de la porción observando referencias visuales típicas (tamaño del plato, cubiertos, etc.).',
+        '',
+        'Respondé ÚNICAMENTE con un JSON válido (sin texto adicional, sin markdown) con esta forma exacta:',
+        `{
   "dishName": string,
   "description": string,
   "estimatedServingGrams": number,
@@ -576,9 +603,10 @@ export class GeminiProvider implements AiProvider {
   "items": [{ "name": string, "approxGrams": number }],
   "nutrition": { "calories": number, "proteinG": number, "fatG": number, "carbsG": number, "fiberG": number, "sugarG": number, "sodiumMg": number }
 }`,
-      'confidence es un número entre 0 y 1 que indica qué tan seguro estás de la identificación y la estimación.',
-      'Si la imagen no muestra comida, igual respondé con el JSON, usando dishName "No se detectó comida" y confidence 0.',
-    ].join('\n');
+        'confidence es un número entre 0 y 1 que indica qué tan seguro estás de la identificación y la estimación.',
+        'Si la imagen no muestra comida, igual respondé con el JSON, usando dishName "No se detectó comida" y confidence 0.',
+      ].join('\n') + languageNote()
+    );
   }
 
   async fetchIngredientsNutrition(
