@@ -218,7 +218,9 @@ class _MealPlansScreenState extends State<MealPlansScreen> {
   String _formatDayHeader(String dateKey) {
     final date = DateTime.tryParse(dateKey);
     if (date == null) return dateKey;
-    final formatted = DateFormat(tr('EEEE d/MM'), 'es').format(date);
+    final formatted = AppLanguage.instance.isEnglish
+        ? DateFormat('EEEE MM/d', 'en').format(date)
+        : DateFormat('EEEE d/MM', 'es').format(date);
     return formatted[0].toUpperCase() + formatted.substring(1);
   }
 }

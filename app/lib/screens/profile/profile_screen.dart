@@ -227,6 +227,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [
               Text(auth.currentUser?.email ?? '',
                   style: Theme.of(context).textTheme.bodyMedium),
+              const SizedBox(height: 8),
+              _buildLanguageSelector(),
               const SizedBox(height: 16),
               if (_isEditing) _buildEditForm() else _buildReadOnlyView(user),
               const SizedBox(height: 24),
@@ -235,6 +237,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildLanguageSelector() {
+    final language = context.watch<AppLanguage>();
+    return Row(
+      children: [
+        const Icon(Icons.language),
+        const SizedBox(width: 12),
+        Text(tr('Idioma'), style: Theme.of(context).textTheme.titleSmall),
+        const Spacer(),
+        SegmentedButton<String>(
+          segments: [
+            ButtonSegment(value: 'es', label: Text(tr('Español'))),
+            ButtonSegment(value: 'en', label: Text(tr('Inglés'))),
+          ],
+          selected: {language.code},
+          showSelectedIcon: false,
+          onSelectionChanged: (s) => AppLanguage.instance.set(s.first),
+        ),
+      ],
     );
   }
 

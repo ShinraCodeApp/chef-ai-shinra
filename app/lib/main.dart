@@ -16,6 +16,7 @@ import 'screens/auth/auth_gate.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('es', null);
+  await initializeDateFormatting('en', null);
   await NotificationsService.instance.initialize();
   await AppLanguage.instance.load();
   runApp(const ChefAiApp());

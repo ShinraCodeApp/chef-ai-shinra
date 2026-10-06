@@ -71,7 +71,7 @@ class _AdminStatsScreenState extends State<AdminStatsScreen> {
               child: ListTile(
                 leading: const Icon(Icons.manage_accounts_outlined),
                 title: Text(tr('Gestionar usuarios')),
-                subtitle: Text(tr('Ver usuarios, cambiar roles o eliminar')),
+                subtitle: Text(tr('Ver y eliminar usuarios')),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const AdminUsersScreen()),
