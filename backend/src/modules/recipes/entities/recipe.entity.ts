@@ -17,6 +17,17 @@ export interface RecipeStep {
   instruction: string;
 }
 
+/** Texto de la receta en otro idioma. ingredientNotes sigue el orden de los ingredientes. */
+export interface RecipeTranslation {
+  title: string;
+  description: string;
+  instructions: string[];
+  tips?: string[];
+  ingredientNotes?: (string | null)[];
+}
+
+export type RecipeTranslations = Partial<Record<'en', RecipeTranslation>>;
+
 export interface RecipeNutrition {
   calories: number;
   proteinG: number;
@@ -77,6 +88,10 @@ export class Recipe {
 
   @Column({ type: 'text', array: true, nullable: true })
   tips: string[] | null;
+
+  /** Versión en inglés de las recetas del catálogo (ver RecipeLanguageInterceptor). */
+  @Column({ type: 'jsonb', nullable: true })
+  translations: RecipeTranslations | null;
 
   @OneToMany(() => RecipeIngredient, (ri) => ri.recipe, { cascade: true })
   recipeIngredients: RecipeIngredient[];
