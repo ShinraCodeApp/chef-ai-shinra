@@ -7,6 +7,7 @@ import '../../widgets/empty_state.dart';
 import '../generate_recipe/voice_inventory_screen.dart';
 import 'add_inventory_item_screen.dart';
 import '../../core/i18n.dart';
+import '../../core/quantity_format.dart';
 
 Map<String, String> get _stateLabels => {
   'fresh': tr('Fresco'),
@@ -113,7 +114,7 @@ class _ItemSubtitle extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '${item.quantity} ${item.unit} · ${_stateLabels[item.state] ?? item.state}'
+          '${formatQuantity(item.quantity, item.unit)} · ${_stateLabels[item.state] ?? item.state}'
           '${item.expirationDate != null ? ' · vence ${item.expirationDate}' : ''}',
         ),
         if (nutrition.hasData || macro != null) ...[

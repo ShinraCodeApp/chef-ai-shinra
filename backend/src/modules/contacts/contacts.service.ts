@@ -22,8 +22,19 @@ export class ContactsService {
   ) {}
 
   async sendInvite(requesterId: string, addresseeEmail: string): Promise<Contact> {
-    const addressee = await this.usersRepo.findOne({ where: { email: addresseeEmail } });
-    if (!addressee) throw new NotFoundException('Usuario no encontrado con ese email');
+    // Sin distinguir mayúsculas: "Lali_GD47@Hotmail.com" es la misma cuenta
+    const email = addresseeEmail.trim().toLowerCase();
+    const addressee = await this.usersRepo
+      .createQueryBuilder('user')
+      .where('LOWER(user.email) = :email', { email })
+      .getOne();
+    if (!addressee) {
+      // code: la app ofrece invitar a descargar Chef AI en vez de solo mostrar el error
+      throw new NotFoundException({
+        message: 'Esa persona todavía no tiene Chef AI',
+        code: 'USER_NOT_FOUND',
+      });
+    }
     if (addressee.id === requesterId) throw new BadRequestException('No podés agregarte a vos mismo');
 
     const existing = await this.contactsRepo.findOne({
@@ -114,11 +125,19 @@ export class ContactsService {
     userId: string,
     emails: string[],
   ): Promise<{ userId: string; name: string; email: string; isContact: boolean }[]> {
-    if (emails.length === 0) return [];
+    const normalized = [
+      ...new Set(
+        (Array.isArray(emails) ? emails : [])
+          .filter((e): e is string => typeof e === 'string')
+          .map((e) => e.trim().toLowerCase())
+          .filter(Boolean),
+      ),
+    ].slice(0, 500);
+    if (normalized.length === 0) return [];
 
     const users = await this.usersRepo
       .createQueryBuilder('user')
-      .where('user.email IN (:...emails)', { emails })
+      .where('LOWER(user.email) IN (:...emails)', { emails: normalized })
       .andWhere('user.id != :userId', { userId })
       .select(['user.id', 'user.name', 'user.email'])
       .getMany();

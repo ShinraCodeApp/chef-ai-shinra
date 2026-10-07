@@ -4,6 +4,7 @@ import '../../models/contact.dart';
 import '../../models/inventory_item.dart';
 import '../../providers/contacts_provider.dart';
 import '../../core/i18n.dart';
+import '../../core/quantity_format.dart';
 
 class ContactInventoryScreen extends StatefulWidget {
   final Contact contact;
@@ -67,7 +68,7 @@ class _ContactInventoryScreenState extends State<ContactInventoryScreen> {
                               title: Text(item.ingredient.name),
                               subtitle: Text(item.state),
                               trailing: Text(
-                                '${item.quantity % 1 == 0 ? item.quantity.toInt() : item.quantity} ${item.unit}',
+                                formatQuantity(item.quantity, item.unit),
                                 style: Theme.of(context).textTheme.bodyMedium,
                               ),
                             );

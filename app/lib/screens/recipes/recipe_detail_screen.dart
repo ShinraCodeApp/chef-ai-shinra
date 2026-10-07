@@ -352,7 +352,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                           children: [
                             Expanded(
                               child: Text(
-                                '• ${b['ingredientName']} (${b['quantity']} ${b['unit']})',
+                                '• ${b['ingredientName']} (${formatQuantity((b['quantity'] as num).toDouble(), b['unit'] as String)})',
                                 style: Theme.of(context).textTheme.bodyMedium,
                               ),
                             ),

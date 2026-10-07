@@ -26,13 +26,25 @@ class _PhoneContactsScreenState extends State<PhoneContactsScreen> {
 
   Future<void> _scan() async {
     setState(() { _loading = true; _error = null; });
-    final results = await context.read<ContactsProvider>().findContactsWithApp();
+    final provider = context.read<ContactsProvider>();
+    final results = await provider.findContactsWithApp();
     if (!mounted) return;
     if (results.isEmpty) {
+      // Mensaje según el motivo: antes era uno solo para todo y no se sabía qué pasaba
+      final message = switch (provider.lastScanStatus) {
+        ContactScanStatus.noPermission =>
+          tr('Chef AI necesita permiso para leer tus contactos. Activalo en Ajustes → Apps → Chef AI → Permisos.'),
+        ContactScanStatus.noEmails =>
+          tr('Ninguno de tus contactos tiene email guardado. Chef AI encuentra a tus amigos por su email: invitalos escribiendo su email en la pantalla anterior.'),
+        ContactScanStatus.serverError =>
+          tr('No se pudo conectar con el servidor. Probá de nuevo en un minuto.'),
+        _ => tr('Revisamos {count} emails de tus contactos y ninguno tiene Chef AI todavía. ¡Invitalos a descargarla!',
+            {'count': '${provider.lastScanEmailCount}'}),
+      };
       setState(() {
         _results = [];
         _loading = false;
-        _error = tr('No se encontraron contactos con la app, o no se otorgó el permiso.');
+        _error = message;
       });
     } else {
       setState(() { _results = results; _loading = false; });

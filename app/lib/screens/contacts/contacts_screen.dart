@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../models/contact.dart';
 import '../../providers/contacts_provider.dart';
 import 'contact_inventory_screen.dart';
@@ -33,16 +34,51 @@ class _ContactsScreenState extends State<ContactsScreen> {
   Future<void> _sendInvite() async {
     final email = _emailController.text.trim();
     if (email.isEmpty) return;
-    final error = await context.read<ContactsProvider>().sendInvite(email);
+    final provider = context.read<ContactsProvider>();
+    final error = await provider.sendInvite(email);
     if (!mounted) return;
     if (error == null) {
       _emailController.clear();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(tr('Invitación enviada'))),
       );
+    } else if (provider.lastInviteUserNotFound) {
+      await _offerDownloadInvite(email);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
     }
+  }
+
+  /// La persona no tiene cuenta: en vez de un error, ofrecemos mandarle el link
+  /// de Chef AI (WhatsApp, mail, etc.). Cuando se registre con ese email, ya se
+  /// la puede agregar.
+  Future<void> _offerDownloadInvite(String email) async {
+    final share = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tr('Todavía no tiene Chef AI')),
+        content: Text(tr(
+          '{email} no tiene una cuenta en Chef AI. ¿Querés mandarle el link para descargarla? Cuando se registre con ese email, la vas a poder agregar.',
+          {'email': email},
+        )),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(tr('Ahora no'))),
+          FilledButton.icon(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            icon: const Icon(Icons.share),
+            label: Text(tr('Invitar a descargar')),
+          ),
+        ],
+      ),
+    );
+    if (share != true || !mounted) return;
+    await SharePlus.instance.share(ShareParams(
+      text: tr(
+        '¡Usemos Chef AI juntos! 🍳 Genera recetas con lo que tenés en casa y podemos compartir el inventario. Descargala acá: {link}',
+        {'link': 'https://play.google.com/store/apps/details?id=com.shinracode.chefai'},
+      ),
+      subject: 'Chef AI',
+    ));
   }
 
   Future<void> _removeContact(Contact contact) async {

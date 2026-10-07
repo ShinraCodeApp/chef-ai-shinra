@@ -2,7 +2,7 @@ import '../core/i18n.dart';
 /// Formatea una cantidad de ingrediente eligiendo la unidad más legible:
 /// - Sólidos (g/kg): gramos si es menos de 1 kilo, kilos si es 1 kilo o más.
 /// - Líquidos (ml/l): mililitros si es menos de 1 litro, litros si es 1 litro o más.
-/// - El resto de las unidades (ej. "unidad") se muestran tal cual, sin decimales de más.
+/// - "unidad": "1 unidad" / "2 unidades". El resto se muestra tal cual, sin decimales de más.
 /// Nunca deja un ".0" colgando: 1.0 se muestra "1", 1.5 se muestra "1.5".
 String formatQuantity(double quantity, String unit) {
   switch (unit) {
@@ -20,6 +20,11 @@ String formatQuantity(double quantity, String unit) {
         return tr('{v} l', {'v': _trim(milliliters / 1000)});
       }
       return tr('{milliliters} ml', {'milliliters': _trim(milliliters)});
+    case 'unidad':
+    case 'unidades':
+      // "1 unidad", "2 unidades" (en inglés "1 unit", "2 units")
+      final n = _trim(quantity);
+      return quantity == 1 ? tr('{n} unidad', {'n': n}) : tr('{n} unidades', {'n': n});
     default:
       return '${_trim(quantity)} $unit';
   }

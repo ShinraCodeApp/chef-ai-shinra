@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/shopping_lists_provider.dart';
 import '../../widgets/empty_state.dart';
 import '../../core/i18n.dart';
+import '../../core/quantity_format.dart';
 
 class ShoppingListsScreen extends StatefulWidget {
   const ShoppingListsScreen({super.key});
@@ -167,7 +168,7 @@ class _ShoppingListsScreenState extends State<ShoppingListsScreen> {
                                         ? const TextStyle(decoration: TextDecoration.lineThrough)
                                         : null,
                                   ),
-                                  subtitle: Text('${item.quantity} ${item.unit}'),
+                                  subtitle: Text(formatQuantity(item.quantity, item.unit)),
                                   onChanged: (_) => context
                                       .read<ShoppingListsProvider>()
                                       .toggleItem(list.id, item.id),

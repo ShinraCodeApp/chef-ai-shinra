@@ -36,12 +36,21 @@ class ContactsProvider extends ChangeNotifier {
     }
   }
 
+  /// true si la última invitación falló porque esa persona no tiene la app
+  /// (la pantalla ofrece mandarle el link para descargarla).
+  bool lastInviteUserNotFound = false;
+
   Future<String?> sendInvite(String email) async {
+    lastInviteUserNotFound = false;
     try {
-      await _dio.post('/contacts/invite', data: {'email': email});
+      await _dio.post('/contacts/invite', data: {'email': email.trim().toLowerCase()});
       return null;
     } catch (e) {
       final data = (e as dynamic).response?.data;
+      if (data is Map && data['code'] == 'USER_NOT_FOUND') {
+        lastInviteUserNotFound = true;
+        return tr('Esa persona todavía no tiene Chef AI');
+      }
       if (data is Map && data['message'] != null) return data['message'].toString();
       return tr('No se pudo enviar la invitación');
     }
@@ -89,9 +98,19 @@ class ContactsProvider extends ChangeNotifier {
 
   /// Lee los contactos del teléfono, extrae los emails y pregunta al backend
   /// cuáles tienen cuenta en la app.
+  /// Por qué la última búsqueda en los contactos del celular no trajo nada.
+  ContactScanStatus lastScanStatus = ContactScanStatus.ok;
+
+  /// Cuántos contactos del celular tienen email (Chef AI busca por email).
+  int lastScanEmailCount = 0;
+
   Future<List<PhoneContactWithApp>> findContactsWithApp() async {
+    lastScanEmailCount = 0;
     final hasPermission = await fc.FlutterContacts.requestPermission(readonly: true);
-    if (!hasPermission) return [];
+    if (!hasPermission) {
+      lastScanStatus = ContactScanStatus.noPermission;
+      return [];
+    }
 
     final phoneContacts = await fc.FlutterContacts.getContacts(withProperties: true);
     final emails = phoneContacts
@@ -99,15 +118,26 @@ class ContactsProvider extends ChangeNotifier {
         .where((e) => e.isNotEmpty)
         .toSet()
         .toList();
+    lastScanEmailCount = emails.length;
 
-    if (emails.isEmpty) return [];
+    if (emails.isEmpty) {
+      lastScanStatus = ContactScanStatus.noEmails;
+      return [];
+    }
 
     try {
-      final res = await _dio.post('/contacts/find-by-emails', data: {'emails': emails});
-      return (res.data as List)
-          .map((e) => PhoneContactWithApp.fromJson(e as Map<String, dynamic>))
-          .toList();
+      final found = <PhoneContactWithApp>[];
+      // De a 500 para no mandar listas enormes en un solo pedido
+      for (var i = 0; i < emails.length; i += 500) {
+        final chunk = emails.sublist(i, i + 500 > emails.length ? emails.length : i + 500);
+        final res = await _dio.post('/contacts/find-by-emails', data: {'emails': chunk});
+        found.addAll((res.data as List)
+            .map((e) => PhoneContactWithApp.fromJson(e as Map<String, dynamic>)));
+      }
+      lastScanStatus = found.isEmpty ? ContactScanStatus.noneWithApp : ContactScanStatus.ok;
+      return found;
     } catch (_) {
+      lastScanStatus = ContactScanStatus.serverError;
       return [];
     }
   }
@@ -123,3 +153,5 @@ class ContactsProvider extends ChangeNotifier {
     }
   }
 }
+
+enum ContactScanStatus { ok, noPermission, noEmails, noneWithApp, serverError }

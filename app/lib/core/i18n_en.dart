@@ -474,4 +474,24 @@ const Map<String, String> kEnglish = {
   'Idioma': 'Language',
   'Español': 'Spanish',
   'Inglés': 'English',
+  // contactos: motivos de búsqueda vacía e invitar a descargar
+  'Esa persona todavía no tiene Chef AI': "That person doesn't have Chef AI yet",
+  'Chef AI necesita permiso para leer tus contactos. Activalo en Ajustes → Apps → Chef AI → Permisos.':
+      'Chef AI needs permission to read your contacts. Turn it on in Settings → Apps → Chef AI → Permissions.',
+  'Ninguno de tus contactos tiene email guardado. Chef AI encuentra a tus amigos por su email: invitalos escribiendo su email en la pantalla anterior.':
+      "None of your contacts has a saved email. Chef AI finds your friends by email: invite them by typing their email on the previous screen.",
+  'No se pudo conectar con el servidor. Probá de nuevo en un minuto.':
+      "Couldn't reach the server. Try again in a minute.",
+  'Revisamos {count} emails de tus contactos y ninguno tiene Chef AI todavía. ¡Invitalos a descargarla!':
+      "We checked {count} emails from your contacts and none of them has Chef AI yet. Invite them to download it!",
+  'Todavía no tiene Chef AI': "Doesn't have Chef AI yet",
+  '{email} no tiene una cuenta en Chef AI. ¿Querés mandarle el link para descargarla? Cuando se registre con ese email, la vas a poder agregar.':
+      "{email} doesn't have a Chef AI account. Send them the download link? Once they sign up with that email, you can add them.",
+  'Ahora no': 'Not now',
+  'Invitar a descargar': 'Invite to download',
+  '¡Usemos Chef AI juntos! 🍳 Genera recetas con lo que tenés en casa y podemos compartir el inventario. Descargala acá: {link}':
+      "Let's use Chef AI together! 🍳 It creates recipes from what you have at home and we can share our pantry. Get it here: {link}",
+  // cantidades por unidad (quantity_format.dart)
+  '{n} unidad': '{n} unit',
+  '{n} unidades': '{n} units',
 };
