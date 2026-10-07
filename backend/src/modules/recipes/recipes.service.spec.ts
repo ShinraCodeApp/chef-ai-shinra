@@ -74,12 +74,14 @@ describe('RecipesService', () => {
         'ing-1',
         4,
         IngredientUnit.UNIT,
+        undefined, // peso por unidad (el ingrediente de prueba no lo trae)
       );
       expect(inventoryService.consume).toHaveBeenCalledWith(
         'user-1',
         'ing-2',
         1000,
         IngredientUnit.GRAMS,
+        undefined, // peso por unidad (el ingrediente de prueba no lo trae)
       );
     });
 
@@ -93,12 +95,14 @@ describe('RecipesService', () => {
         'ing-1',
         2,
         IngredientUnit.UNIT,
+        undefined, // peso por unidad (el ingrediente de prueba no lo trae)
       );
       expect(inventoryService.consume).toHaveBeenCalledWith(
         'user-1',
         'ing-2',
         500,
         IngredientUnit.GRAMS,
+        undefined, // peso por unidad (el ingrediente de prueba no lo trae)
       );
     });
 

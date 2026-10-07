@@ -4,7 +4,11 @@ import 'package:chef_ai_app/models/inventory_item.dart';
 import 'package:chef_ai_app/models/recipe.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Ingredient ing(String id) => Ingredient(id: id, name: id, category: 'otros', unit: 'g');
+Ingredient ing(String id) =>
+    Ingredient(id: id, name: id, category: 'otros', unit: 'g', unitWeightG: _weights[id]);
+
+// Peso de una unidad, como lo manda el servidor (huevo ≈ 50 g, cebolla ≈ 150 g)
+const _weights = {'cebolla': 150.0, 'huevo': 50.0};
 
 InventoryItem owned(String id, double qty, String unit) => InventoryItem(
       id: 'inv-$id',
@@ -69,6 +73,23 @@ void main() {
         ('fideos', 300.0, 'g'),
         ('tomate', 300.0, 'g'),
       ]);
+    });
+
+    test('compara unidades con gramos usando el peso de una unidad', () {
+      // la receta pide 400 g de cebolla y tengo 2 cebollas (≈ 300 g) -> faltan 100 g
+      final recipe = recipeWith([('cebolla', 400, 'g'), ('huevo', 3, 'unidad')]);
+      final missing = missingFromInventory(recipe, [
+        owned('cebolla', 2, 'unidad'),
+        owned('huevo', 200, 'g'), // 200 g ≈ 4 huevos -> alcanza para 3
+      ]);
+      expect(missing.map((m) => (m.name, m.quantity, m.unit)), [('cebolla', 100.0, 'g')]);
+    });
+
+    test('convertUnits: exacto entre g/kg y con peso por unidad', () {
+      expect(convertUnits(0.5, 'kg', 'g'), 500);
+      expect(convertUnits(3, 'unidad', 'g', unitWeightG: 150), 450);
+      expect(convertUnits(1, 'kg', 'unidad', unitWeightG: 200), 5);
+      expect(convertUnits(3, 'unidad', 'g'), isNull);
     });
 
     test('si las unidades no se pueden comparar, asume que alcanza', () {

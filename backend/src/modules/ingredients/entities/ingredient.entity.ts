@@ -1,4 +1,5 @@
 import {
+  AfterLoad,
   Column,
   CreateDateColumn,
   Entity,
@@ -7,6 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { IngredientCategory, IngredientUnit } from '../../../common/enums';
+import { unitWeightFor } from '../../../common/utils/unit-weights';
 import { InventoryItem } from '../../inventory/entities/inventory-item.entity';
 import { IngredientPrice } from './ingredient-price.entity';
 import { RecipeIngredient } from '../../recipes/entities/recipe-ingredient.entity';
@@ -51,6 +53,18 @@ export class Ingredient {
 
   @Column({ nullable: true })
   imageUrl: string | null;
+
+  /**
+   * Gramos que pesa una unidad (huevo ≈ 50 g, cebolla ≈ 150 g). No es columna:
+   * se calcula al cargar desde la tabla de pesos y viaja en la API para que la
+   * app también pueda comparar "unidad" con gramos.
+   */
+  unitWeightG: number | null;
+
+  @AfterLoad()
+  setUnitWeight() {
+    this.unitWeightG = unitWeightFor(this.name);
+  }
 
   @OneToMany(() => InventoryItem, (item) => item.ingredient)
   inventoryItems: InventoryItem[];

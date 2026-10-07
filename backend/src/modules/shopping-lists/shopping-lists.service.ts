@@ -125,6 +125,7 @@ export class ShoppingListsService {
         quantity: number;
         unit: IngredientUnit;
         category: ShoppingListItem['category'];
+        unitWeightG: number | null;
       }
     >();
 
@@ -137,16 +138,18 @@ export class ShoppingListsService {
             quantity: recipeIngredient.quantity,
             unit: recipeIngredient.unit,
             category: recipeIngredient.ingredient.category,
+            unitWeightG: recipeIngredient.ingredient.unitWeightG,
           });
           continue;
         }
-        // suma en la unidad ya establecida para este ingrediente; si no es convertible
-        // (ej. "unidad" vs "g" en dos recetas distintas) se ignora esa cantidad para no
-        // mezclar magnitudes incompatibles
+        // suma en la unidad ya establecida para este ingrediente ("unidad" y "g" se
+        // convierten con el peso promedio de una unidad); si no es convertible se
+        // ignora esa cantidad para no mezclar magnitudes incompatibles
         const converted = convertQuantity(
           recipeIngredient.quantity,
           recipeIngredient.unit,
           current.unit,
+          current.unitWeightG,
         );
         if (converted !== null) {
           current.quantity += converted;
@@ -164,7 +167,13 @@ export class ShoppingListsService {
         inventoryByIngredient.get(ingredientId) ?? []
       ).reduce(
         (sum, entry) =>
-          sum + (convertQuantity(entry.quantity, entry.unit, info.unit) ?? 0),
+          sum +
+          (convertQuantity(
+            entry.quantity,
+            entry.unit,
+            info.unit,
+            info.unitWeightG,
+          ) ?? 0),
         0,
       );
       const toBuy = info.quantity - alreadyHave;

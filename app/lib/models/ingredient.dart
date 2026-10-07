@@ -13,6 +13,10 @@ class Ingredient {
   final double? sodiumPer100g;
   final String? imageUrl;
 
+  /// Gramos que pesa una unidad (huevo ≈ 50 g); lo manda el servidor. Permite
+  /// comparar "unidad" con gramos. null si no se conoce.
+  final double? unitWeightG;
+
   Ingredient({
     required this.id,
     required this.name,
@@ -27,6 +31,7 @@ class Ingredient {
     this.sugarPer100g,
     this.sodiumPer100g,
     this.imageUrl,
+    this.unitWeightG,
   });
 
   factory Ingredient.fromJson(Map<String, dynamic> json) => Ingredient(
@@ -43,5 +48,6 @@ class Ingredient {
         sugarPer100g: (json['sugarPer100g'] as num?)?.toDouble(),
         sodiumPer100g: (json['sodiumPer100g'] as num?)?.toDouble(),
         imageUrl: json['imageUrl'] as String?,
+        unitWeightG: (json['unitWeightG'] as num?)?.toDouble(),
       );
 }

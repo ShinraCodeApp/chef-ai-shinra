@@ -418,6 +418,7 @@ export class RecipesService {
         recipeIngredient.ingredientId,
         neededQuantity,
         recipeIngredient.unit,
+        recipeIngredient.ingredient.unitWeightG,
       );
       if (shortfall > 0) {
         missingIngredients.push({

@@ -4,9 +4,9 @@ import '../core/i18n.dart';
 /// Convierte una cantidad de un ítem a gramos para poder aplicar los valores
 /// nutricionales del ingrediente (que están expresados "por cada 100g").
 /// Para líquidos se asume 1ml ~ 1g (aproximación estándar en etiquetado
-/// nutricional). Para "unidad" no hay forma de convertir sin saber el peso
-/// de una unidad, así que devuelve null.
-double? gramsForQuantity(double quantity, String unit) {
+/// nutricional). Para "unidad" usa [unitWeightG] (cuánto pesa una unidad);
+/// si no se conoce devuelve null.
+double? gramsForQuantity(double quantity, String unit, {double? unitWeightG}) {
   switch (unit) {
     case 'g':
       return quantity;
@@ -16,6 +16,8 @@ double? gramsForQuantity(double quantity, String unit) {
       return quantity;
     case 'l':
       return quantity * 1000;
+    case 'unidad':
+      return unitWeightG != null ? quantity * unitWeightG : null;
     default:
       return null;
   }
@@ -34,7 +36,7 @@ class ItemNutrition {
 /// Calcula calorías/proteína/carbohidratos totales para la cantidad cargada de
 /// un ingrediente, a partir de sus valores "por cada 100g".
 ItemNutrition nutritionFor(Ingredient ingredient, double quantity, String unit) {
-  final grams = gramsForQuantity(quantity, unit);
+  final grams = gramsForQuantity(quantity, unit, unitWeightG: ingredient.unitWeightG);
   if (grams == null) return const ItemNutrition();
   double? scale(double? per100g) => per100g == null ? null : per100g * grams / 100;
   return ItemNutrition(

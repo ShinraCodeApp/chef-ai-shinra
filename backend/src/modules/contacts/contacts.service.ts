@@ -21,7 +21,10 @@ export class ContactsService {
     private readonly inventoryRepo: Repository<InventoryItem>,
   ) {}
 
-  async sendInvite(requesterId: string, addresseeEmail: string): Promise<Contact> {
+  async sendInvite(
+    requesterId: string,
+    addresseeEmail: string,
+  ): Promise<Contact> {
     // Sin distinguir mayúsculas: "Lali_GD47@Hotmail.com" es la misma cuenta
     const email = addresseeEmail.trim().toLowerCase();
     const addressee = await this.usersRepo
@@ -35,7 +38,8 @@ export class ContactsService {
         code: 'USER_NOT_FOUND',
       });
     }
-    if (addressee.id === requesterId) throw new BadRequestException('No podés agregarte a vos mismo');
+    if (addressee.id === requesterId)
+      throw new BadRequestException('No podés agregarte a vos mismo');
 
     const existing = await this.contactsRepo.findOne({
       where: [
@@ -44,8 +48,10 @@ export class ContactsService {
       ],
     });
     if (existing) {
-      if (existing.status === ContactStatus.ACCEPTED) throw new BadRequestException('Ya son contactos');
-      if (existing.status === ContactStatus.PENDING) throw new BadRequestException('Ya hay una invitación pendiente');
+      if (existing.status === ContactStatus.ACCEPTED)
+        throw new BadRequestException('Ya son contactos');
+      if (existing.status === ContactStatus.PENDING)
+        throw new BadRequestException('Ya hay una invitación pendiente');
       // si fue rechazada, permitir reenviar
       existing.status = ContactStatus.PENDING;
       existing.requesterId = requesterId;
@@ -53,15 +59,26 @@ export class ContactsService {
       return this.contactsRepo.save(existing);
     }
 
-    const contact = this.contactsRepo.create({ requesterId, addresseeId: addressee.id });
+    const contact = this.contactsRepo.create({
+      requesterId,
+      addresseeId: addressee.id,
+    });
     return this.contactsRepo.save(contact);
   }
 
-  async respondInvite(userId: string, contactId: string, accept: boolean): Promise<Contact> {
-    const contact = await this.contactsRepo.findOne({ where: { id: contactId } });
+  async respondInvite(
+    userId: string,
+    contactId: string,
+    accept: boolean,
+  ): Promise<Contact> {
+    const contact = await this.contactsRepo.findOne({
+      where: { id: contactId },
+    });
     if (!contact) throw new NotFoundException('Invitación no encontrada');
-    if (contact.addresseeId !== userId) throw new ForbiddenException('No sos el destinatario de esta invitación');
-    if (contact.status !== ContactStatus.PENDING) throw new BadRequestException('Esta invitación ya fue procesada');
+    if (contact.addresseeId !== userId)
+      throw new ForbiddenException('No sos el destinatario de esta invitación');
+    if (contact.status !== ContactStatus.PENDING)
+      throw new BadRequestException('Esta invitación ya fue procesada');
 
     contact.status = accept ? ContactStatus.ACCEPTED : ContactStatus.REJECTED;
     return this.contactsRepo.save(contact);
@@ -95,7 +112,11 @@ export class ContactsService {
     });
     return rows.map((c) => ({
       contactId: c.id,
-      from: { userId: c.requester.id, name: c.requester.name, email: c.requester.email },
+      from: {
+        userId: c.requester.id,
+        name: c.requester.name,
+        email: c.requester.email,
+      },
       createdAt: c.createdAt,
     }));
   }
@@ -107,16 +128,24 @@ export class ContactsService {
     });
     return rows.map((c) => ({
       contactId: c.id,
-      to: { userId: c.addressee.id, name: c.addressee.name, email: c.addressee.email },
+      to: {
+        userId: c.addressee.id,
+        name: c.addressee.name,
+        email: c.addressee.email,
+      },
       createdAt: c.createdAt,
     }));
   }
 
   async removeContact(userId: string, contactId: string): Promise<void> {
-    const contact = await this.contactsRepo.findOne({ where: { id: contactId } });
+    const contact = await this.contactsRepo.findOne({
+      where: { id: contactId },
+    });
     if (!contact) throw new NotFoundException('Contacto no encontrado');
     if (contact.requesterId !== userId && contact.addresseeId !== userId) {
-      throw new ForbiddenException('No tenés permiso para eliminar este contacto');
+      throw new ForbiddenException(
+        'No tenés permiso para eliminar este contacto',
+      );
     }
     await this.contactsRepo.remove(contact);
   }
@@ -124,7 +153,9 @@ export class ContactsService {
   async findByEmails(
     userId: string,
     emails: string[],
-  ): Promise<{ userId: string; name: string; email: string; isContact: boolean }[]> {
+  ): Promise<
+    { userId: string; name: string; email: string; isContact: boolean }[]
+  > {
     const normalized = [
       ...new Set(
         (Array.isArray(emails) ? emails : [])
@@ -165,27 +196,43 @@ export class ContactsService {
   }
 
   async toggleFavorite(userId: string, contactId: string): Promise<boolean> {
-    const contact = await this.contactsRepo.findOne({ where: { id: contactId } });
+    const contact = await this.contactsRepo.findOne({
+      where: { id: contactId },
+    });
     if (!contact) throw new NotFoundException('Contacto no encontrado');
     if (contact.requesterId !== userId && contact.addresseeId !== userId) {
       throw new ForbiddenException('No tenés permiso');
     }
     if (contact.status !== ContactStatus.ACCEPTED) {
-      throw new BadRequestException('Solo podés marcar como favorito a contactos aceptados');
+      throw new BadRequestException(
+        'Solo podés marcar como favorito a contactos aceptados',
+      );
     }
     contact.isFavorite = !contact.isFavorite;
     await this.contactsRepo.save(contact);
     return contact.isFavorite;
   }
 
-  async getContactInventory(userId: string, contactUserId: string): Promise<InventoryItem[]> {
+  async getContactInventory(
+    userId: string,
+    contactUserId: string,
+  ): Promise<InventoryItem[]> {
     const isContact = await this.contactsRepo.findOne({
       where: [
-        { requesterId: userId, addresseeId: contactUserId, status: ContactStatus.ACCEPTED },
-        { requesterId: contactUserId, addresseeId: userId, status: ContactStatus.ACCEPTED },
+        {
+          requesterId: userId,
+          addresseeId: contactUserId,
+          status: ContactStatus.ACCEPTED,
+        },
+        {
+          requesterId: contactUserId,
+          addresseeId: userId,
+          status: ContactStatus.ACCEPTED,
+        },
       ],
     });
-    if (!isContact) throw new ForbiddenException('No sos contacto de este usuario');
+    if (!isContact)
+      throw new ForbiddenException('No sos contacto de este usuario');
 
     return this.inventoryRepo.find({
       where: { userId: contactUserId },

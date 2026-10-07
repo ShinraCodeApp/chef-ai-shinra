@@ -64,8 +64,9 @@ export class InventoryService {
    * del usuario. Usado al marcar una receta como "cocinada". Si el usuario no tiene
    * ese ingrediente en inventario, no hace nada (no todo lo que usa una receta
    * viene necesariamente del inventario registrado). Convierte unidades cuando son
-   * de la misma magnitud (g/kg, ml/l); si son incompatibles (ej. "unidad" vs "g")
-   * ese ítem del inventario se deja intacto porque no hay forma confiable de reconciliar.
+   * de la misma magnitud (g/kg, ml/l) y entre "unidad" y peso si se conoce cuánto pesa
+   * una unidad del ingrediente (`unitWeightG`: 3 cebollas ≈ 450 g). Si no se puede
+   * convertir, ese ítem del inventario se deja intacto.
    *
    * Devuelve `shortfall`, la cantidad (en `unit`) que no pudo descontarse por no haber
    * suficiente en inventario, y `depleted`, si el ingrediente tenía stock antes de
@@ -77,6 +78,7 @@ export class InventoryService {
     ingredientId: string,
     quantity: number,
     unit: IngredientUnit,
+    unitWeightG?: number | null,
   ): Promise<{ shortfall: number; depleted: boolean }> {
     const items = await this.inventoryRepository.find({
       where: { userId, ingredientId },
@@ -93,6 +95,7 @@ export class InventoryService {
         item.quantity,
         item.unit,
         unit,
+        unitWeightG,
       );
       if (itemQuantityInRequestedUnit === null) {
         continue; // unidades incompatibles, no se puede descontar de este ítem
@@ -107,6 +110,7 @@ export class InventoryService {
           remainingToConsume,
           unit,
           item.unit,
+          unitWeightG,
         )!;
         item.quantity -= consumedInItemUnit;
         remainingToConsume = 0;

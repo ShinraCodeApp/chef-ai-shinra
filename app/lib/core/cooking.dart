@@ -27,12 +27,26 @@ String formatTimer(Duration d) {
 }
 
 const _toBase = {'g': 1.0, 'kg': 1000.0, 'ml': 1.0, 'l': 1000.0};
-bool _sameDimension(String a, String b) =>
-    a == b || ({'g', 'kg'}.containsAll({a, b})) || ({'ml', 'l'}.containsAll({a, b}));
+
+/// Convierte [quantity] de [from] a [to]. Entre g/kg y ml/l es exacto; entre
+/// "unidad" y peso/volumen usa [unitWeightG] (cuánto pesa una unidad, ej.
+/// huevo ≈ 50 g; para líquidos 1 ml ≈ 1 g). null si no se puede convertir.
+double? convertUnits(double quantity, String from, String to, {double? unitWeightG}) {
+  if (from == to) return quantity;
+  final sameScale =
+      ({'g', 'kg'}.containsAll({from, to})) || ({'ml', 'l'}.containsAll({from, to}));
+  if (sameScale) return quantity * _toBase[from]! / _toBase[to]!;
+  if (unitWeightG != null && unitWeightG > 0) {
+    if (from == 'unidad' && _toBase.containsKey(to)) return quantity * unitWeightG / _toBase[to]!;
+    if (to == 'unidad' && _toBase.containsKey(from)) return quantity * _toBase[from]! / unitWeightG;
+  }
+  return null;
+}
 
 /// Lo que falta de la receta según el inventario: lo que no está, o lo que
-/// está en menor cantidad (convierte g↔kg y ml↔l). Si la unidad del inventario
-/// no se puede comparar (ej. "unidad" contra gramos), se asume que alcanza.
+/// está en menor cantidad. Convierte g↔kg, ml↔l y "unidad"↔gramos con el peso
+/// promedio de una unidad (3 cebollas ≈ 450 g). Si igual no se puede comparar,
+/// se asume que alcanza.
 List<MissingIngredient> missingFromInventory(Recipe recipe, List<InventoryItem> inventory) {
   final missing = <MissingIngredient>[];
   for (final ri in recipe.recipeIngredients) {
@@ -46,12 +60,13 @@ List<MissingIngredient> missingFromInventory(Recipe recipe, List<InventoryItem> 
       ));
       continue;
     }
-    final comparable = owned.where((i) => _sameDimension(i.unit, ri.unit)).toList();
-    if (comparable.isEmpty) continue; // no se puede comparar: se asume que alcanza
-    double have = 0;
-    for (final i in comparable) {
-      have += i.unit == ri.unit ? i.quantity : i.quantity * _toBase[i.unit]! / _toBase[ri.unit]!;
-    }
+    final weight = ri.ingredient.unitWeightG;
+    final converted = owned
+        .map((i) => convertUnits(i.quantity, i.unit, ri.unit, unitWeightG: weight))
+        .whereType<double>()
+        .toList();
+    if (converted.isEmpty) continue; // no se puede comparar: se asume que alcanza
+    final have = converted.fold<double>(0, (a, b) => a + b);
     if (have + 1e-9 < ri.quantity) {
       missing.add(MissingIngredient(
         ingredientId: ri.ingredient.id,
