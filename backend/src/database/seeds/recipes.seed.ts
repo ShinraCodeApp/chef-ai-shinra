@@ -15,6 +15,7 @@ import {
 import { withHealthTags } from './health-tags';
 import { animeRecipes } from './anime-recipes';
 import { brainRecipes } from './brain-recipes';
+import { juiceRecipes } from './juice-recipes';
 
 dotenv.config();
 
@@ -58,6 +59,7 @@ const UN = IngredientUnit.UNIT;
 export const seedRecipes: SeedRecipe[] = [
   ...animeRecipes,
   ...brainRecipes,
+  ...juiceRecipes,
   {
     title: 'Milanesas de pollo con puré de papas',
     description:

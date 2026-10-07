@@ -60,6 +60,8 @@ class HomeScreen extends StatelessWidget {
           (ctx) => const RecipesListScreen(initialDietTag: 'cerebro_sano')),
       _QuickAction(tr('Texturas suaves'), Icons.soup_kitchen_outlined,
           (ctx) => const RecipesListScreen(initialDietTag: 'textura_suave')),
+      _QuickAction(tr('Jugos y licuados'), Icons.local_drink_outlined,
+          (ctx) => const RecipesListScreen(initialDietTag: 'jugos')),
       _QuickAction(tr('Favoritos'), Icons.favorite, (ctx) => const FavoritesScreen()),
       _QuickAction(tr('Compartir receta'), Icons.share, (ctx) => const CreateRecipeScreen()),
       _QuickAction(tr('Plan semanal'), Icons.calendar_month,

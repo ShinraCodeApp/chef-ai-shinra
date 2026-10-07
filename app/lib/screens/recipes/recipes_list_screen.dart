@@ -25,6 +25,7 @@ const _dietTagOptions = [
   'anime',
   'cerebro_sano',
   'textura_suave',
+  'jugos',
 ];
 
 class RecipesListScreen extends StatefulWidget {
@@ -101,6 +102,8 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
         return tr('Cerebro sano');
       case 'textura_suave':
         return tr('Texturas suaves');
+      case 'jugos':
+        return tr('Jugos y licuados');
       default:
         return tr('Recetas');
     }

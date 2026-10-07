@@ -72,6 +72,16 @@ const TAG_SYNONYMS: Record<string, string[]> = {
     'acv',
     'infarto cerebral',
   ],
+  jugos: [
+    'jugos',
+    'jugo',
+    'licuados',
+    'licuado',
+    'batido',
+    'batidos',
+    'smoothie',
+    'bebidas',
+  ],
   textura_suave: [
     'textura suave',
     'texturas suaves',

@@ -52,7 +52,7 @@ function dietTagsRule(): string {
   return (
     '"dietTags" solo puede usar estos valores exactos (en minúscula, los que apliquen, o un array vacío): ' +
     'proteico, vegetariano, vegano, sin_tacc, keto, fitness, economico, comida_cruda, ' +
-    'hipotiroidismo, hipertiroidismo, bajo_yodo, cerebro_sano, textura_suave. ' +
+    'hipotiroidismo, hipertiroidismo, bajo_yodo, cerebro_sano, textura_suave, jugos. ' +
     (currentLanguage() === 'en'
       ? languageNote()
       : 'Los textos (título, descripción, pasos, ingredientes) van en castellano rioplatense.')

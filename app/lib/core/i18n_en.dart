@@ -505,4 +505,6 @@ const Map<String, String> kEnglish = {
       'Soft textures: meals will be soft and moist (purées, creamy soups, tender stews). The right texture and whether liquids must be thickened are decided by a speech therapist.',
   'Es una guía general: no reemplaza la indicación de tu médico o nutricionista.':
       'This is general guidance: it does not replace advice from your doctor or dietitian.',
+  'jugos y licuados': 'juices and smoothies',
+  'Jugos y licuados': 'Juices and smoothies',
 };

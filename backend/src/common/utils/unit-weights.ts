@@ -46,6 +46,9 @@ export const UNIT_WEIGHTS_G: Record<string, number> = {
   melon: 1200,
   kiwi: 75,
   frutilla: 15,
+  pina: 1500, // ananá entero
+  anana: 1500,
+  sandia: 4000,
   // huevos, lácteos y panificados
   huevo: 50,
   yogur: 125, // un pote

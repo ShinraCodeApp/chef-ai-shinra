@@ -17,6 +17,7 @@ const Map<String, String> kDietTagLabels = {
   'anime': 'platos anime',
   'cerebro_sano': 'cerebro sano',
   'textura_suave': 'texturas suaves',
+  'jugos': 'jugos y licuados',
 };
 
 /// Recetas generadas antes de pedirle a la IA las etiquetas en castellano

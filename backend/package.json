@@ -22,6 +22,7 @@
     "seed:recipes": "ts-node -r tsconfig-paths/register src/database/seeds/recipes.seed.ts",
     "seed:anime": "ts-node -r tsconfig-paths/register src/database/seeds/recipes.seed.ts --only=anime",
     "seed:cerebro": "ts-node -r tsconfig-paths/register src/database/seeds/recipes.seed.ts --only=cerebro_sano",
+    "seed:jugos": "ts-node -r tsconfig-paths/register src/database/seeds/recipes.seed.ts --only=jugos",
     "seed:admin": "ts-node -r tsconfig-paths/register src/database/seeds/admin.seed.ts",
     "typeorm": "typeorm-ts-node-commonjs -d src/database/data-source.ts",
     "migration:generate": "npm run typeorm -- migration:generate",
