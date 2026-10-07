@@ -15,6 +15,8 @@ const Map<String, String> kDietTagLabels = {
   'hipertiroidismo': 'hipertiroidismo',
   'bajo_yodo': 'bajo en yodo',
   'anime': 'platos anime',
+  'cerebro_sano': 'cerebro sano',
+  'textura_suave': 'texturas suaves',
 };
 
 /// Recetas generadas antes de pedirle a la IA las etiquetas en castellano

@@ -494,4 +494,15 @@ const Map<String, String> kEnglish = {
   // cantidades por unidad (quantity_format.dart)
   '{n} unidad': '{n} unit',
   '{n} unidades': '{n} units',
+  // cerebro sano / texturas suaves (dieta MIND, demencia, ACV, disfagia)
+  'cerebro sano': 'brain health',
+  'texturas suaves': 'soft textures',
+  'Cerebro sano': 'Brain health',
+  'Texturas suaves': 'Soft textures',
+  'Cerebro sano: tu plan semanal va a priorizar hojas verdes, verduras, frutos rojos, frutos secos, legumbres, granos integrales, pescado y aceite de oliva (dieta MIND), con poca sal. Si tomás anticoagulantes, consultá a tu médico por las hojas verdes (vitamina K).':
+      'Brain health: your weekly plan will favor leafy greens, vegetables, berries, nuts, legumes, whole grains, fish and olive oil (MIND diet), with little salt. If you take blood thinners, ask your doctor about leafy greens (vitamin K).',
+  'Texturas suaves: las comidas van a ser blandas y húmedas (purés, cremas, guisos tiernos). La textura adecuada y si los líquidos deben espesarse los indica el fonoaudiólogo.':
+      'Soft textures: meals will be soft and moist (purées, creamy soups, tender stews). The right texture and whether liquids must be thickened are decided by a speech therapist.',
+  'Es una guía general: no reemplaza la indicación de tu médico o nutricionista.':
+      'This is general guidance: it does not replace advice from your doctor or dietitian.',
 };

@@ -23,6 +23,8 @@ const _dietTagOptions = [
   'hipertiroidismo',
   'bajo_yodo',
   'anime',
+  'cerebro_sano',
+  'textura_suave',
 ];
 
 class RecipesListScreen extends StatefulWidget {
@@ -95,6 +97,10 @@ class _RecipesListScreenState extends State<RecipesListScreen> {
         return tr('Recetas bajas en yodo');
       case 'anime':
         return tr('Platos anime');
+      case 'cerebro_sano':
+        return tr('Cerebro sano');
+      case 'textura_suave':
+        return tr('Texturas suaves');
       default:
         return tr('Recetas');
     }

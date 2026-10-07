@@ -109,6 +109,9 @@ export interface GenerateDailyMealPlanInput {
   healthNotes?: string | null;
   goal?: string | null;
   avoidTitles: string[];
+  /** Calorías diarias estimadas con los datos del perfil (null si faltan datos). */
+  dailyCalories?: number | null;
+  age?: number | null;
 }
 
 export interface GeneratedDailyMeal {

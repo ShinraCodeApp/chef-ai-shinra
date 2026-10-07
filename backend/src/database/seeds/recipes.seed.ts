@@ -14,6 +14,7 @@ import {
 } from '../../common/enums';
 import { withHealthTags } from './health-tags';
 import { animeRecipes } from './anime-recipes';
+import { brainRecipes } from './brain-recipes';
 
 dotenv.config();
 
@@ -56,6 +57,7 @@ const UN = IngredientUnit.UNIT;
 
 export const seedRecipes: SeedRecipe[] = [
   ...animeRecipes,
+  ...brainRecipes,
   {
     title: 'Milanesas de pollo con puré de papas',
     description:
@@ -38295,13 +38297,15 @@ async function run() {
   let created = 0;
   let skipped = 0;
 
-  // --only=anime (npm run seed:anime): carga solo los platos de anime y no toca las demás recetas
-  // (la carga completa re-sincroniza tags/fotos/tips de todas, y pisaría
-  // cambios hechos desde el panel de admin).
-  const toSeed =
-    process.argv.includes('--only=anime')
-      ? seedRecipes.filter((r) => r.dietTags.includes('anime'))
-      : seedRecipes;
+  // --only=<tag> (npm run seed:anime / seed:cerebro): carga solo las recetas con
+  // esa etiqueta y no toca las demás (la carga completa re-sincroniza
+  // tags/fotos/tips de todas, y pisaría cambios hechos desde el panel de admin).
+  const onlyTag = process.argv
+    .find((a) => a.startsWith('--only='))
+    ?.split('=')[1];
+  const toSeed = onlyTag
+    ? seedRecipes.filter((r) => r.dietTags.includes(onlyTag))
+    : seedRecipes;
   for (const seed of toSeed) {
     const dietTags = withHealthTags(seed);
     const existing = await recipesRepository.findOne({

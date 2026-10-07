@@ -14,6 +14,7 @@ import { RecipesService } from '../recipes/recipes.service';
 import { IngredientsService } from '../ingredients/ingredients.service';
 import { StorageService } from '../storage/storage.service';
 import { Recipe } from '../recipes/entities/recipe.entity';
+import { estimateDailyCalories } from '../../common/utils/daily-calories';
 import {
   IngredientCategory,
   IngredientUnit,
@@ -86,6 +87,10 @@ export class AiService {
       healthNotes: user.healthNotes,
       goal: user.goal,
       avoidTitles: params.avoidTitles,
+      // el plan se ajusta a la persona: calorías según edad, peso, altura,
+      // sexo, actividad y objetivo
+      dailyCalories: estimateDailyCalories(user),
+      age: user.age,
     });
 
     return Promise.all(
@@ -217,7 +222,9 @@ export class AiService {
     return analysis;
   }
 
-  async parseVoiceInventory(text: string): Promise<DetectedIngredientWithCatalog[]> {
+  async parseVoiceInventory(
+    text: string,
+  ): Promise<DetectedIngredientWithCatalog[]> {
     const detected = await this.aiProvider.parseIngredientsFromText(text);
 
     return Promise.all(
@@ -248,7 +255,8 @@ export class AiService {
     ingredients: { id: string; name: string }[],
   ): Promise<{ enriched: number; failed: number }> {
     if (ingredients.length === 0) return { enriched: 0, failed: 0 };
-    const nutritionData = await this.aiProvider.fetchIngredientsNutrition(ingredients);
+    const nutritionData =
+      await this.aiProvider.fetchIngredientsNutrition(ingredients);
     let enriched = 0;
     let failed = ingredients.length - nutritionData.length;
     for (const item of nutritionData) {

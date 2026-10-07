@@ -61,6 +61,26 @@ const TAG_SYNONYMS: Record<string, string[]> = {
     'yodo radiactivo',
   ],
   anime: ['anime', 'platos anime'],
+  cerebro_sano: [
+    'cerebro sano',
+    'cerebro',
+    'dieta mind',
+    'mind',
+    'memoria',
+    'demencia',
+    'alzheimer',
+    'acv',
+    'infarto cerebral',
+  ],
+  textura_suave: [
+    'textura suave',
+    'texturas suaves',
+    'blando',
+    'blanda',
+    'facil de tragar',
+    'disfagia',
+    'pure',
+  ],
 };
 
 const CONDITION_SYNONYMS: Record<HealthConditionKey, string[]> = {

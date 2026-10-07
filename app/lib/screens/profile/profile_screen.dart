@@ -8,6 +8,7 @@ import '../../models/weight_log.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/voice_text_field.dart';
 import '../../core/i18n.dart';
+import '../../widgets/special_diet_notice.dart';
 
 Map<String, String> get _sexOptions => {'male': tr('Masculino'), 'female': tr('Femenino'), 'other': tr('Otro')};
 Map<String, String> get _goalOptions => {
@@ -35,6 +36,8 @@ const _dietOptions = [
   'comida_cruda',
   'hipotiroidismo',
   'hipertiroidismo',
+  'cerebro_sano',
+  'textura_suave',
 ];
 const _allergyOptions = [
   'celiaquia',
@@ -472,6 +475,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ))
               .toList(),
         ),
+        SpecialDietNotice(selected: _dietPreferences),
         const SizedBox(height: 20),
         Text(tr('Alergias / intolerancias'), style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),

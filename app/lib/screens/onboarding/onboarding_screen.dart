@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../core/diet_tags.dart';
 import '../../providers/auth_provider.dart';
 import '../../core/i18n.dart';
+import '../../widgets/special_diet_notice.dart';
 
 Map<String, String> get _goalOptions => {
   'lose_weight': tr('Bajar de peso'),
@@ -29,6 +30,8 @@ const _dietOptions = [
   'comida_cruda',
   'hipotiroidismo',
   'hipertiroidismo',
+  'cerebro_sano',
+  'textura_suave',
 ];
 
 /// Se muestra una única vez, después de registrarse, para conocer al usuario
@@ -152,6 +155,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         ))
                     .toList(),
               ),
+              SpecialDietNotice(selected: _dietPreferences),
               const SizedBox(height: 32),
               FilledButton(
                 onPressed: _isSaving ? null : () => _finish(onboardingCompleted: true),

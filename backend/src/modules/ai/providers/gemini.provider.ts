@@ -52,11 +52,41 @@ function dietTagsRule(): string {
   return (
     '"dietTags" solo puede usar estos valores exactos (en minúscula, los que apliquen, o un array vacío): ' +
     'proteico, vegetariano, vegano, sin_tacc, keto, fitness, economico, comida_cruda, ' +
-    'hipotiroidismo, hipertiroidismo, bajo_yodo. ' +
+    'hipotiroidismo, hipertiroidismo, bajo_yodo, cerebro_sano, textura_suave. ' +
     (currentLanguage() === 'en'
       ? languageNote()
       : 'Los textos (título, descripción, pasos, ingredientes) van en castellano rioplatense.')
   );
+}
+
+/**
+ * Reglas extra cuando la persona eligió "Cerebro sano" (patrón de la dieta
+ * MIND, para demencia/Alzheimer/ACV) o "Texturas suaves" (dificultad para
+ * masticar o tragar). Se usan al generar recetas y planes.
+ */
+export function specialDietRules(
+  dietTags: string[] | undefined | null,
+): string[] {
+  const tags = dietTags ?? [];
+  const rules: string[] = [];
+  if (tags.includes('cerebro_sano')) {
+    rules.push(
+      'CEREBRO SANO (patrón de la dieta MIND): priorizá verduras de hoja verde, otras verduras, frutos rojos, frutos secos,',
+      'legumbres, granos integrales, pescado (sobre todo graso: salmón, sardina, caballa, atún) al menos 1 vez por semana, pollo y aceite de oliva.',
+      'Limitá carne roja, manteca, queso, facturas/dulces y frituras o comida rápida. Usá poca sal (hierbas, limón y especias para dar sabor).',
+      'Si una receta lleva muchas hojas verdes, agregá como tip: "Si tomás anticoagulantes (warfarina, acenocumarol), comé las hojas verdes en cantidades parecidas cada semana y consultá a tu médico".',
+      'No afirmes que una comida previene, trata o cura la demencia, el Alzheimer ni los ACV.',
+    );
+  }
+  if (tags.includes('textura_suave')) {
+    rules.push(
+      'TEXTURAS SUAVES (dificultad para masticar o tragar): todas las comidas deben ser blandas y húmedas (purés, cremas, guisos tiernos,',
+      'pescado o pollo desmenuzado con salsa, huevos revueltos, compotas). Nada duro, seco, crocante, pegajoso ni con texturas mezcladas',
+      '(evitá frutos secos enteros, semillas sueltas, pan tostado, carnes en trozos, espinas, cáscaras y sopas con trozos en caldo líquido).',
+      'Usá poca sal. Incluí como tip: "La textura y si los líquidos deben espesarse los indica el fonoaudiólogo".',
+    );
+  }
+  return rules;
 }
 
 /**
@@ -411,6 +441,8 @@ export class GeminiProvider implements AiProvider {
       healthNotes,
       goal,
       avoidTitles,
+      dailyCalories,
+      age,
     } = input;
     const mealTypeLabels: Record<MealType, string> = {
       [MealType.BREAKFAST]: 'breakfast (desayuno)',
@@ -448,6 +480,18 @@ export class GeminiProvider implements AiProvider {
     if (goal) {
       lines.push(`Objetivo general del usuario: ${goal}.`);
     }
+    if (dailyCalories) {
+      lines.push(
+        `Calorías objetivo del día para esta persona (calculadas con su edad, peso, altura, sexo y actividad): unas ${dailyCalories} kcal.`,
+        'Repartilas entre las comidas pedidas; el campo "nutrition" de cada receta es por porción y la suma de una porción de cada comida debe acercarse a ese total.',
+      );
+    }
+    if (age && age >= 65) {
+      lines.push(
+        `La persona tiene ${age} años: priorizá proteína en cada comida, preparaciones fáciles de masticar y buena hidratación (sopas, frutas jugosas).`,
+      );
+    }
+    lines.push(...specialDietRules(dietTags));
     if (avoidTitles.length) {
       lines.push(
         `No repitas estos platos, ya se usaron otros días de esta semana: ${avoidTitles.join(', ')}.`,
@@ -499,6 +543,7 @@ export class GeminiProvider implements AiProvider {
         `Debe cumplir con estas dietas/etiquetas: ${preferences.dietTags.join(', ')}.`,
       );
     }
+    lines.push(...specialDietRules(preferences?.dietTags));
     if (preferences?.maxPrepTimeMinutes) {
       lines.push(
         `Tiempo total de preparación máximo: ${preferences.maxPrepTimeMinutes} minutos.`,
