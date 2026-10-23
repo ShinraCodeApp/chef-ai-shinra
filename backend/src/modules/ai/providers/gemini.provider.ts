@@ -24,21 +24,26 @@ import { currentLanguage } from '../../../common/request-language';
 
 // Modelos gratuitos en orden de preferencia (todos aceptan imágenes). Si uno
 // está saturado (503) o sin cuota (429) se reintenta poco y se pasa al
-// siguiente; si la key no tiene acceso a uno (404) se saltea. Con un solo
-// modelo, cuando gemini-3.8-flash estaba saturado la receta fallaba siempre.
+// siguiente; si la key no tiene acceso a uno (404) o tarda más que
+// MODEL_TIMEOUT_MS se saltea. Los gemini-2.5 ya dan 404 con la key gratis y
+// gemini-flash-latest a veces se cuelga, por eso va último.
 const TEXT_MODELS = [
+  'gemini-3.5-flash',
   'gemini-3.8-flash',
-  'gemini-flash-latest',
   'gemini-3.5-flash-lite',
   'gemini-flash-lite-latest',
+  'gemini-3.1-flash-lite',
+  'gemini-flash-latest',
 ];
 const VISION_MODELS = TEXT_MODELS;
 const MAX_RETRIES = 2;
 const RETRY_DELAY_MS = 3000;
+const MODEL_TIMEOUT_MS = 45000;
 
 // Último respaldo para las funciones de texto (gratis): Groq, si hay GROQ_API_KEY.
+// llama-3.3-70b-versatile se apagó en el plan gratis (16/08/26).
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_MODEL = 'llama-3.3-70b-versatile';
+const GROQ_MODELS = ['openai/gpt-oss-120b', 'openai/gpt-oss-20b'];
 
 export function isBusyError(msg: string): boolean {
   return /\b(503|429)\b|UNAVAILABLE|RESOURCE_EXHAUSTED|overloaded|high demand/i.test(
@@ -166,6 +171,7 @@ export class GeminiProvider implements AiProvider {
           const result = await this.getClient().models.generateContent({
             model: modelName,
             contents: buildContents() as any,
+            config: { abortSignal: AbortSignal.timeout(MODEL_TIMEOUT_MS) },
           });
           this.logger.log(
             `Gemini [${context}] OK with ${modelName} (attempt ${attempt})`,
@@ -200,15 +206,19 @@ export class GeminiProvider implements AiProvider {
         typeof contents === 'string'
           ? contents
           : contents.map((p) => p.text ?? '').join('\n');
-      try {
-        const text = await this.generateWithGroq(prompt, groqKey);
-        this.logger.log(`Groq [${context}] OK (respaldo de Gemini)`);
-        return text;
-      } catch (error) {
-        lastError = error;
-        this.logger.warn(
-          `Groq [${context}] falló: ${error instanceof Error ? error.message : error}`,
-        );
+      for (const groqModel of GROQ_MODELS) {
+        try {
+          const text = await this.generateWithGroq(prompt, groqKey, groqModel);
+          this.logger.log(
+            `Groq [${context}] OK with ${groqModel} (respaldo de Gemini)`,
+          );
+          return text;
+        } catch (error) {
+          lastError = error;
+          this.logger.warn(
+            `Groq [${context}] ${groqModel} falló: ${error instanceof Error ? error.message : error}`,
+          );
+        }
       }
     }
     this.handleGeminiError(lastError, context);
@@ -217,6 +227,7 @@ export class GeminiProvider implements AiProvider {
   private async generateWithGroq(
     prompt: string,
     apiKey: string,
+    model: string,
   ): Promise<string> {
     const res = await fetch(GROQ_URL, {
       method: 'POST',
@@ -225,13 +236,15 @@ export class GeminiProvider implements AiProvider {
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: GROQ_MODEL,
+        model,
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.7,
+        // gpt-oss razona antes de responder; con "low" tarda bastante menos.
+        reasoning_effort: 'low',
       }),
-      signal: AbortSignal.timeout(30000),
+      signal: AbortSignal.timeout(MODEL_TIMEOUT_MS),
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status} (${model})`);
     const data = (await res.json()) as {
       choices?: { message?: { content?: string } }[];
     };

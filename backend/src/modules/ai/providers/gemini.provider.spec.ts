@@ -54,7 +54,7 @@ describe('GeminiProvider — modelos de respaldo', () => {
       GEMINI_API_KEY: 'x',
     });
     generateContent.mockImplementation(async ({ model }: { model: string }) => {
-      if (model === 'gemini-3.8-flash') throw busy();
+      if (model === 'gemini-3.5-flash') throw busy();
       return { text: RECIPE_JSON };
     });
 
@@ -66,9 +66,9 @@ describe('GeminiProvider — modelos de respaldo', () => {
     expect(recipe.title).toBe('Fideos con tomate');
     const models = generateContent.mock.calls.map((c) => c[0].model);
     expect(models).toEqual([
+      'gemini-3.5-flash',
+      'gemini-3.5-flash',
       'gemini-3.8-flash',
-      'gemini-3.8-flash',
-      'gemini-flash-latest',
     ]);
   });
 
@@ -105,6 +105,35 @@ describe('GeminiProvider — modelos de respaldo', () => {
     } as any);
     expect(recipe.title).toBe('Fideos con tomate');
     expect(fetchMock).toHaveBeenCalledTimes(1);
+    const body = JSON.parse(String(fetchMock.mock.calls[0][1]?.body));
+    expect(body.model).toBe('openai/gpt-oss-120b');
+  });
+
+  it('si el primer modelo de Groq falla, prueba el siguiente', async () => {
+    const { provider, generateContent } = buildProvider({
+      GEMINI_API_KEY: 'x',
+      GROQ_API_KEY: 'g',
+    });
+    generateContent.mockRejectedValue(busy());
+    const fetchMock = jest
+      .spyOn(global, 'fetch')
+      .mockResolvedValueOnce({ ok: false, status: 429 } as any)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          choices: [{ message: { content: RECIPE_JSON } }],
+        }),
+      } as any);
+
+    const recipe = await provider.generateRecipe({
+      availableIngredients: ['fideos'],
+      allergies: [],
+    } as any);
+    expect(recipe.title).toBe('Fideos con tomate');
+    const models = fetchMock.mock.calls.map(
+      (c) => JSON.parse(String(c[1]?.body)).model,
+    );
+    expect(models).toEqual(['openai/gpt-oss-120b', 'openai/gpt-oss-20b']);
   });
 
   it('si todo falla, el mensaje al usuario es claro y en castellano (sin el JSON de Google)', async () => {
