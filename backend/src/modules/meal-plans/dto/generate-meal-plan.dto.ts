@@ -1,4 +1,11 @@
-import { IsArray, IsEnum, IsIn, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsDateString,
+  IsEnum,
+  IsIn,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { MealType } from '../../../common/enums';
 
 export class GenerateMealPlanDto {
@@ -14,4 +21,9 @@ export class GenerateMealPlanDto {
   @IsArray()
   @IsString({ each: true })
   dietTags?: string[];
+
+  /** Primer día del plan en la fecha del celular (el servidor está en UTC). */
+  @IsOptional()
+  @IsDateString()
+  startDate?: string;
 }
